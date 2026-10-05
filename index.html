@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Lion Weather</title>
-<link rel="icon" href="https://oss-macaron-ai.macaron.im/image/text_to_image/6ac3ec61754e18ccbcb3e261.webp">
-<link rel="apple-touch-icon" href="https://oss-macaron-ai.macaron.im/image/text_to_image/6ac3ec61754e18ccbcb3e261.webp">
+<link rel="icon" href="https://oss-macaron-user.macaron.im/photo/095c9f90-89a0-48ab-b566-680517ca9441.jpeg">
+<link rel="apple-touch-icon" href="https://oss-macaron-user.macaron.im/photo/095c9f90-89a0-48ab-b566-680517ca9441.jpeg">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#06402b">
 <style>
@@ -101,21 +101,54 @@
   #lav.fade { opacity: 0; }
   #lav-wrap { position: relative; display: inline-block; }
   #efekti { position: absolute; top: -20px; left: -20px; width: calc(100% + 40px); height: calc(100% + 40px); pointer-events: none; }
-  #efekti span { position: absolute; font-size: 28px; opacity: 0; text-shadow: 0 0 10px rgba(240, 212, 124, .4); }
-  #efekti .ef-kisa span, #efekti span.ef-kisa { animation: ef-pad 1.6s linear infinite; }
-  #efekti span.ef-sneg { animation: ef-pad 3.2s linear infinite; }
-  #efekti span.ef-sunce { animation: ef-sija 2.6s ease-in-out infinite; }
-  #efekti span.ef-oluja { animation: ef-blesak 2.4s steps(1) infinite; }
-  #efekti span.ef-oblacno { animation: ef-pluta 5.5s ease-in-out infinite; }
-  @keyframes ef-pad {
-    0% { transform: translateY(0) rotate(0deg); opacity: 0; }
-    12% { opacity: .95; }
-    85% { opacity: .85; }
-    100% { transform: translateY(300px) rotate(60deg); opacity: 0; }
+  .ef-halo {
+    position: absolute; top: 50%; left: 50%;
+    width: 260px; height: 260px; margin: -130px 0 0 -130px;
+    border-radius: 50%;
+    animation: ef-disi 6s ease-in-out infinite;
   }
-  @keyframes ef-sija {
-    0%, 100% { transform: scale(.8); opacity: .45; }
-    50% { transform: scale(1.25); opacity: 1; }
+  .ef-halo-sunce   { background: radial-gradient(closest-side, transparent 58%, rgba(255,196,77,.42) 76%, rgba(255,196,77,0) 100%); }
+  .ef-halo-kisa    { background: radial-gradient(closest-side, transparent 58%, rgba(88,115,142,.55) 76%, rgba(88,115,142,0) 100%); }
+  .ef-halo-oluja   { background: radial-gradient(closest-side, transparent 58%, rgba(96,214,150,.38) 76%, rgba(96,214,150,0) 100%); }
+  .ef-halo-sneg    { background: radial-gradient(closest-side, transparent 58%, rgba(225,238,252,.55) 76%, rgba(225,238,252,0) 100%); }
+  .ef-halo-oblacno { background: radial-gradient(closest-side, transparent 58%, rgba(158,172,182,.42) 76%, rgba(158,172,182,0) 100%); }
+  @keyframes ef-disi {
+    0%, 100% { transform: scale(.94); opacity: .55; }
+    50% { transform: scale(1.07); opacity: 1; }
+  }
+  .ef-kisa-crp {
+    position: absolute; width: 2px; height: 16px; border-radius: 2px;
+    background: linear-gradient(rgba(185,210,232,0), rgba(185,210,232,.9));
+    animation: ef-kisapad 1.4s linear infinite;
+  }
+  @keyframes ef-kisapad {
+    0% { transform: translateY(-20px); opacity: 0; }
+    14% { opacity: .95; }
+    80% { opacity: .75; }
+    100% { transform: translateY(300px); opacity: 0; }
+  }
+  .ef-sneg-tacka {
+    position: absolute; width: 5px; height: 5px; border-radius: 50%;
+    background: rgba(255,255,255,.95); box-shadow: 0 0 6px rgba(255,255,255,.7);
+    animation: ef-snegpad 4.6s linear infinite;
+  }
+  @keyframes ef-snegpad {
+    0% { transform: translateY(-16px); opacity: 0; }
+    12% { opacity: .95; }
+    85% { opacity: .8; }
+    100% { transform: translateY(280px); opacity: 0; }
+  }
+  .ef-blesak-zelen {
+    position: absolute; top: 50%; left: 50%;
+    width: 260px; height: 260px; margin: -130px 0 0 -130px;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, transparent 50%, rgba(150,255,196,.5) 74%, rgba(150,255,196,0) 100%);
+    animation: ef-blesak 2.8s steps(1) infinite;
+  }
+  .ef-magla {
+    position: absolute; width: 76px; height: 26px; border-radius: 50%;
+    background: rgba(178,190,200,.5); filter: blur(7px);
+    animation: ef-pluta 5.5s ease-in-out infinite;
   }
   @keyframes ef-blesak {
     0%, 55%, 62%, 100% { opacity: 0; }
@@ -426,35 +459,42 @@ function postaviEfekte(vrsta) {
   var wrap = document.getElementById("efekti");
   if (!wrap) return;
   wrap.innerHTML = "";
-  var ZNAKOVI = {
-    sunce: ["✨", "☀️", "✨", "✨", "☀️"],
-    kisa: ["💧", "💧", "💧", "💧", "💧", "💧", "💧", "💧"],
-    oluja: ["⚡", "⚡", "☁️"],
-    oblacno: ["☁️", "☁️", "☁️"],
-    sneg: ["❄️", "❄️", "❄️", "❄️", "❄️", "❄️", "❄️", "❄️"]
-  };
-  var POZE = {
-    sunce: [[-16, 6], [90, 4], [-14, 76], [88, 74], [42, -4]],
-    oblacno: [[-22, 8], [78, 2], [-8, 82]],
-    oluja: [[-18, 4], [80, 0], [-6, 84]]
-  };
-  var znakovi = ZNAKOVI[vrsta] || [];
-  for (var i = 0; i < znakovi.length; i++) {
-    var s = document.createElement("span");
-    s.textContent = znakovi[i];
-    s.className = "ef-" + vrsta;
-    var poze = POZE[vrsta];
-    if (poze) {
-      var p = poze[i % poze.length];
-      s.style.left = p[0] + "%";
-      s.style.top = p[1] + "%";
-      s.style.animationDelay = (i * 0.5).toFixed(2) + "s";
-    } else {
-      s.style.left = (-6 + Math.floor(Math.random() * 108)) + "%";
-      s.style.top = "-18%";
-      s.style.animationDelay = (Math.random() * 2.4).toFixed(2) + "s";
+  var h = document.createElement("div");
+  h.className = "ef-halo ef-halo-" + vrsta;
+  wrap.appendChild(h);
+  var i, s;
+  if (vrsta === "kisa") {
+    for (i = 0; i < 6; i++) {
+      s = document.createElement("span");
+      s.className = "ef-kisa-crp";
+      s.style.left = (-4 + Math.floor(Math.random() * 102)) + "%";
+      s.style.top = "-12%";
+      s.style.animationDelay = (Math.random() * 1.3).toFixed(2) + "s";
+      wrap.appendChild(s);
     }
+  } else if (vrsta === "sneg") {
+    for (i = 0; i < 7; i++) {
+      s = document.createElement("span");
+      s.className = "ef-sneg-tacka";
+      s.style.left = Math.floor(Math.random() * 100) + "%";
+      s.style.top = "-10%";
+      s.style.animationDelay = (Math.random() * 4.2).toFixed(2) + "s";
+      wrap.appendChild(s);
+    }
+  } else if (vrsta === "oluja") {
+    s = document.createElement("div");
+    s.className = "ef-blesak-zelen";
     wrap.appendChild(s);
+  } else if (vrsta === "oblacno") {
+    var POZE = [[-10, 14], [72, 6], [0, 80]];
+    for (i = 0; i < POZE.length; i++) {
+      s = document.createElement("span");
+      s.className = "ef-magla";
+      s.style.left = POZE[i][0] + "%";
+      s.style.top = POZE[i][1] + "%";
+      s.style.animationDelay = (i * 0.9).toFixed(2) + "s";
+      wrap.appendChild(s);
+    }
   }
 }
 
