@@ -1,7 +1,7 @@
 {
   "name": "Lion Weather",
   "short_name": "Lion Weather",
-  "description": "Vremenska prognoza za bilo koju lokaciju na svetu -— sa lavom.",
+  "description": "Vremenska prognoza za bilo koju lokaciju na svetu -— sa lavom🦁.",
   "start_url": "index.html",
   "scope": ".",
   "display": "standalone",
