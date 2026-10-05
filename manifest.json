@@ -1,6 +1,6 @@
 {
-  "name": "Lion_Time",
-  "short_name": "Lion_Time",
+  "name": "Lion Time",
+  "short_name": "Lion Time",
   "description": "Vremenska prognoza za bilo koju likaciju na svetu -— s lavom.",
   "start_url": "index.html",
   "scope": ".",
