@@ -1,7 +1,7 @@
 {
-  "name": "LAV-VREME — Stara Pazova",
-  "short_name": "LAV-VREME",
-  "description": "Vremenska prognoza za Stara Pazovu — s lavom.",
+  "name": "Lion_Time" — Stara Pazova",
+  "short_name": "Lion_Time",
+  "description": "Vremenska prognoza za bilo koju likaciju na svetu -— s lavom.",
   "start_url": "index.html",
   "scope": ".",
   "display": "standalone",
