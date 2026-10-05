@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Lion Weather</title>
-<link rel="icon" href="https://oss-macaron-ai.macaron.im/image/text_to_image/6ac3d073e1c9684dbf1fdf64.webp">
-<link rel="apple-touch-icon" href="https://oss-macaron-ai.macaron.im/image/text_to_image/6ac3d073e1c9684dbf1fdf64.webp">
+<link rel="icon" href="https://oss-macaron-ai.macaron.im/image/text_to_image/6ac3ec61754e18ccbcb3e261.webp">
+<link rel="apple-touch-icon" href="https://oss-macaron-ai.macaron.im/image/text_to_image/6ac3ec61754e18ccbcb3e261.webp">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#06402b">
 <style>
@@ -100,8 +100,8 @@
   }
   #lav.fade { opacity: 0; }
   #lav-wrap { position: relative; display: inline-block; }
-  #efekti { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
-  #efekti span { position: absolute; font-size: 18px; opacity: 0; }
+  #efekti { position: absolute; top: -20px; left: -20px; width: calc(100% + 40px); height: calc(100% + 40px); pointer-events: none; }
+  #efekti span { position: absolute; font-size: 28px; opacity: 0; text-shadow: 0 0 10px rgba(240, 212, 124, .4); }
   #efekti .ef-kisa span, #efekti span.ef-kisa { animation: ef-pad 1.6s linear infinite; }
   #efekti span.ef-sneg { animation: ef-pad 3.2s linear infinite; }
   #efekti span.ef-sunce { animation: ef-sija 2.6s ease-in-out infinite; }
@@ -109,21 +109,21 @@
   #efekti span.ef-oblacno { animation: ef-pluta 5.5s ease-in-out infinite; }
   @keyframes ef-pad {
     0% { transform: translateY(0) rotate(0deg); opacity: 0; }
-    15% { opacity: .9; }
-    85% { opacity: .7; }
-    100% { transform: translateY(200px) rotate(40deg); opacity: 0; }
+    12% { opacity: .95; }
+    85% { opacity: .85; }
+    100% { transform: translateY(300px) rotate(60deg); opacity: 0; }
   }
   @keyframes ef-sija {
-    0%, 100% { transform: scale(.7); opacity: .25; }
-    50% { transform: scale(1.15); opacity: .95; }
+    0%, 100% { transform: scale(.8); opacity: .45; }
+    50% { transform: scale(1.25); opacity: 1; }
   }
   @keyframes ef-blesak {
     0%, 55%, 62%, 100% { opacity: 0; }
     57%, 60% { opacity: 1; }
   }
   @keyframes ef-pluta {
-    0%, 100% { transform: translateX(-3px); opacity: .55; }
-    50% { transform: translateX(3px); opacity: .85; }
+    0%, 100% { transform: translateX(-4px); opacity: .7; }
+    50% { transform: translateX(4px); opacity: 1; }
   }
   .temp-row {
     display: flex;
@@ -426,28 +426,33 @@ function postaviEfekte(vrsta) {
   var wrap = document.getElementById("efekti");
   if (!wrap) return;
   wrap.innerHTML = "";
-  var EFEKTI = {
-    sunce: ["✨", "☀️", "✨"],
-    kisa: ["💧", "💧", "💧", "💧", "💧", "💧"],
-    oluja: ["⚡", "☁️", "⚡"],
-    oblacno: ["☁️", "☁️"],
-    sneg: ["❄️", "❄️", "❄️", "❄️", "❄️", "❄️"]
+  var ZNAKOVI = {
+    sunce: ["✨", "☀️", "✨", "✨", "☀️"],
+    kisa: ["💧", "💧", "💧", "💧", "💧", "💧", "💧", "💧"],
+    oluja: ["⚡", "⚡", "☁️"],
+    oblacno: ["☁️", "☁️", "☁️"],
+    sneg: ["❄️", "❄️", "❄️", "❄️", "❄️", "❄️", "❄️", "❄️"]
   };
-  var znakovi = EFEKTI[vrsta] || [];
+  var POZE = {
+    sunce: [[-16, 6], [90, 4], [-14, 76], [88, 74], [42, -4]],
+    oblacno: [[-22, 8], [78, 2], [-8, 82]],
+    oluja: [[-18, 4], [80, 0], [-6, 84]]
+  };
+  var znakovi = ZNAKOVI[vrsta] || [];
   for (var i = 0; i < znakovi.length; i++) {
     var s = document.createElement("span");
     s.textContent = znakovi[i];
     s.className = "ef-" + vrsta;
-    if (vrsta === "sunce" || vrsta === "oblacno") {
-      s.style.left = (i * 42 + 6) + "%";
-      s.style.top = (8 + Math.floor(Math.random() * 24)) + "%";
-    } else if (vrsta === "oluja") {
-      s.style.left = (i === 0 ? "72%" : (i === 1 ? "38%" : "4%"));
-      s.style.top = (i === 1 ? "70%" : "2%");
+    var poze = POZE[vrsta];
+    if (poze) {
+      var p = poze[i % poze.length];
+      s.style.left = p[0] + "%";
+      s.style.top = p[1] + "%";
+      s.style.animationDelay = (i * 0.5).toFixed(2) + "s";
     } else {
-      s.style.left = (4 + Math.floor(Math.random() * 92)) + "%";
-      s.style.top = "-8%";
-      s.style.animationDelay = (Math.random() * 2.2).toFixed(2) + "s";
+      s.style.left = (-6 + Math.floor(Math.random() * 108)) + "%";
+      s.style.top = "-18%";
+      s.style.animationDelay = (Math.random() * 2.4).toFixed(2) + "s";
     }
     wrap.appendChild(s);
   }
