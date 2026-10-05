@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>LAV-VREME</title>
-<link rel="icon" href="https://oss-macaron-ai.macaron.im/image/text_to_image/6ac38d04a512cea1a59526b7.webp">
-<link rel="apple-touch-icon" href="https://oss-macaron-ai.macaron.im/image/text_to_image/6ac38d04a512cea1a59526b7.webp">
+<title>Lion Weather</title>
+<link rel="icon" href="https://oss-macaron-ai.macaron.im/image/text_to_image/6ac3d073e1c9684dbf1fdf64.webp">
+<link rel="apple-touch-icon" href="https://oss-macaron-ai.macaron.im/image/text_to_image/6ac3d073e1c9684dbf1fdf64.webp">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#06402b">
 <style>
@@ -28,15 +28,8 @@
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
-    padding: 18px 16px calc(14px + env(safe-area-inset-bottom));
+    padding: 18px 16px calc(78px + env(safe-area-inset-bottom));
     overflow-x: hidden;
-  }
-  .monogram {
-    font-size: 13px;
-    letter-spacing: 6px;
-    color: var(--gold-light);
-    font-weight: 700;
-    opacity: .9;
   }
   .top-row {
     width: 100%;
@@ -52,12 +45,13 @@
     gap: 4px;
   }
   .lav-top {
-    width: 56px;
-    height: 56px;
+    width: 64px;
+    height: 64px;
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid var(--gold);
     box-shadow: 0 6px 18px rgba(0, 0, 0, .5);
+    filter: brightness(1.18);
   }
   #sat {
     font-size: 40px;
@@ -95,15 +89,42 @@
     text-align: center;
   }
   #lav {
-    width: 170px;
-    height: 170px;
+    width: 200px;
+    height: 200px;
     border-radius: 50%;
     object-fit: cover;
     border: 3px solid var(--gold);
     box-shadow: 0 0 0 6px rgba(212,175,55,.15), 0 10px 34px rgba(0,0,0,.5);
+    filter: brightness(1.18);
     transition: opacity .5s ease;
   }
   #lav.fade { opacity: 0; }
+  #lav-wrap { position: relative; display: inline-block; }
+  #efekti { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+  #efekti span { position: absolute; font-size: 18px; opacity: 0; }
+  #efekti .ef-kisa span, #efekti span.ef-kisa { animation: ef-pad 1.6s linear infinite; }
+  #efekti span.ef-sneg { animation: ef-pad 3.2s linear infinite; }
+  #efekti span.ef-sunce { animation: ef-sija 2.6s ease-in-out infinite; }
+  #efekti span.ef-oluja { animation: ef-blesak 2.4s steps(1) infinite; }
+  #efekti span.ef-oblacno { animation: ef-pluta 5.5s ease-in-out infinite; }
+  @keyframes ef-pad {
+    0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+    15% { opacity: .9; }
+    85% { opacity: .7; }
+    100% { transform: translateY(200px) rotate(40deg); opacity: 0; }
+  }
+  @keyframes ef-sija {
+    0%, 100% { transform: scale(.7); opacity: .25; }
+    50% { transform: scale(1.15); opacity: .95; }
+  }
+  @keyframes ef-blesak {
+    0%, 55%, 62%, 100% { opacity: 0; }
+    57%, 60% { opacity: 1; }
+  }
+  @keyframes ef-pluta {
+    0%, 100% { transform: translateX(-3px); opacity: .55; }
+    50% { transform: translateX(3px); opacity: .85; }
+  }
   .temp-row {
     display: flex;
     align-items: baseline;
@@ -175,11 +196,12 @@
     color: #b9d6c6;
   }
   .sat-item img {
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     object-fit: cover;
     border: 1px solid rgba(212, 175, 55, .4);
+    filter: brightness(1.18);
   }
   .sat-item b { color: var(--text); font-size: 13px; }
   .dan-red {
@@ -193,13 +215,14 @@
   }
   .dan-red:last-child { border-bottom: none; }
   .dan-red img {
-    width: 40px;
-    height: 40px;
+    width: 46px;
+    height: 46px;
     border-radius: 50%;
     object-fit: cover;
     border: 1px solid rgba(212, 175, 55, .4);
+    filter: brightness(1.18);
   }
-  .dan-ime { width: 74px; text-align: left; color: var(--text); font-weight: 600; }
+  .dan-ime { width: 84px; text-align: left; color: var(--text); font-weight: 600; }
   .dan-opis { flex: 1; text-align: left; font-size: 12px; color: #b9d6c6; }
   .dan-temp { color: var(--text); font-weight: 600; }
   .lok-red {
@@ -264,13 +287,15 @@
       <div id="datum">-/-/-</div>
     </div>
     <div class="top-desno">
-      <img id="lav-top" class="lav-top" src="https://oss-macaron-ai.macaron.im/image/chat_image/f90db405-ef57-498c-95d6-cc9f2080b370.webp" alt="Vremenski lav">
-      <div class="monogram">V B</div>
+      <img id="lav-top" class="lav-top" src="https://oss-macaron-ai.macaron.im/image/text_to_image/6ac3d08be1c9684dbf1fdfbf.webp" alt="Vremenski lav">
     </div>
   </div>
 
   <div class="card">
-    <img id="lav" src="https://oss-macaron-ai.macaron.im/image/chat_image/f90db405-ef57-498c-95d6-cc9f2080b370.webp" alt="Lav — vremensko raspoloženje" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20210%20210%22%3E%3Ctext%20x=%22105%22%20y=%22140%22%20font-size=%22100%22%20text-anchor=%22middle%22%3E%F0%9F%A6%81%3C%2Ftext%3E%3C%2Fsvg%3E';">
+    <div id="lav-wrap">
+      <img id="lav" src="https://oss-macaron-ai.macaron.im/image/text_to_image/6ac3d08be1c9684dbf1fdfbf.webp" alt="Lav — vremensko raspoloženje" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20210%20210%22%3E%3Ctext%20x=%22105%22%20y=%22140%22%20font-size=%22100%22%20text-anchor=%22middle%22%3E%F0%9F%A6%81%3C%2Ftext%3E%3C%2Fsvg%3E';">
+      <div id="efekti"></div>
+    </div>
     <div class="temp-row">
       <span id="temp">–</span>
       <span class="temp-unit">°C</span>
@@ -279,10 +304,10 @@
     <div id="mood">Lav se budi…</div>
     <div class="meta">
       <span id="grad">Stara Pazova</span>
-      <span> vetski: <b id="wind">–</b></span>
+      <span> vetar: <b id="wind">–</b> km/h</span>
       <span> kiša: <b id="rain">–</b> mm</span>
-      <span> izlazak: <b id="izlazak">–</b></span>
-      <span> zalazak: <b id="zalazak">–</b></span>
+      <span> izlazak sunca: <b id="izlazak">–</b></span>
+      <span> zalazak sunca: <b id="zalazak">–</b></span>
     </div>
     <div id="msg" class="loading">Učitavam prognozu…</div>
     <div id="err" class="err"></div>
@@ -319,7 +344,7 @@
 
   <img class="vb-avatar" src="https://oss-macaron-ai.macaron.im/image/chat_image/f05bb68b-34de-415b-9b63-b828377811f1.webp" alt="VB — Vladimir Blanuša">
 
-  <div class="foot">LAV-VREME · <span id="grad-foot">Stara Pazova</span> · Open-Meteo</div>
+  <div class="foot">Lion Weather · <span id="grad-foot">Stara Pazova</span> · Open-Meteo</div>
 
 <script>
 // Open-Meteo — besplatan, bez API ključa
@@ -336,16 +361,16 @@ try {
 function postaviGradUI(ime) {
   document.getElementById("grad").textContent = ime;
   document.getElementById("grad-foot").textContent = ime;
-  document.title = "LAV-VREME — " + ime;
+  document.title = "Lion Weather — " + ime;
 }
 postaviGradUI(LOK.ime);
 
 var LAVOVI = {
-  sunce:   "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac38d04a512cea1a59526b7.webp",
-  kisa:    "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac38d2ea512cea1a5952716.webp",
-  oluja:   "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac37af9e1c9684dbf1ec544.webp",
-  oblacno: "https://oss-macaron-ai.macaron.im/image/chat_image/f90db405-ef57-498c-95d6-cc9f2080b370.webp",
-  sneg:    "https://oss-macaron-ai.macaron.im/image/chat_image/7fed73c2-f74d-43bd-8e9f-024349261e8d.webp"
+  sunce:   "https://oss-macaron-ai.macaron.im/image/chat_image/ca4f56fb-a7ce-4642-b069-1c299d6264ce.webp",
+  kisa:    "https://oss-macaron-ai.macaron.im/image/chat_image/0a390ccb-651a-47a9-b480-b8769b6ae5e0.webp",
+  oluja:   "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac3d05be1c9684dbf1fdeff.webp",
+  oblacno: "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac3d08be1c9684dbf1fdfbf.webp",
+  sneg:    "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac3d0bfa512cea1a5960762.webp"
 };
 var WCODE = {
   0:  ["Vedro",                 "sunce",  "Lav se grije na suncu 😎"],
@@ -354,24 +379,25 @@ var WCODE = {
   3:  ["Oblačno",                "oblacno","Lav dosađuje, al' je smiren 😐"],
   45: ["Magla",                  "oblacno","Lav se izgubio u magli 🌫"],
   48: ["Magla s mrazom",         "oblacno","Lav se ježi od mraza"],
-  51: ["Slaba rosulja",          "kisa",   "Lav se pravi da ne mari 🌧"],
-  53: ["Rosulja",                "kisa",   "Lav ne izlazi iz jazbine 🌧"],
-  55: ["Jaka rosulja",           "kisa",   "Lav mokar do gole kože 🌧"],
+  51: ["Slaba kiša",             "kisa",   "Lav se pravi da ne mari 🌧"],
+  53: ["Lagana kiša",            "kisa",   "Lav ne izlazi iz jazbine 🌧"],
+  55: ["Jaka kiša",              "kisa",   "Lav mokar do gole kože 🌧"],
   61: ["Slaba kiša",             "kisa",   "Lav se skićući vratio u jazbinu"],
   63: ["Kiša",                   "kisa",   "Griva mokra, brkovi kapanju 🌧"],
   65: ["Jaka kiša",              "kisa",   "Lav pliva, a ne hoda 🌧"],
   71: ["Slab sneg",              "sneg",   "Lav sa sedim dlakama se stapa s pejzažom ❄"],
   73: ["Sneg",                   "sneg",   "Snežni kralj u kruni ❄"],
   75: ["Jak sneg",               "sneg",   "Lav zatrpan do brkova ❄"],
-  80: ["Slabe pljuskavice",      "kisa",   "Lav beži pod krov 🌧"],
-  81: ["Pljuskavice",            "kisa",   "Griva mokra, lav naboran 🌧"],
-  82: ["Jake pljuskavice",       "kisa",   "Lav čeka da prođe 🌧"],
+  80: ["Slab pljusak",           "kisa",   "Lav beži pod krov 🌧"],
+  81: ["Pljusak",                "kisa",   "Griva mokra, lav naboran 🌧"],
+  82: ["Jak pljusak",            "kisa",   "Lav čeka da prođe 🌧"],
   95: ["Grmljavinska oluja",     "oluja",  "Ljutnja lava: grom i crvene oči ⚡"],
   96: ["Oluja s gradom",         "oluja",  "Grom iza lava, oči gore ⚡"],
   99: ["Jaka oluja s gradom",    "oluja",  "LAV SE BESNI ⚡"]
 };
 var MOOD_LAT = { sunce: "sunce", kisa: "kiša", oluja: "oluja", oblacno: "oblačno", sneg: "sneg" };
 var DANI_SR = ["Nedelja", "Ponedeljak", "Utorak", "Sreda", "Četvrtak", "Petak", "Subota"];
+var DANI_SR_KRATKO = ["ned", "pon", "uto", "sre", "čet", "pet", "sub"];
 
 // Sat i datum — lokalni čas telefona
 var MES = ["januar","februar","mart","april","maj","jun","jul","avgust","septembar","oktobar","novembar","decembar"];
@@ -393,6 +419,37 @@ function postaviLava(vrsta) {
       img.onload = function(){ img.classList.remove("fade"); };
       setTimeout(function(){ img.classList.remove("fade"); }, 400);
     }, 250);
+  }
+}
+
+function postaviEfekte(vrsta) {
+  var wrap = document.getElementById("efekti");
+  if (!wrap) return;
+  wrap.innerHTML = "";
+  var EFEKTI = {
+    sunce: ["✨", "☀️", "✨"],
+    kisa: ["💧", "💧", "💧", "💧", "💧", "💧"],
+    oluja: ["⚡", "☁️", "⚡"],
+    oblacno: ["☁️", "☁️"],
+    sneg: ["❄️", "❄️", "❄️", "❄️", "❄️", "❄️"]
+  };
+  var znakovi = EFEKTI[vrsta] || [];
+  for (var i = 0; i < znakovi.length; i++) {
+    var s = document.createElement("span");
+    s.textContent = znakovi[i];
+    s.className = "ef-" + vrsta;
+    if (vrsta === "sunce" || vrsta === "oblacno") {
+      s.style.left = (i * 42 + 6) + "%";
+      s.style.top = (8 + Math.floor(Math.random() * 24)) + "%";
+    } else if (vrsta === "oluja") {
+      s.style.left = (i === 0 ? "72%" : (i === 1 ? "38%" : "4%"));
+      s.style.top = (i === 1 ? "70%" : "2%");
+    } else {
+      s.style.left = (4 + Math.floor(Math.random() * 92)) + "%";
+      s.style.top = "-8%";
+      s.style.animationDelay = (Math.random() * 2.2).toFixed(2) + "s";
+    }
+    wrap.appendChild(s);
   }
 }
 
@@ -423,7 +480,8 @@ function renderDana(d) {
   for (var i = 0; i < d.time.length && i < 7; i++) {
     var info = WCODE[d.weather_code[i]] || ["", "oblacno", ""];
     var dt = new Date(d.time[i] + "T12:00:00");
-    var ime = i === 0 ? "Danas" : DANI_SR[dt.getDay()];
+    var datum = dt.getDate() + "." + (dt.getMonth() + 1) + ".";
+    var ime = i === 0 ? "Danas" : DANI_SR_KRATKO[dt.getDay()] + " " + datum;
     var red = document.createElement("div");
     red.className = "dan-red";
     red.innerHTML = "<span class=\"dan-ime\">" + ime + "</span>" +
@@ -447,6 +505,7 @@ function obradi(tekst) {
   document.getElementById("wind").textContent = v;
   document.getElementById("rain").textContent = k;
   postaviLava(info[1]);
+  postaviEfekte(info[1]);
   document.getElementById("lav-top").src = LAVOVI[info[1]];
   document.getElementById("msg").style.display = "none";
 
