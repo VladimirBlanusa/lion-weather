@@ -1,0 +1,25 @@
+{
+  "name": "LAV-VREME — Stara Pazova",
+  "short_name": "LAV-VREME",
+  "description": "Vremenska prognoza za Stara Pazovu — s lavom.",
+  "start_url": "index.html",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#06402b",
+  "theme_color": "#06402b",
+  "icons": [
+    {
+      "src": "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac38d04a512cea1a59526b7.webp",
+      "sizes": "1024x1024",
+      "type": "image/webp",
+      "purpose": "any"
+    },
+    {
+      "src": "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac38d04a512cea1a59526b7.webp",
+      "sizes": "512x512",
+      "type": "image/webp",
+      "purpose": "maskable"
+    }
+  ]
+}

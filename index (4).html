@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>LAV-VREME</title>
+<link rel="icon" href="https://oss-macaron-ai.macaron.im/image/text_to_image/6ac38d04a512cea1a59526b7.webp">
+<link rel="apple-touch-icon" href="https://oss-macaron-ai.macaron.im/image/text_to_image/6ac38d04a512cea1a59526b7.webp">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#06402b">
+<style>
+  :root {
+    --emerald-dark: #06402b;
+    --emerald: #0b5c3f;
+    --emerald-light: #0f7a54;
+    --gold: #d4af37;
+    --gold-light: #f0d47c;
+    --text: #f5f1e6;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: radial-gradient(ellipse at 50% 20%, var(--emerald) 0%, var(--emerald-dark) 65%, #031f14 100%);
+    color: var(--text);
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 16px calc(14px + env(safe-area-inset-bottom));
+    overflow-x: hidden;
+  }
+  .monogram {
+    font-size: 13px;
+    letter-spacing: 6px;
+    color: var(--gold-light);
+    font-weight: 700;
+    opacity: .9;
+  }
+  .top-row {
+    width: 100%;
+    max-width: 420px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  .top-desno {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .lav-top {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--gold);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, .5);
+  }
+  #sat {
+    font-size: 40px;
+    font-weight: 400;
+    letter-spacing: 2px;
+    color: #d4af37;
+    line-height: 1;
+  }
+  #datum {
+    font-size: 12px;
+    letter-spacing: 1px;
+    color: rgba(212, 175, 55, .85);
+    margin-top: 4px;
+  }
+  .vb-avatar {
+    position: fixed;
+    right: 14px;
+    bottom: calc(14px + env(safe-area-inset-bottom));
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid rgba(212, 175, 55, .45);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, .5);
+    z-index: 5;
+  }
+  .card {
+    width: 100%;
+    max-width: 420px;
+    background: rgba(3, 31, 20, .45);
+    border: 1px solid rgba(212, 175, 55, .25);
+    border-radius: 24px;
+    padding: 22px 18px 18px;
+    box-shadow: 0 22px 60px rgba(0,0,0,.45);
+    text-align: center;
+  }
+  #lav {
+    width: 170px;
+    height: 170px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--gold);
+    box-shadow: 0 0 0 6px rgba(212,175,55,.15), 0 10px 34px rgba(0,0,0,.5);
+    transition: opacity .5s ease;
+  }
+  #lav.fade { opacity: 0; }
+  .temp-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 16px;
+  }
+  #temp { font-size: 64px; font-weight: 200; line-height: 1; color: var(--text); }
+  .temp-unit { font-size: 28px; color: var(--gold-light); }
+  #desc {
+    margin-top: 6px;
+    font-size: 16px;
+    color: #cfe7d9;
+    min-height: 22px;
+  }
+  #mood {
+    margin-top: 10px;
+    font-size: 13px;
+    font-style: italic;
+    color: var(--gold-light);
+    min-height: 18px;
+  }
+  .meta {
+    margin-top: 16px;
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    font-size: 13px;
+    color: #b9d6c6;
+  }
+  .meta span b { color: var(--text); font-weight: 600; }
+  .panel {
+    width: 100%;
+    max-width: 420px;
+    margin-top: 12px;
+    background: rgba(3, 31, 20, .35);
+    border: 1px solid rgba(212, 175, 55, .15);
+    border-radius: 16px;
+    padding: 12px 14px;
+  }
+  .panel h3 {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold-light);
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+  .models table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .models td { padding: 4px 2px; color: #cfe7d9; border-bottom: 1px solid rgba(212,175,55,.08); }
+  .models tr:last-child td { border-bottom: none; }
+  .models td:last-child { text-align: right; color: var(--text); font-weight: 600; }
+  .sati-traka {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+  }
+  .sati-traka::-webkit-scrollbar { display: none; }
+  .sat-item {
+    min-width: 52px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: #b9d6c6;
+  }
+  .sat-item img {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid rgba(212, 175, 55, .4);
+  }
+  .sat-item b { color: var(--text); font-size: 13px; }
+  .dan-red {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(212, 175, 55, .08);
+    font-size: 13px;
+    color: #cfe7d9;
+  }
+  .dan-red:last-child { border-bottom: none; }
+  .dan-red img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid rgba(212, 175, 55, .4);
+  }
+  .dan-ime { width: 74px; text-align: left; color: var(--text); font-weight: 600; }
+  .dan-opis { flex: 1; text-align: left; font-size: 12px; color: #b9d6c6; }
+  .dan-temp { color: var(--text); font-weight: 600; }
+  .lok-red {
+    display: flex;
+    gap: 8px;
+  }
+  .lok-red input {
+    flex: 1;
+    min-width: 0;
+    background: rgba(3, 31, 20, .6);
+    border: 1px solid rgba(212, 175, 55, .35);
+    border-radius: 10px;
+    color: var(--text);
+    font-size: 14px;
+    padding: 10px 12px;
+    outline: none;
+  }
+  .lok-red input::placeholder { color: rgba(185, 214, 198, .55); }
+  .lok-red button {
+    background: rgba(212, 175, 55, .16);
+    border: 1px solid rgba(212, 175, 55, .45);
+    border-radius: 10px;
+    color: var(--gold-light);
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 12px;
+    cursor: pointer;
+  }
+  #lok-gps { font-size: 16px; padding: 10px 12px; }
+  #lok-rez { margin-top: 8px; display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #b9d6c6; }
+  .lok-rez-btn {
+    text-align: left;
+    background: rgba(3, 31, 20, .6);
+    border: 1px solid rgba(212, 175, 55, .25);
+    border-radius: 10px;
+    color: var(--text);
+    font-size: 13px;
+    padding: 9px 12px;
+    cursor: pointer;
+  }
+  .lok-rez-btn:active { background: rgba(212, 175, 55, .18); }
+  .foot {
+    font-size: 11px;
+    color: rgba(245, 241, 230, .45);
+    text-align: center;
+    margin-top: 14px;
+    letter-spacing: 1px;
+  }
+  .err {
+    color: #ffb0a0;
+    font-size: 13px;
+    margin-top: 10px;
+    display: none;
+  }
+  .loading { color: var(--gold-light); font-size: 14px; margin-top: 10px; }
+</style>
+</head>
+<body>
+  <div class="top-row">
+    <div>
+      <div id="sat">--:--</div>
+      <div id="datum">-/-/-</div>
+    </div>
+    <div class="top-desno">
+      <img id="lav-top" class="lav-top" src="https://oss-macaron-ai.macaron.im/image/chat_image/f90db405-ef57-498c-95d6-cc9f2080b370.webp" alt="Vremenski lav">
+      <div class="monogram">V B</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <img id="lav" src="https://oss-macaron-ai.macaron.im/image/chat_image/f90db405-ef57-498c-95d6-cc9f2080b370.webp" alt="Lav — vremensko raspoloženje" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20210%20210%22%3E%3Ctext%20x=%22105%22%20y=%22140%22%20font-size=%22100%22%20text-anchor=%22middle%22%3E%F0%9F%A6%81%3C%2Ftext%3E%3C%2Fsvg%3E';">
+    <div class="temp-row">
+      <span id="temp">–</span>
+      <span class="temp-unit">°C</span>
+    </div>
+    <div id="desc">Provera vremena…</div>
+    <div id="mood">Lav se budi…</div>
+    <div class="meta">
+      <span id="grad">Stara Pazova</span>
+      <span> vetski: <b id="wind">–</b></span>
+      <span> kiša: <b id="rain">–</b> mm</span>
+      <span> izlazak: <b id="izlazak">–</b></span>
+      <span> zalazak: <b id="zalazak">–</b></span>
+    </div>
+    <div id="msg" class="loading">Učitavam prognozu…</div>
+    <div id="err" class="err"></div>
+  </div>
+
+  <div class="panel sati">
+    <h3>Po satima</h3>
+    <div id="sati-traka" class="sati-traka"></div>
+  </div>
+
+  <div class="panel dani">
+    <h3>Po danima — 7 dana</h3>
+    <div id="dani-lista"></div>
+  </div>
+
+  <div class="panel models">
+    <h3>Modeli — uporedno</h3>
+    <table>
+      <tr><td>ECMWF</td><td id="m-ecmwf">–</td></tr>
+      <tr><td>GFS</td><td id="m-gfs">–</td></tr>
+      <tr><td>ICON</td><td id="m-icon">–</td></tr>
+    </table>
+  </div>
+
+  <div class="panel lok">
+    <h3>Lokacija — bilo gde</h3>
+    <div class="lok-red">
+      <input id="lok-unos" placeholder="Traži grad (Beograd, Kotor, New York…)" autocomplete="off">
+      <button id="lok-trazi" type="button">Traži</button>
+      <button id="lok-gps" type="button" title="Moja lokacija">📍</button>
+    </div>
+    <div id="lok-rez"></div>
+  </div>
+
+  <img class="vb-avatar" src="https://oss-macaron-ai.macaron.im/image/chat_image/f05bb68b-34de-415b-9b63-b828377811f1.webp" alt="VB — Vladimir Blanuša">
+
+  <div class="foot">LAV-VREME · <span id="grad-foot">Stara Pazova</span> · Open-Meteo</div>
+
+<script>
+// Open-Meteo — besplatan, bez API ključa
+// Lokacija: pamti se u localStorage, default Stara Pazova
+var LOK_KEY = "lav-vreme-lokacija";
+var LOK = { lat: 44.9931, lon: 20.1669, ime: "Stara Pazova" };
+try {
+  var sacuvano = JSON.parse(localStorage.getItem(LOK_KEY));
+  if (sacuvano && typeof sacuvano.lat === "number" && typeof sacuvano.lon === "number" && sacuvano.ime) {
+    LOK = sacuvano;
+  }
+} catch (e) {}
+
+function postaviGradUI(ime) {
+  document.getElementById("grad").textContent = ime;
+  document.getElementById("grad-foot").textContent = ime;
+  document.title = "LAV-VREME — " + ime;
+}
+postaviGradUI(LOK.ime);
+
+var LAVOVI = {
+  sunce:   "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac38d04a512cea1a59526b7.webp",
+  kisa:    "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac38d2ea512cea1a5952716.webp",
+  oluja:   "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac37af9e1c9684dbf1ec544.webp",
+  oblacno: "https://oss-macaron-ai.macaron.im/image/chat_image/f90db405-ef57-498c-95d6-cc9f2080b370.webp",
+  sneg:    "https://oss-macaron-ai.macaron.im/image/chat_image/7fed73c2-f74d-43bd-8e9f-024349261e8d.webp"
+};
+var WCODE = {
+  0:  ["Vedro",                 "sunce",  "Lav se grije na suncu 😎"],
+  1:  ["Pretežno vedro",         "sunce",  "Lav žmuri na svetlu 😌"],
+  2:  ["Delimično oblačno",      "oblacno","Lav posmatra oblake 😐"],
+  3:  ["Oblačno",                "oblacno","Lav dosađuje, al' je smiren 😐"],
+  45: ["Magla",                  "oblacno","Lav se izgubio u magli 🌫"],
+  48: ["Magla s mrazom",         "oblacno","Lav se ježi od mraza"],
+  51: ["Slaba rosulja",          "kisa",   "Lav se pravi da ne mari 🌧"],
+  53: ["Rosulja",                "kisa",   "Lav ne izlazi iz jazbine 🌧"],
+  55: ["Jaka rosulja",           "kisa",   "Lav mokar do gole kože 🌧"],
+  61: ["Slaba kiša",             "kisa",   "Lav se skićući vratio u jazbinu"],
+  63: ["Kiša",                   "kisa",   "Griva mokra, brkovi kapanju 🌧"],
+  65: ["Jaka kiša",              "kisa",   "Lav pliva, a ne hoda 🌧"],
+  71: ["Slab sneg",              "sneg",   "Lav sa sedim dlakama se stapa s pejzažom ❄"],
+  73: ["Sneg",                   "sneg",   "Snežni kralj u kruni ❄"],
+  75: ["Jak sneg",               "sneg",   "Lav zatrpan do brkova ❄"],
+  80: ["Slabe pljuskavice",      "kisa",   "Lav beži pod krov 🌧"],
+  81: ["Pljuskavice",            "kisa",   "Griva mokra, lav naboran 🌧"],
+  82: ["Jake pljuskavice",       "kisa",   "Lav čeka da prođe 🌧"],
+  95: ["Grmljavinska oluja",     "oluja",  "Ljutnja lava: grom i crvene oči ⚡"],
+  96: ["Oluja s gradom",         "oluja",  "Grom iza lava, oči gore ⚡"],
+  99: ["Jaka oluja s gradom",    "oluja",  "LAV SE BESNI ⚡"]
+};
+var MOOD_LAT = { sunce: "sunce", kisa: "kiša", oluja: "oluja", oblacno: "oblačno", sneg: "sneg" };
+var DANI_SR = ["Nedelja", "Ponedeljak", "Utorak", "Sreda", "Četvrtak", "Petak", "Subota"];
+
+// Sat i datum — lokalni čas telefona
+var MES = ["januar","februar","mart","april","maj","jun","jul","avgust","septembar","oktobar","novembar","decembar"];
+function sati(){
+  var d = new Date();
+  var h = d.getHours(), m = d.getMinutes();
+  document.getElementById("sat").textContent = (h<10?"0":"")+h+":"+(m<10?"0":"")+m;
+  document.getElementById("datum").textContent = d.getDate()+". "+MES[d.getMonth()]+" "+d.getFullYear()+".";
+}
+sati();
+setInterval(sati, 1000);
+
+function postaviLava(vrsta) {
+  var img = document.getElementById("lav");
+  if (img.getAttribute("src") !== LAVOVI[vrsta]) {
+    img.classList.add("fade");
+    setTimeout(function(){
+      img.src = LAVOVI[vrsta];
+      img.onload = function(){ img.classList.remove("fade"); };
+      setTimeout(function(){ img.classList.remove("fade"); }, 400);
+    }, 250);
+  }
+}
+
+// Traka po satima — 24 sata od trenutnog sata
+function renderSate(h, trenutno) {
+  var traka = document.getElementById("sati-traka");
+  traka.innerHTML = "";
+  if (!h || !h.time) return;
+  var idx = h.time.indexOf(trenutno.slice(0, 14) + ":00");
+  if (idx < 0) idx = 0;
+  var kraj = Math.min(idx + 24, h.time.length);
+  for (var i = idx; i < kraj; i++) {
+    var info = WCODE[h.weather_code[i]] || ["", "oblacno", ""];
+    var d = document.createElement("div");
+    d.className = "sat-item";
+    d.innerHTML = "<span>" + h.time[i].slice(11, 13) + "h</span>" +
+                  "<img src=\"" + LAVOVI[info[1]] + "\" alt=\"\">" +
+                  "<b>" + Math.round(h.temperature_2m[i]) + "°</b>";
+    traka.appendChild(d);
+  }
+}
+
+// 7 dana — dan, lav, opis, min/max
+function renderDana(d) {
+  var lista = document.getElementById("dani-lista");
+  lista.innerHTML = "";
+  if (!d || !d.time) return;
+  for (var i = 0; i < d.time.length && i < 7; i++) {
+    var info = WCODE[d.weather_code[i]] || ["", "oblacno", ""];
+    var dt = new Date(d.time[i] + "T12:00:00");
+    var ime = i === 0 ? "Danas" : DANI_SR[dt.getDay()];
+    var red = document.createElement("div");
+    red.className = "dan-red";
+    red.innerHTML = "<span class=\"dan-ime\">" + ime + "</span>" +
+      "<img src=\"" + LAVOVI[info[1]] + "\" alt=\"\">" +
+      "<span class=\"dan-opis\">" + info[0] + "</span>" +
+      "<span class=\"dan-temp\">" + Math.round(d.temperature_2m_max[i]) + "° / " + Math.round(d.temperature_2m_min[i]) + "°</span>";
+    lista.appendChild(red);
+  }
+}
+
+function obradi(tekst) {
+  var t = Math.round(tekst.current.temperature_2m);
+  var kod = tekst.current.weather_code;
+  var v = Math.round(tekst.current.wind_speed_10m);
+  var k = (tekst.current.precipitation || 0);
+  var info = WCODE[kod] || ["Nepoznato", "oblacno", "Lav je zbunjen 🤔"];
+
+  document.getElementById("temp").textContent = t;
+  document.getElementById("desc").textContent = info[0];
+  document.getElementById("mood").textContent = info[2];
+  document.getElementById("wind").textContent = v;
+  document.getElementById("rain").textContent = k;
+  postaviLava(info[1]);
+  document.getElementById("lav-top").src = LAVOVI[info[1]];
+  document.getElementById("msg").style.display = "none";
+
+  var e = tekst.daily ? tekst.daily : null;
+  if (e && e.temperature_2m_max) {
+    document.getElementById("m-ecmwf").textContent =
+      Math.round(e.temperature_2m_max[0]) + "° / " + Math.round(e.temperature_2m_min[0]) + "°";
+  }
+  if (e && e.sunrise && e.sunset) {
+    document.getElementById("izlazak").textContent = e.sunrise[0].slice(11, 16);
+    document.getElementById("zalazak").textContent = e.sunset[0].slice(11, 16);
+  }
+  renderSate(tekst.hourly, tekst.current.time);
+  renderDana(tekst.daily);
+}
+
+function uporediModel(model, id) {
+  var d = model.daily;
+  if (d && d.temperature_2m_max) {
+    document.getElementById(id).textContent =
+      Math.round(d.temperature_2m_max[0]) + "° / " + Math.round(d.temperature_2m_min[0]) + "°";
+  }
+}
+
+function greska(poruka) {
+  var el = document.getElementById("err");
+  el.style.display = "block";
+  el.textContent = "Greška: " + poruka + " — osveži stranicu.";
+  document.getElementById("msg").style.display = "none";
+}
+
+// Registracija service workera — omogućava "Instaliraj aplikaciju"
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js").catch(function(){});
+}
+
+// Prognoza za trenutnu lokaciju (LOK)
+function ucitajPrognozu() {
+  document.getElementById("err").style.display = "none";
+  document.getElementById("msg").style.display = "block";
+  document.getElementById("msg").textContent = "Učitavam prognozu…";
+
+  fetch(
+    "https://api.open-meteo.com/v1/forecast?latitude=" + LOK.lat + "&longitude=" + LOK.lon +
+    "&current=temperature_2m,weather_code,wind_speed_10m,precipitation" +
+    "&hourly=temperature_2m,weather_code" +
+    "&daily=temperature_2m_max,temperature_2m_min,weather_code,sunrise,sunset" +
+    "&forecast_days=7&timezone=auto"
+  )
+    .then(function(r){ return r.json(); })
+    .then(function(j){ obradi(j); })
+    .catch(function(){ greska("prognoza nije stigla"); });
+
+  // Uporedni modeli (ECMWF dolazi iz glavnog poziva)
+  fetch(
+    "https://api.open-meteo.com/v1/forecast?latitude=" + LOK.lat + "&longitude=" + LOK.lon +
+    "&daily=temperature_2m_max,temperature_2m_min&forecast_days=1&timezone=auto&models=gfs_seamless"
+  )
+    .then(function(r){ return r.json(); })
+    .then(function(j){ uporediModel(j, "m-gfs"); })
+    .catch(function(){});
+
+  fetch(
+    "https://api.open-meteo.com/v1/forecast?latitude=" + LOK.lat + "&longitude=" + LOK.lon +
+    "&daily=temperature_2m_max,temperature_2m_min&forecast_days=1&timezone=auto&models=icon_seamless"
+  )
+    .then(function(r){ return r.json(); })
+    .then(function(j){ uporediModel(j, "m-icon"); })
+    .catch(function(){});
+}
+ucitajPrognozu();
+
+// Auto-osvežavanje — na svakih 30 min i svaki put kad se app otvori
+setInterval(ucitajPrognozu, 30 * 60 * 1000);
+document.addEventListener("visibilitychange", function() {
+  if (!document.hidden) ucitajPrognozu();
+});
+
+// ——— Lokacija: pretraga grada, GPS, pamćenje ———
+function postaviLokaciju(lat, lon, ime) {
+  LOK = { lat: lat, lon: lon, ime: ime };
+  try { localStorage.setItem(LOK_KEY, JSON.stringify(LOK)); } catch (e) {}
+  postaviGradUI(ime);
+  document.getElementById("lok-unos").value = "";
+  document.getElementById("lok-rez").innerHTML = "";
+  document.getElementById("lav").classList.add("fade");
+  ucitajPrognozu();
+}
+
+function traziGrad() {
+  var q = document.getElementById("lok-unos").value.trim();
+  var rez = document.getElementById("lok-rez");
+  if (q.length < 2) { rez.textContent = "Ukucaj bar dva slova."; return; }
+  rez.textContent = "Tražim…";
+  fetch("https://geocoding-api.open-meteo.com/v1/search?name=" + encodeURIComponent(q) + "&count=6&language=sr")
+    .then(function(r){ return r.json(); })
+    .then(function(j){
+      var rezultati = j.results || [];
+      rez.innerHTML = "";
+      if (!rezultati.length) { rez.textContent = "Ništa nije nađeno 🤷"; return; }
+      rezultati.forEach(function(r){
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "lok-rez-btn";
+        var opis = r.name;
+        if (r.admin1 && r.admin1 !== r.name) opis += ", " + r.admin1;
+        if (r.country) opis += " (" + r.country + ")";
+        b.textContent = opis;
+        b.onclick = function(){ postaviLokaciju(r.latitude, r.longitude, r.name); };
+        rez.appendChild(b);
+      });
+    })
+    .catch(function(){ rez.textContent = "Pretraga pukla — proveri net." });
+}
+
+function gpsLokacija() {
+  var rez = document.getElementById("lok-rez");
+  if (!navigator.geolocation) { rez.textContent = "GPS nije dostupan na ovom uređaju."; return; }
+  rez.textContent = "Tražim GPS…";
+  navigator.geolocation.getCurrentPosition(
+    function(p){ postaviLokaciju(p.coords.latitude, p.coords.longitude, "Moja lokacija"); },
+    function(){ rez.textContent = "GPS odbijen ili nedostupan."; },
+    { timeout: 10000 }
+  );
+}
+
+document.getElementById("lok-trazi").onclick = traziGrad;
+document.getElementById("lok-gps").onclick = gpsLokacija;
+document.getElementById("lok-unos").addEventListener("keydown", function(e){
+  if (e.key === "Enter") traziGrad();
+});
+</script>
+</body>
+</html>
