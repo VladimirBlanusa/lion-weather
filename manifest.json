@@ -1,6 +1,6 @@
 {
-  "name": "Lion Time",
-  "short_name": "Lion Time",
+  "name": "Lion Weather",
+  "short_name": "Lion Weather",
   "description": "Vremenska prognoza za bilo koju lokaciju na svetu -— s lavom.",
   "start_url": "index.html",
   "scope": ".",
@@ -10,13 +10,13 @@
   "theme_color": "#06402b",
   "icons": [
     {
-      "src": "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac38d04a512cea1a59526b7.webp",
+      "src": "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac3d073e1c9684dbf1fdf64.webp",
       "sizes": "1024x1024",
       "type": "image/webp",
       "purpose": "any"
     },
     {
-      "src": "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac38d04a512cea1a59526b7.webp",
+      "src": "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac3d073e1c9684dbf1fdf64.webp",
       "sizes": "512x512",
       "type": "image/webp",
       "purpose": "maskable"
