@@ -230,13 +230,19 @@
     z-index: 0;
   }
   .card > *:not(#scena) { position: relative; z-index: 1; }
-  .mood-sunce   .card { background-color: rgba(128, 88, 26, .55); }
-  .mood-oblacno .card { background-color: rgba(74, 88, 106, .5); }
-  .mood-magla   .card { background-color: rgba(150, 155, 160, .45); }
-  .mood-kisa    .card { background-color: rgba(44, 72, 108, .55); }
-  .mood-sneg    .card { background-color: rgba(148, 168, 200, .5); }
-  .mood-oluja   .card { background-color: rgba(12, 14, 24, .78); }
-  .mood-noc     .card { background-color: rgba(20, 28, 56, .62); }
+  .mood-sunce   .card { background-color: rgba(125, 175, 230, .6); }
+  .mood-oblacno .card { background-color: rgba(120, 135, 155, .62); }
+  .mood-magla   .card { background-color: rgba(185, 190, 196, .58); }
+  .mood-kisa    .card { background-color: rgba(70, 115, 175, .68); }
+  .mood-sneg    .card { background-color: rgba(185, 200, 222, .62); }
+  .mood-oluja   .card { background-color: rgba(25, 28, 45, .85); }
+  .mood-noc     .card { background-color: rgba(16, 22, 48, .78); }
+  /* Noćne varijante neba kad je mrak */
+  .je-noc.mood-oblacno .card { background-color: rgba(45, 52, 66, .72); }
+  .je-noc.mood-magla   .card { background-color: rgba(95, 100, 108, .62); }
+  .je-noc.mood-kisa    .card { background-color: rgba(22, 30, 55, .75); }
+  .je-noc.mood-sneg    .card { background-color: rgba(70, 85, 110, .65); }
+  .je-noc.mood-oluja   .card { background-color: rgba(10, 12, 22, .88); }
   /* ——— Scena u kvadratu: kapi, pahulje, blesak, oblaci, zvezde ——— */
   .sc-kapa {
     position: absolute; width: 2px; border-radius: 2px;
@@ -287,6 +293,19 @@
   }
   .ef-halo-magla { background: radial-gradient(closest-side, transparent 48%, rgba(200,204,208,.75) 70%, rgba(200,204,208,0) 100%); }
   .ef-halo-noc   { background: radial-gradient(closest-side, transparent 48%, rgba(210,220,255,.65) 72%, rgba(210,220,255,0) 100%); }
+  .ef-zrak {
+    position: absolute; top: 50%; left: 50%;
+    width: 260px; height: 260px; margin: -130px 0 0 -130px;
+    border-radius: 50%;
+    background: repeating-conic-gradient(rgba(255,216,120,.3) 0deg 4deg, rgba(255,216,120,0) 4deg 8deg);
+    -webkit-mask-image: radial-gradient(circle, rgba(0,0,0,.95) 28%, transparent 68%);
+    mask-image: radial-gradient(circle, rgba(0,0,0,.95) 28%, transparent 68%);
+    animation: ef-zrak-vrti 26s linear infinite;
+  }
+  @keyframes ef-zrak-vrti {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
   /* ——— Sati traka: vraćamo zeleni ton ——— */
   .panel.sati {
     background: linear-gradient(160deg, rgba(10, 38, 26, .62), rgba(5, 22, 15, .72));
@@ -296,7 +315,13 @@
   .panel.sati .sat-item { color: #b9d6c6; }
   .panel.sati .sat-item b { color: #eafff2; }
   .panel.sati .sat-item img { border-color: rgba(130, 210, 165, .45); }
-  .sat-emoji { font-size: 15px; line-height: 1; }
+  /* ——— Po danima: vraćamo toplu braon ——— */
+  .panel.dani {
+    background: linear-gradient(160deg, rgba(102, 70, 32, .5), rgba(64, 44, 20, .62));
+    border-color: rgba(212, 175, 55, .3);
+  }
+  .dan-emoji { font-size: 17px; line-height: 1; }
+  .sat-emoji { font-size: 18px; line-height: 1; }
   .sati-traka {
     display: flex;
     gap: 10px;
@@ -568,6 +593,11 @@ function postaviEfekte(vrsta) {
   var h = document.createElement("div");
   h.className = "ef-halo ef-halo-" + vrsta;
   wrap.appendChild(h);
+  if (vrsta === "sunce") {
+    var z = document.createElement("div");
+    z.className = "ef-zrak";
+    wrap.appendChild(z);
+  }
   var i, s;
   if (vrsta === "kisa") {
     for (i = 0; i < 6; i++) {
@@ -706,7 +736,7 @@ function renderDana(d) {
     red.className = "dan-red";
     red.innerHTML = "<span class=\"dan-ime\">" + ime + "</span>" +
       "<img src=\"" + LAVOVI[info[1]] + "\" alt=\"\">" +
-      "<span class=\"dan-opis\">" + info[0] + " " + (info[3] || "") + "</span>" +
+      "<span class=\"dan-opis\">" + info[0] + " <span class=\"dan-emoji\">" + (info[3] || "") + "</span></span>" +
       "<span class=\"dan-temp\">" + Math.round(d.temperature_2m_max[i]) + "° / " + Math.round(d.temperature_2m_min[i]) + "°</span>";
     lista.appendChild(red);
   }
@@ -733,6 +763,8 @@ function obradi(tekst) {
   var stare = document.body.className.match(/mood-\S+/g) || [];
   for (var mi = 0; mi < stare.length; mi++) document.body.classList.remove(stare[mi]);
   document.body.classList.add("mood-" + moodKlasa);
+  if (jeNoc(tekst)) document.body.classList.add("je-noc");
+  else document.body.classList.remove("je-noc");
   document.getElementById("lav-top").src = LAVOVI[info[1]];
   document.getElementById("msg").style.display = "none";
 
