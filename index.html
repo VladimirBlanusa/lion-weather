@@ -340,6 +340,14 @@
     scrollbar-width: none;
   }
   .sati-traka::-webkit-scrollbar { display: none; }
+  /* Na računaru: vitka zlatna traka za listanje sati (telefon ostaje bez nje) */
+  @media (hover: hover) and (pointer: fine) {
+    .sati-traka { scrollbar-width: thin; scrollbar-color: rgba(212, 175, 55, .45) transparent; }
+    .sati-traka::-webkit-scrollbar { display: block; height: 6px; }
+    .sati-traka::-webkit-scrollbar-track { background: transparent; }
+    .sati-traka::-webkit-scrollbar-thumb { background: rgba(212, 175, 55, .35); border-radius: 3px; }
+    .sati-traka::-webkit-scrollbar-thumb:hover { background: rgba(212, 175, 55, .55); }
+  }
   .sat-item {
     min-width: 52px;
     display: flex;
