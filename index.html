@@ -84,7 +84,7 @@
     position: relative;
     transition: background-color 1.2s ease;
     background: rgba(18, 22, 31, .55);
-    border: 1px solid rgba(212, 175, 55, .25);
+    border: 1px solid rgba(212, 175, 55, .3);
     border-radius: 24px;
     padding: 22px 18px 18px;
     box-shadow: 0 22px 60px rgba(0,0,0,.45);
@@ -172,7 +172,7 @@
   #desc {
     margin-top: 6px;
     font-size: 16px;
-    color: #d9dee6;
+    color: rgba(245, 241, 230, .68);
     min-height: 22px;
   }
   #mood {
@@ -189,7 +189,7 @@
     gap: 14px;
     flex-wrap: wrap;
     font-size: 13px;
-    color: #aeb8c2;
+    color: rgba(245, 241, 230, .68);
   }
   .meta span b { color: var(--text); font-weight: 600; }
   .panel {
@@ -197,7 +197,7 @@
     max-width: 420px;
     margin-top: 12px;
     background: rgba(18, 22, 31, .5);
-    border: 1px solid rgba(212, 175, 55, .15);
+    border: 1px solid rgba(212, 175, 55, .3);
     border-radius: 16px;
     padding: 12px 14px;
   }
@@ -210,7 +210,7 @@
     font-weight: 600;
   }
   .models table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .models td { padding: 4px 2px; color: #d9dee6; border-bottom: 1px solid rgba(212,175,55,.08); }
+  .models td { padding: 4px 2px; color: rgba(245, 241, 230, .68); border-bottom: 1px solid rgba(212,175,55,.08); }
   .models tr:last-child td { border-bottom: none; }
   .models td:last-child { text-align: right; color: var(--text); font-weight: 600; }
   /* ——— Modeli — izvori: bordo panel ——— */
@@ -230,11 +230,11 @@
     z-index: 0;
   }
   .card > *:not(#scena) { position: relative; z-index: 1; }
-  .mood-sunce   .card { background-color: rgba(125, 175, 230, .6); }
+  .mood-sunce   .card { background: linear-gradient(180deg, rgba(72, 148, 220, .6), rgba(22, 62, 132, .72)); }
   .mood-oblacno .card { background-color: rgba(120, 135, 155, .62); }
   .mood-magla   .card { background-color: rgba(185, 190, 196, .58); }
-  .mood-kisa    .card { background-color: rgba(70, 115, 175, .68); }
-  .mood-sneg    .card { background-color: rgba(185, 200, 222, .62); }
+  .mood-kisa    .card { background-color: rgba(28, 78, 148, .7); }
+  .mood-sneg    .card { background-color: rgba(170, 200, 235, .6); }
   .mood-oluja   .card { background-color: rgba(25, 28, 45, .85); }
   .mood-noc     .card { background-color: rgba(16, 22, 48, .78); }
   /* Noćne varijante neba kad je mrak */
@@ -284,7 +284,8 @@
   }
   .sc-zvezda {
     position: absolute; width: 3px; height: 3px; border-radius: 50%;
-    background: rgba(230,238,255,.9); box-shadow: 0 0 6px rgba(200,215,255,.8);
+    background: #fff;
+    box-shadow: 0 0 3px #fff, 0 0 8px rgba(255, 230, 170, .95), 0 0 15px rgba(240, 212, 130, .5);
     animation: sc-trepti 3s ease-in-out infinite;
   }
   @keyframes sc-trepti {
@@ -309,15 +310,15 @@
   /* ——— Sati traka: vraćamo zeleni ton ——— */
   .panel.sati {
     background: linear-gradient(160deg, rgba(10, 38, 26, .62), rgba(5, 22, 15, .72));
-    border-color: rgba(130, 210, 165, .3);
+    border-color: rgba(212, 175, 55, .3);
   }
-  .panel.sati h3 { color: #cfe7d9; }
-  .panel.sati .sat-item { color: #b9d6c6; }
-  .panel.sati .sat-item b { color: #eafff2; }
-  .panel.sati .sat-item img { border-color: rgba(130, 210, 165, .45); }
-  /* ——— Po danima: vraćamo toplu braon ——— */
+  .panel.sati h3 { color: var(--gold-light); }
+  .panel.sati .sat-item { color: rgba(245, 241, 230, .68); }
+  .panel.sati .sat-item b { color: var(--text); }
+  .panel.sati .sat-item img { border-color: rgba(212, 175, 55, .4); }
+  /* ——— Po danima: zeleno staklo kao sati ——— */
   .panel.dani {
-    background: linear-gradient(160deg, rgba(102, 70, 32, .5), rgba(64, 44, 20, .62));
+    background: linear-gradient(160deg, rgba(10, 38, 26, .62), rgba(5, 22, 15, .72));
     border-color: rgba(212, 175, 55, .3);
   }
   .dan-emoji { font-size: 17px; line-height: 1; }
@@ -337,7 +338,7 @@
     align-items: center;
     gap: 4px;
     font-size: 12px;
-    color: #aeb8c2;
+    color: rgba(245, 241, 230, .68);
   }
   .sat-item img {
     width: 40px;
@@ -355,7 +356,7 @@
     padding: 6px 0;
     border-bottom: 1px solid rgba(212, 175, 55, .08);
     font-size: 13px;
-    color: #d9dee6;
+    color: rgba(245, 241, 230, .68);
   }
   .dan-red:last-child { border-bottom: none; }
   .dan-red img {
@@ -367,7 +368,7 @@
     filter: brightness(1.18);
   }
   .dan-ime { width: 84px; text-align: left; color: var(--text); font-weight: 600; }
-  .dan-opis { flex: 1; text-align: left; font-size: 12px; color: #aeb8c2; }
+  .dan-opis { flex: 1; text-align: left; font-size: 12px; color: rgba(245, 241, 230, .68); }
   .dan-temp { color: var(--text); font-weight: 600; }
   .lok-red {
     display: flex;
@@ -384,7 +385,7 @@
     padding: 10px 12px;
     outline: none;
   }
-  .lok-red input::placeholder { color: rgba(174, 184, 194, .55); }
+  .lok-red input::placeholder { color: rgba(245, 241, 230, .45); }
   .lok-red button {
     background: rgba(212, 175, 55, .16);
     border: 1px solid rgba(212, 175, 55, .45);
@@ -396,7 +397,7 @@
     cursor: pointer;
   }
   #lok-gps { font-size: 16px; padding: 10px 12px; }
-  #lok-rez { margin-top: 8px; display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #aeb8c2; }
+  #lok-rez { margin-top: 8px; display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: rgba(245, 241, 230, .68); }
   .lok-rez-btn {
     text-align: left;
     background: rgba(18, 22, 31, .6);
@@ -691,7 +692,7 @@ function postaviScenu(vrsta) {
       sc.appendChild(s);
     }
   } else if (vrsta === "noc") {
-    for (i = 0; i < 14; i++) {
+    for (i = 0; i < 28; i++) {
       s = document.createElement("span");
       s.className = "sc-zvezda";
       s.style.left = Math.floor(Math.random() * 100) + "%";
@@ -758,6 +759,7 @@ function obradi(tekst) {
   var moodKlasa = (kod === 45 || kod === 48) ? "magla" : info[1];
   // Noć: vedro/pretežno vedro noću → mesečina umesto sunca
   if (jeNoc(tekst) && moodKlasa === "sunce") moodKlasa = "noc";
+  if (moodKlasa === "noc") document.getElementById("mood").textContent = "Vreme je za mesečinu 🌙";
   postaviEfekte(moodKlasa);
   postaviScenu(moodKlasa);
   var stare = document.body.className.match(/mood-\S+/g) || [];
