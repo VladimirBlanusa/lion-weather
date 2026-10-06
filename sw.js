@@ -1,5 +1,5 @@
 // LAV-VREME service worker — omogućava instalaciju kao aplikaciju (PWA)
-var CACHE = "lav-vreme-v1";
+var CACHE = "lav-vreme-v2";
 
 self.addEventListener("install", function (e) {
   self.skipWaiting();
