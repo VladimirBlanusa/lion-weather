@@ -7,12 +7,12 @@
 <link rel="icon" href="https://oss-macaron-user.macaron.im/photo/095c9f90-89a0-48ab-b566-680517ca9441.jpeg">
 <link rel="apple-touch-icon" href="https://oss-macaron-user.macaron.im/photo/095c9f90-89a0-48ab-b566-680517ca9441.jpeg">
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#06402b">
+<meta name="theme-color" content="#161d29">
 <style>
   :root {
-    --emerald-dark: #06402b;
-    --emerald: #0b5c3f;
-    --emerald-light: #0f7a54;
+    --bg-mid: #232c3a;
+    --bg-dark: #161d29;
+    --bg-deep: #0b0f16;
     --gold: #d4af37;
     --gold-light: #f0d47c;
     --text: #f5f1e6;
@@ -20,7 +20,7 @@
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background: radial-gradient(ellipse at 50% 20%, var(--emerald) 0%, var(--emerald-dark) 65%, #031f14 100%);
+    background: radial-gradient(ellipse at 50% 20%, var(--bg-mid) 0%, var(--bg-dark) 65%, var(--bg-deep) 100%);
     color: var(--text);
     min-height: 100vh;
     min-height: 100dvh;
@@ -81,7 +81,7 @@
   .card {
     width: 100%;
     max-width: 420px;
-    background: rgba(3, 31, 20, .45);
+    background: rgba(18, 22, 31, .55);
     border: 1px solid rgba(212, 175, 55, .25);
     border-radius: 24px;
     padding: 22px 18px 18px;
@@ -170,7 +170,7 @@
   #desc {
     margin-top: 6px;
     font-size: 16px;
-    color: #cfe7d9;
+    color: #d9dee6;
     min-height: 22px;
   }
   #mood {
@@ -187,14 +187,14 @@
     gap: 14px;
     flex-wrap: wrap;
     font-size: 13px;
-    color: #b9d6c6;
+    color: #aeb8c2;
   }
   .meta span b { color: var(--text); font-weight: 600; }
   .panel {
     width: 100%;
     max-width: 420px;
     margin-top: 12px;
-    background: rgba(3, 31, 20, .35);
+    background: rgba(18, 22, 31, .5);
     border: 1px solid rgba(212, 175, 55, .15);
     border-radius: 16px;
     padding: 12px 14px;
@@ -208,9 +208,32 @@
     font-weight: 600;
   }
   .models table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .models td { padding: 4px 2px; color: #cfe7d9; border-bottom: 1px solid rgba(212,175,55,.08); }
+  .models td { padding: 4px 2px; color: #d9dee6; border-bottom: 1px solid rgba(212,175,55,.08); }
   .models tr:last-child td { border-bottom: none; }
   .models td:last-child { text-align: right; color: var(--text); font-weight: 600; }
+  /* ——— Modeli — izvori: bordo panel ——— */
+  .panel.models {
+    background: linear-gradient(160deg, rgba(122, 26, 34, .55), rgba(66, 14, 20, .6));
+    border-color: rgba(228, 120, 108, .35);
+  }
+  .panel.models h3 { color: #f3b0a4; }
+  .panel.models td { color: #f0d8d2; border-bottom-color: rgba(228, 130, 118, .16); }
+  .panel.models td:last-child { color: #ffe9e6; }
+  /* ——— Vremenski mood: pozadina se menja sa vremenom ——— */
+  #mood-bg {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    z-index: -1;
+    background-color: transparent;
+    transition: background-color 1.2s ease;
+    pointer-events: none;
+  }
+  .mood-sunce   #mood-bg { background-color: rgba(196, 128, 36, .26); }
+  .mood-oblacno #mood-bg { background-color: rgba(110, 124, 142, .22); }
+  .mood-magla   #mood-bg { background-color: rgba(188, 192, 196, .24); }
+  .mood-kisa    #mood-bg { background-color: rgba(70, 100, 140, .28); }
+  .mood-sneg    #mood-bg { background-color: rgba(200, 216, 236, .24); }
+  .mood-oluja   #mood-bg { background-color: rgba(10, 12, 20, .52); }
+  .sat-emoji { font-size: 15px; line-height: 1; }
   .sati-traka {
     display: flex;
     gap: 10px;
@@ -226,7 +249,7 @@
     align-items: center;
     gap: 4px;
     font-size: 12px;
-    color: #b9d6c6;
+    color: #aeb8c2;
   }
   .sat-item img {
     width: 40px;
@@ -244,7 +267,7 @@
     padding: 6px 0;
     border-bottom: 1px solid rgba(212, 175, 55, .08);
     font-size: 13px;
-    color: #cfe7d9;
+    color: #d9dee6;
   }
   .dan-red:last-child { border-bottom: none; }
   .dan-red img {
@@ -256,7 +279,7 @@
     filter: brightness(1.18);
   }
   .dan-ime { width: 84px; text-align: left; color: var(--text); font-weight: 600; }
-  .dan-opis { flex: 1; text-align: left; font-size: 12px; color: #b9d6c6; }
+  .dan-opis { flex: 1; text-align: left; font-size: 12px; color: #aeb8c2; }
   .dan-temp { color: var(--text); font-weight: 600; }
   .lok-red {
     display: flex;
@@ -265,7 +288,7 @@
   .lok-red input {
     flex: 1;
     min-width: 0;
-    background: rgba(3, 31, 20, .6);
+    background: rgba(18, 22, 31, .6);
     border: 1px solid rgba(212, 175, 55, .35);
     border-radius: 10px;
     color: var(--text);
@@ -273,7 +296,7 @@
     padding: 10px 12px;
     outline: none;
   }
-  .lok-red input::placeholder { color: rgba(185, 214, 198, .55); }
+  .lok-red input::placeholder { color: rgba(174, 184, 194, .55); }
   .lok-red button {
     background: rgba(212, 175, 55, .16);
     border: 1px solid rgba(212, 175, 55, .45);
@@ -285,10 +308,10 @@
     cursor: pointer;
   }
   #lok-gps { font-size: 16px; padding: 10px 12px; }
-  #lok-rez { margin-top: 8px; display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #b9d6c6; }
+  #lok-rez { margin-top: 8px; display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #aeb8c2; }
   .lok-rez-btn {
     text-align: left;
-    background: rgba(3, 31, 20, .6);
+    background: rgba(18, 22, 31, .6);
     border: 1px solid rgba(212, 175, 55, .25);
     border-radius: 10px;
     color: var(--text);
@@ -304,6 +327,19 @@
     margin-top: 14px;
     letter-spacing: 1px;
   }
+  .foot-crveni {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .foot-crveni .foot-glava {
+    color: #e8a49a;
+    letter-spacing: 2px;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+  .foot-crveni span { color: rgba(245, 241, 230, .55); }
   .err {
     color: #ffb0a0;
     font-size: 13px;
@@ -313,7 +349,8 @@
   .loading { color: var(--gold-light); font-size: 14px; margin-top: 10px; }
 </style>
 </head>
-<body>
+<body class="mood-oblacno">
+  <div id="mood-bg"></div>
   <div class="top-row">
     <div>
       <div id="sat">--:--</div>
@@ -378,6 +415,12 @@
   <img class="vb-avatar" src="https://oss-macaron-ai.macaron.im/image/chat_image/f05bb68b-34de-415b-9b63-b828377811f1.webp" alt="VB — Vladimir Blanuša">
 
   <div class="foot">Lion Weather · <span id="grad-foot">Stara Pazova</span> · Open-Meteo</div>
+  <div class="foot foot-crveni">
+    <div class="foot-glava">IZVORI</div>
+    <span>Vremenski modeli: ECMWF · GFS · ICON</span>
+    <span>Podaci: Open-Meteo API</span>
+    <span>Hosting: GitHub Pages</span>
+  </div>
 
 <script>
 // Open-Meteo — besplatan, bez API ključa
@@ -406,27 +449,27 @@ var LAVOVI = {
   sneg:    "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac3d0bfa512cea1a5960762.webp"
 };
 var WCODE = {
-  0:  ["Vedro",                 "sunce",  "Lav se grije na suncu 😎"],
-  1:  ["Pretežno vedro",         "sunce",  "Lav žmuri na svetlu 😌"],
-  2:  ["Delimično oblačno",      "oblacno","Lav posmatra oblake 😐"],
-  3:  ["Oblačno",                "oblacno","Lav dosađuje, al' je smiren 😐"],
-  45: ["Magla",                  "oblacno","Lav se izgubio u magli 🌫"],
-  48: ["Magla s mrazom",         "oblacno","Lav se ježi od mraza"],
-  51: ["Slaba kiša",             "kisa",   "Lav se pravi da ne mari 🌧"],
-  53: ["Lagana kiša",            "kisa",   "Lav ne izlazi iz jazbine 🌧"],
-  55: ["Jaka kiša",              "kisa",   "Lav mokar do gole kože 🌧"],
-  61: ["Slaba kiša",             "kisa",   "Lav se skićući vratio u jazbinu"],
-  63: ["Kiša",                   "kisa",   "Griva mokra, brkovi kapanju 🌧"],
-  65: ["Jaka kiša",              "kisa",   "Lav pliva, a ne hoda 🌧"],
-  71: ["Slab sneg",              "sneg",   "Lav sa sedim dlakama se stapa s pejzažom ❄"],
-  73: ["Sneg",                   "sneg",   "Snežni kralj u kruni ❄"],
-  75: ["Jak sneg",               "sneg",   "Lav zatrpan do brkova ❄"],
-  80: ["Slab pljusak",           "kisa",   "Lav beži pod krov 🌧"],
-  81: ["Pljusak",                "kisa",   "Griva mokra, lav naboran 🌧"],
-  82: ["Jak pljusak",            "kisa",   "Lav čeka da prođe 🌧"],
-  95: ["Grmljavinska oluja",     "oluja",  "Ljutnja lava: grom i crvene oči ⚡"],
-  96: ["Oluja s gradom",         "oluja",  "Grom iza lava, oči gore ⚡"],
-  99: ["Jaka oluja s gradom",    "oluja",  "LAV SE BESNI ⚡"]
+  0:  ["Vedro",                 "sunce",  "Vreme je za sunčanje 😎", "☀️"],
+  1:  ["Pretežno vedro",         "sunce",  "Malo sunca, malo hlada — taman 😁", "🌤️"],
+  2:  ["Delimično oblačno",      "oblacno","Oblak tu, sunce tamo — dogovoriće se već", "⛅"],
+  3:  ["Oblačno",                "oblacno","Sunce je uzelo slobodno do daljnjeg", "☁️"],
+  45: ["Magla",                  "oblacno","Ne vidim ni do brkova", "🌫️"],
+  48: ["Magla s mrazom",         "oblacno","Magla i mraz — dan za jazbinu", "🌫️"],
+  51: ["Slaba kiša",             "kisa",   "Ja bih poneo kišobran, a ti odluči šta ćeš", "🌦️"],
+  53: ["Lagana kiša",            "kisa",   "Kap po kap — dan ide polako", "🌦️"],
+  55: ["Jaka kiša",              "kisa",   "Pada i ne misli da stane", "🌧️"],
+  61: ["Slaba kiša",             "kisa",   "Slaba kiša — kapuljača reši sve", "🌦️"],
+  63: ["Kiša",                   "kisa",   "Kiša k'o kiša — dan ide dalje", "🌧️"],
+  65: ["Jaka kiša",              "kisa",   "Pada kao da nema sutra", "🌧️"],
+  71: ["Slab sneg",              "sneg",   "Više najava nego sneg", "🌨️"],
+  73: ["Sneg",                   "sneg",   "Dan k'o razglednica — beli se svuda", "🌨️"],
+  75: ["Jak sneg",               "sneg",   "Ko će sutra da čisti sneg 🤦", "❄️"],
+  80: ["Slab pljusak",           "kisa",   "Slabiji pljusak — dobar znak za brzi korak", "🌦️"],
+  81: ["Pljusak",                "kisa",   "Lije k'o iz kabla — ali kratko", "🌧️"],
+  82: ["Jak pljusak",            "kisa",   "Nebo se otvorilo", "⛈️"],
+  95: ["Grmljavinska oluja",     "oluja",  "Grom k'o iz topa", "⛈️"],
+  96: ["Oluja s gradom",         "oluja",  "Oluja je punog sadržaja — grom i led", "⛈️"],
+  99: ["Jaka oluja s gradom",    "oluja",  "Sedi gde si — čekaj da prođe", "⛈️"]
 };
 var MOOD_LAT = { sunce: "sunce", kisa: "kiša", oluja: "oluja", oblacno: "oblačno", sneg: "sneg" };
 var DANI_SR = ["Nedelja", "Ponedeljak", "Utorak", "Sreda", "Četvrtak", "Petak", "Subota"];
@@ -512,6 +555,7 @@ function renderSate(h, trenutno) {
     d.className = "sat-item";
     d.innerHTML = "<span>" + h.time[i].slice(11, 13) + "h</span>" +
                   "<img src=\"" + LAVOVI[info[1]] + "\" alt=\"\">" +
+                  "<span class=\"sat-emoji\">" + (info[3] || "") + "</span>" +
                   "<b>" + Math.round(h.temperature_2m[i]) + "°</b>";
     traka.appendChild(d);
   }
@@ -531,7 +575,7 @@ function renderDana(d) {
     red.className = "dan-red";
     red.innerHTML = "<span class=\"dan-ime\">" + ime + "</span>" +
       "<img src=\"" + LAVOVI[info[1]] + "\" alt=\"\">" +
-      "<span class=\"dan-opis\">" + info[0] + "</span>" +
+      "<span class=\"dan-opis\">" + info[0] + " " + (info[3] || "") + "</span>" +
       "<span class=\"dan-temp\">" + Math.round(d.temperature_2m_max[i]) + "° / " + Math.round(d.temperature_2m_min[i]) + "°</span>";
     lista.appendChild(red);
   }
@@ -551,6 +595,10 @@ function obradi(tekst) {
   document.getElementById("rain").textContent = k;
   postaviLava(info[1]);
   postaviEfekte(info[1]);
+  var moodKlasa = (kod === 45 || kod === 48) ? "magla" : info[1];
+  var stare = document.body.className.match(/mood-\S+/g) || [];
+  for (var mi = 0; mi < stare.length; mi++) document.body.classList.remove(stare[mi]);
+  document.body.classList.add("mood-" + moodKlasa);
   document.getElementById("lav-top").src = LAVOVI[info[1]];
   document.getElementById("msg").style.display = "none";
 
