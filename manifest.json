@@ -1,13 +1,13 @@
 {
-  "name": "LAV-VREME — Stara Pazova",
-  "short_name": "LAV-VREME",
+  "name": "Lion Weather",
+  "short_name": "Lion Weather",
   "description": "Vremenska prognoza za Stara Pazovu — s lavom.",
   "start_url": "index.html",
   "scope": ".",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#161d29",
-  "theme_color": "#161d29",
+  "background_color": "#071710",
+  "theme_color": "#071710",
   "icons": [
     {
       "src": "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac38d04a512cea1a59526b7.webp",

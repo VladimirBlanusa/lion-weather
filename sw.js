@@ -1,6 +1,6 @@
-// LAV-VREME service worker — omogućava instalaciju kao aplikaciju (PWA)
-// v3-4: keš se puni na mreži (offline radi), stari keš se briše, update ide odmah
-var CACHE = "lav-vreme-v3-4";
+// Lion Weather service worker — omogućava instalaciju kao aplikaciju (PWA)
+// v3-5: keš se puni na mreži (offline radi), stari keš se briše, update ide odmah
+var CACHE = "lav-vreme-v3-5";
 var FAJLOVI = ["./", "./index.html", "./manifest.json"];
 
 self.addEventListener("install", function (e) {

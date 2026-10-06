@@ -4,15 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Lion Weather</title>
-<link rel="icon" href="https://oss-macaron-user.macaron.im/photo/095c9f90-89a0-48ab-b566-680517ca9441.jpeg">
-<link rel="apple-touch-icon" href="https://oss-macaron-user.macaron.im/photo/095c9f90-89a0-48ab-b566-680517ca9441.jpeg">
+<link rel="icon" href="https://oss-macaron-ai.macaron.im/image/text_to_image/6ac38d04a512cea1a59526b7.webp">
+<link rel="apple-touch-icon" href="https://oss-macaron-ai.macaron.im/image/text_to_image/6ac38d04a512cea1a59526b7.webp">
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#161d29">
+<meta name="theme-color" content="#071710">
 <style>
   :root {
-    --bg-mid: #232c3a;
-    --bg-dark: #161d29;
-    --bg-deep: #0b0f16;
+    --bg-mid: #0c2117;
+    --bg-dark: #071710;
+    --bg-deep: #030a07;
     --gold: #d4af37;
     --gold-light: #f0d47c;
     --text: #f5f1e6;
@@ -81,6 +81,8 @@
   .card {
     width: 100%;
     max-width: 420px;
+    position: relative;
+    transition: background-color 1.2s ease;
     background: rgba(18, 22, 31, .55);
     border: 1px solid rgba(212, 175, 55, .25);
     border-radius: 24px;
@@ -219,20 +221,81 @@
   .panel.models h3 { color: #f3b0a4; }
   .panel.models td { color: #f0d8d2; border-bottom-color: rgba(228, 130, 118, .16); }
   .panel.models td:last-child { color: #ffe9e6; }
-  /* ——— Vremenski mood: pozadina se menja sa vremenom ——— */
-  #mood-bg {
-    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    z-index: -1;
-    background-color: transparent;
-    transition: background-color 1.2s ease;
+  /* ——— Vremenski mood: KVADRAT oko lava se menja sa vremenom ——— */
+  #scena {
+    position: absolute; inset: 0;
+    border-radius: inherit;
+    overflow: hidden;
     pointer-events: none;
+    z-index: 0;
   }
-  .mood-sunce   #mood-bg { background-color: rgba(196, 128, 36, .26); }
-  .mood-oblacno #mood-bg { background-color: rgba(110, 124, 142, .22); }
-  .mood-magla   #mood-bg { background-color: rgba(188, 192, 196, .24); }
-  .mood-kisa    #mood-bg { background-color: rgba(70, 100, 140, .28); }
-  .mood-sneg    #mood-bg { background-color: rgba(200, 216, 236, .24); }
-  .mood-oluja   #mood-bg { background-color: rgba(10, 12, 20, .52); }
+  .card > *:not(#scena) { position: relative; z-index: 1; }
+  .mood-sunce   .card { background-color: rgba(128, 88, 26, .55); }
+  .mood-oblacno .card { background-color: rgba(74, 88, 106, .5); }
+  .mood-magla   .card { background-color: rgba(150, 155, 160, .45); }
+  .mood-kisa    .card { background-color: rgba(44, 72, 108, .55); }
+  .mood-sneg    .card { background-color: rgba(148, 168, 200, .5); }
+  .mood-oluja   .card { background-color: rgba(12, 14, 24, .78); }
+  .mood-noc     .card { background-color: rgba(20, 28, 56, .62); }
+  /* ——— Scena u kvadratu: kapi, pahulje, blesak, oblaci, zvezde ——— */
+  .sc-kapa {
+    position: absolute; width: 2px; border-radius: 2px;
+    background: linear-gradient(rgba(185,210,232,0), rgba(185,210,232,.85));
+    animation: sc-kisa-pad 1.1s linear infinite;
+  }
+  @keyframes sc-kisa-pad {
+    0% { transform: translateY(-24px); opacity: 0; }
+    12% { opacity: .9; }
+    100% { transform: translateY(400px); opacity: 0; }
+  }
+  .sc-pahulja {
+    position: absolute; width: 6px; height: 6px; border-radius: 50%;
+    background: rgba(255,255,255,.95); box-shadow: 0 0 6px rgba(255,255,255,.7);
+    animation: sc-sneg-pad 5s linear infinite;
+  }
+  @keyframes sc-sneg-pad {
+    0% { transform: translateY(-20px); opacity: 0; }
+    10% { opacity: .95; }
+    100% { transform: translateY(400px); opacity: 0; }
+  }
+  .sc-blesak {
+    position: absolute; inset: 0;
+    background: rgba(150,255,196,.3);
+    animation: sc-blesak 3.2s steps(1) infinite;
+  }
+  @keyframes sc-blesak {
+    0%, 54%, 62%, 100% { opacity: 0; }
+    56%, 59% { opacity: 1; }
+  }
+  .sc-oblak {
+    position: absolute; width: 130px; height: 44px; border-radius: 50%;
+    background: rgba(178,190,200,.55); filter: blur(10px);
+    animation: sc-pluta 7s ease-in-out infinite;
+  }
+  @keyframes sc-pluta {
+    0%, 100% { transform: translateX(-10px); opacity: .6; }
+    50% { transform: translateX(10px); opacity: .95; }
+  }
+  .sc-zvezda {
+    position: absolute; width: 3px; height: 3px; border-radius: 50%;
+    background: rgba(230,238,255,.9); box-shadow: 0 0 6px rgba(200,215,255,.8);
+    animation: sc-trepti 3s ease-in-out infinite;
+  }
+  @keyframes sc-trepti {
+    0%, 100% { opacity: .25; }
+    50% { opacity: 1; }
+  }
+  .ef-halo-magla { background: radial-gradient(closest-side, transparent 48%, rgba(200,204,208,.75) 70%, rgba(200,204,208,0) 100%); }
+  .ef-halo-noc   { background: radial-gradient(closest-side, transparent 48%, rgba(210,220,255,.65) 72%, rgba(210,220,255,0) 100%); }
+  /* ——— Sati traka: vraćamo zeleni ton ——— */
+  .panel.sati {
+    background: linear-gradient(160deg, rgba(10, 38, 26, .62), rgba(5, 22, 15, .72));
+    border-color: rgba(130, 210, 165, .3);
+  }
+  .panel.sati h3 { color: #cfe7d9; }
+  .panel.sati .sat-item { color: #b9d6c6; }
+  .panel.sati .sat-item b { color: #eafff2; }
+  .panel.sati .sat-item img { border-color: rgba(130, 210, 165, .45); }
   .sat-emoji { font-size: 15px; line-height: 1; }
   .sati-traka {
     display: flex;
@@ -350,7 +413,6 @@
 </style>
 </head>
 <body class="mood-oblacno">
-  <div id="mood-bg"></div>
   <div class="top-row">
     <div>
       <div id="sat">--:--</div>
@@ -362,6 +424,7 @@
   </div>
 
   <div class="card">
+    <div id="scena"></div>
     <div id="lav-wrap">
       <img id="lav" src="https://oss-macaron-ai.macaron.im/image/text_to_image/6ac3d08be1c9684dbf1fdfbf.webp" alt="Lav — vremensko raspoloženje" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20210%20210%22%3E%3Ctext%20x=%22105%22%20y=%22140%22%20font-size=%22100%22%20text-anchor=%22middle%22%3E%F0%9F%A6%81%3C%2Ftext%3E%3C%2Fsvg%3E';">
       <div id="efekti"></div>
@@ -528,7 +591,7 @@ function postaviEfekte(vrsta) {
     s = document.createElement("div");
     s.className = "ef-blesak-zelen";
     wrap.appendChild(s);
-  } else if (vrsta === "oblacno") {
+  } else if (vrsta === "oblacno" || vrsta === "magla") {
     var POZE = [[-10, 14], [72, 6], [0, 80]];
     for (i = 0; i < POZE.length; i++) {
       s = document.createElement("span");
@@ -541,12 +604,80 @@ function postaviEfekte(vrsta) {
   }
 }
 
+// Da li je noć (posle zalaska / pre izlaska sunca)
+function jeNoc(tekst) {
+  if (!tekst.daily || !tekst.daily.sunrise || !tekst.daily.sunset) return false;
+  var t = tekst.current.time;
+  return (t < tekst.daily.sunrise[0]) || (t >= tekst.daily.sunset[0]);
+}
+
+// Scena u kvadratu oko lava — cela pozornica se menja sa vremenom
+function postaviScenu(vrsta) {
+  var sc = document.getElementById("scena");
+  if (!sc) return;
+  sc.innerHTML = "";
+  var i, s;
+  if (vrsta === "kisa" || vrsta === "oluja") {
+    var broj = vrsta === "kisa" ? 26 : 20;
+    for (i = 0; i < broj; i++) {
+      s = document.createElement("span");
+      s.className = "sc-kapa";
+      s.style.left = Math.floor(Math.random() * 100) + "%";
+      s.style.height = (12 + Math.floor(Math.random() * 12)) + "px";
+      s.style.animationDelay = (Math.random() * 1.2).toFixed(2) + "s";
+      sc.appendChild(s);
+    }
+    if (vrsta === "oluja") {
+      var b = document.createElement("div");
+      b.className = "sc-blesak";
+      sc.appendChild(b);
+    }
+  } else if (vrsta === "sneg") {
+    for (i = 0; i < 20; i++) {
+      s = document.createElement("span");
+      s.className = "sc-pahulja";
+      s.style.left = Math.floor(Math.random() * 100) + "%";
+      s.style.animationDelay = (Math.random() * 4.5).toFixed(2) + "s";
+      sc.appendChild(s);
+    }
+  } else if (vrsta === "magla") {
+    for (i = 0; i < 5; i++) {
+      s = document.createElement("span");
+      s.className = "sc-oblak";
+      s.style.width = (120 + Math.floor(Math.random() * 90)) + "px";
+      s.style.left = (-6 + i * 21 + Math.floor(Math.random() * 9)) + "%";
+      s.style.top = (6 + i * 17 + Math.floor(Math.random() * 7)) + "%";
+      s.style.animationDelay = (i * 1.1).toFixed(2) + "s";
+      sc.appendChild(s);
+    }
+  } else if (vrsta === "oblacno") {
+    var POZE = [[8, 10], [52, 6], [30, 16]];
+    for (i = 0; i < POZE.length; i++) {
+      s = document.createElement("span");
+      s.className = "sc-oblak";
+      s.style.left = POZE[i][0] + "%";
+      s.style.top = POZE[i][1] + "%";
+      s.style.animationDelay = (i * 1.4).toFixed(2) + "s";
+      sc.appendChild(s);
+    }
+  } else if (vrsta === "noc") {
+    for (i = 0; i < 14; i++) {
+      s = document.createElement("span");
+      s.className = "sc-zvezda";
+      s.style.left = Math.floor(Math.random() * 100) + "%";
+      s.style.top = Math.floor(Math.random() * 60) + "%";
+      s.style.animationDelay = (Math.random() * 3).toFixed(2) + "s";
+      sc.appendChild(s);
+    }
+  }
+}
+
 // Traka po satima — 24 sata od trenutnog sata
 function renderSate(h, trenutno) {
   var traka = document.getElementById("sati-traka");
   traka.innerHTML = "";
   if (!h || !h.time) return;
-  var idx = h.time.indexOf(trenutno.slice(0, 14) + ":00");
+  var idx = h.time.indexOf(trenutno.slice(0, 13) + ":00");
   if (idx < 0) idx = 0;
   var kraj = Math.min(idx + 24, h.time.length);
   for (var i = idx; i < kraj; i++) {
@@ -594,8 +725,11 @@ function obradi(tekst) {
   document.getElementById("wind").textContent = v;
   document.getElementById("rain").textContent = k;
   postaviLava(info[1]);
-  postaviEfekte(info[1]);
   var moodKlasa = (kod === 45 || kod === 48) ? "magla" : info[1];
+  // Noć: vedro/pretežno vedro noću → mesečina umesto sunca
+  if (jeNoc(tekst) && moodKlasa === "sunce") moodKlasa = "noc";
+  postaviEfekte(moodKlasa);
+  postaviScenu(moodKlasa);
   var stare = document.body.className.match(/mood-\S+/g) || [];
   for (var mi = 0; mi < stare.length; mi++) document.body.classList.remove(stare[mi]);
   document.body.classList.add("mood-" + moodKlasa);
