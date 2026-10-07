@@ -151,20 +151,22 @@
     position: absolute; top: 50%; left: 50%;
     width: 260px; height: 260px; margin: -130px 0 0 -130px;
     border-radius: 50%;
-    background: radial-gradient(closest-side, rgba(255,255,250,.5) 30%, rgba(246,211,110,.36) 62%, rgba(246,211,110,0) 100%);
+    background: radial-gradient(closest-side, rgba(255,250,230,.5) 30%, rgba(255,196,60,.38) 62%, rgba(255,196,60,0) 100%);
     opacity: 0;
-    animation: ef-blesak-mek 7.5s ease-in-out infinite;
   }
   .ef-magla {
     position: absolute; width: 96px; height: 34px; border-radius: 50%;
     background: rgba(178,190,200,.8); filter: blur(7px);
     animation: ef-pluta 5.5s ease-in-out infinite;
   }
-  @keyframes ef-blesak-mek {
-    0%, 72%, 100% { opacity: 0; }
-    75% { opacity: .9; }
-    80% { opacity: .3; }
-    87% { opacity: 0; }
+  /* Oluja: 2-3 brza bleska u nizu pa pauza — pokrece ih grmljavina() */
+  @keyframes bljesak-udar {
+    0% { opacity: 0; } 4% { opacity: .95; } 14% { opacity: .18; }
+    22% { opacity: .88; } 34% { opacity: .12; } 44% { opacity: .5; }
+    62% { opacity: .06; } 100% { opacity: 0; }
+  }
+  .ef-blesak-zlatni.udar, .sc-blesak.udar, .sc-munja.udar {
+    animation: bljesak-udar .5s linear;
   }
   @keyframes ef-pluta {
     0%, 100% { transform: translateX(-4px); opacity: .7; }
@@ -329,15 +331,24 @@
   }
   .sc-blesak {
     position: absolute; inset: 0;
-    background: rgba(255,249,228,.2);
+    background: rgba(255,204,96,.22);
     opacity: 0;
-    animation: sc-blesak-mek 7.5s ease-in-out infinite;
   }
-  @keyframes sc-blesak-mek {
-    0%, 72%, 100% { opacity: 0; }
-    75% { opacity: .9; }
-    80% { opacity: .3; }
-    87% { opacity: 0; }
+  /* Munja-kosa: razgranata munja koju grmljavina() crta za svaki udar */
+  .sc-munja {
+    position: absolute; top: 3%; width: 140px; height: 220px;
+    opacity: 0; pointer-events: none;
+  }
+  .sc-munja svg { width: 100%; height: 100%; overflow: visible; }
+  /* Živo nebo: oblaci tiho pulsiraju zlatno između udara */
+  .sc-pulse {
+    position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse at 50% 0%, rgba(255,190,60,.14), rgba(255,190,60,0) 65%);
+    animation: sc-nebo-dise 5.6s ease-in-out infinite;
+  }
+  @keyframes sc-nebo-dise {
+    0%, 100% { opacity: .3; }
+    50% { opacity: 1; }
   }
   .sc-oblak {
     position: absolute; width: 130px; height: 44px; border-radius: 50%;
@@ -572,7 +583,7 @@
     <div id="lok-rez"></div>
   </div>
 
-  <img class="vb-avatar" src="https://oss-macaron-ai.macaron.im/image/chat_image/f05bb68b-34de-415b-9b63-b828377811f1.webp" alt="VB — Vladimir Blanuša">
+  <img class="vb-avatar" src="https://oss-macaron-ai.macaron.im/image/chat_image/6f900e9a-de6f-46ff-af62-7c7818206580.webp" alt="VB — Vladimir Blanuša">
 
   <div class="foot">Lion Weather · <span id="grad-foot">Stara Pazova</span> · Open-Meteo</div>
   <div class="foot foot-crveni">
@@ -604,7 +615,7 @@ postaviGradUI(LOK.ime);
 var LAVOVI = {
   sunce:   "https://oss-macaron-ai.macaron.im/image/chat_image/ca4f56fb-a7ce-4642-b069-1c299d6264ce.webp",
   kisa:    "https://oss-macaron-ai.macaron.im/image/chat_image/2cff9af9-ca33-474a-8e70-3fce3f44eb50.webp",
-  oluja:   "https://oss-macaron-ai.macaron.im/image/chat_image/d8b6da9f-0dab-4958-80f5-bbf400102e33.webp",
+  oluja:   "https://oss-macaron-ai.macaron.im/image/chat_image/ba9905b2-87fc-4c8f-8da7-05f782362636.webp",
   oblacno: "https://oss-macaron-ai.macaron.im/image/chat_image/90cae59e-e7c8-444f-bd72-5c12d7d0de8a.webp",
   sneg:    "https://oss-macaron-ai.macaron.im/image/chat_image/4ddff560-c883-4882-8164-19d8fe578adc.webp",
   noc:     "https://oss-macaron-ai.macaron.im/image/chat_image/ae9e074d-8494-4a38-b275-4eca14cb76a6.webp",
@@ -802,6 +813,7 @@ function postaviScenu(vrsta) {
   var sc = document.getElementById("scena");
   if (!sc) return;
   sc.innerHTML = "";
+  GRM_GEN++; // nova scena → stara grmljavina se gasi
   var i, s;
   if (vrsta === "kisa" || vrsta === "oluja") {
     var broj = vrsta === "kisa" ? 26 : 30;
@@ -818,6 +830,14 @@ function postaviScenu(vrsta) {
       var b = document.createElement("div");
       b.className = "sc-blesak";
       sc.appendChild(b);
+      var m = document.createElement("div");
+      m.className = "sc-munja";
+      m.innerHTML = "<svg viewBox=\"0 0 140 220\"></svg>";
+      sc.appendChild(m);
+      var p = document.createElement("div");
+      p.className = "sc-pulse";
+      sc.appendChild(p);
+      pokreniGrmljavinu();
     }
   } else if (vrsta === "sneg") {
     for (i = 0; i < 20; i++) {
@@ -857,6 +877,59 @@ function postaviScenu(vrsta) {
       sc.appendChild(s);
     }
   }
+}
+
+// ——— Oluja: ritam grmljavine — munja-kosa + 2-3 bleska u nizu, pa pauza ———
+var GRM_GEN = 0;
+
+// Munja-kosa: razgranata munja, svaki udar je novi oblik
+function crtaMunju(m) {
+  if (!m) return;
+  var tacke = [], x = 18 + Math.random() * 104, y = 0, i;
+  for (i = 0; i <= 8; i++) {
+    tacke.push([x, y]);
+    x += Math.random() * 34 - 17;
+    y += 27.5;
+  }
+  var put = "M" + tacke.map(function(t) { return t[0].toFixed(0) + " " + t[1].toFixed(0); }).join(" L");
+  function krak(od) {
+    var t = tacke[od], kx = t[0], ky = t[1];
+    var smer = Math.random() < .5 ? -1 : 1;
+    var r = " M" + kx.toFixed(0) + " " + ky.toFixed(0), j;
+    for (j = 1; j <= 3; j++) {
+      kx += smer * (12 + Math.random() * 16);
+      ky += 14 + Math.random() * 12;
+      r += " L" + kx.toFixed(0) + " " + ky.toFixed(0);
+    }
+    return r;
+  }
+  put += krak(2 + Math.floor(Math.random() * 3)) + krak(5 + Math.floor(Math.random() * 2));
+  m.innerHTML = "<svg viewBox=\"0 0 140 220\" xmlns=\"http://www.w3.org/2000/svg\">" +
+    "<path d=\"" + put + "\" fill=\"none\" stroke=\"rgba(255,190,50,.5)\" stroke-width=\"13\"" +
+    " stroke-linecap=\"round\" stroke-linejoin=\"round\" filter=\"drop-shadow(0 0 10px rgba(255,190,50,.95))\"/>" +
+    "<path d=\"" + put + "\" fill=\"none\" stroke=\"#ffc933\" stroke-width=\"5.5\"" +
+    " stroke-linecap=\"round\" stroke-linejoin=\"round\" filter=\"drop-shadow(0 0 6px rgba(255,201,51,1))\"/>" +
+    "<path d=\"" + put + "\" fill=\"none\" stroke=\"#fff9e0\" stroke-width=\"2\"" +
+    " stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>";
+  m.style.left = (4 + Math.random() * 72) + "%";
+}
+
+// Jedan udar groma: crta novu munju, pali blesk, pa čeka sledeći
+function grmCiklus(gen) {
+  if (gen !== GRM_GEN || !document.body.classList.contains("mood-oluja")) return;
+  var blesk = document.querySelector(".sc-blesak");
+  var munja = document.querySelector(".sc-munja");
+  var ef = document.querySelector(".ef-blesak-zlatni");
+  crtaMunju(munja);
+  [blesk, munja, ef].forEach(function(el) {
+    if (el) { el.classList.remove("udar"); void el.offsetWidth; el.classList.add("udar"); }
+  });
+  setTimeout(function() { grmCiklus(gen); }, 3800 + Math.random() * 5200);
+}
+
+function pokreniGrmljavinu() {
+  var gen = GRM_GEN;
+  setTimeout(function() { grmCiklus(gen); }, 700 + Math.random() * 1800);
 }
 
 // Traka po satima — 24 sata od trenutnog sata
