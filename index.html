@@ -12,6 +12,7 @@
 <meta property="og:description" content="Vremenska prognoza sa lavom koji zna šta priča 🦁 — sat, temperatura, 7 dana unapred, sve u zlatu.">
 <meta property="og:image" content="https://oss-macaron-ai.macaron.im/image/text_to_image/6ac38d04a512cea1a59526b7.webp">
 <meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
 <style>
   :root {
     --bg-mid: #111826;
@@ -60,11 +61,11 @@
     filter: brightness(1.18);
   }
   #sat {
-    font-size: 40px;
-    font-weight: 700;
-    letter-spacing: 2px;
+    font-size: 44px;
+    font-weight: 500;
+    letter-spacing: 3px;
     color: #d4af37;
-    text-shadow: 0 2px 6px rgba(0, 0, 0, .65), 0 0 20px rgba(212, 175, 55, .4);
+    text-shadow: 0 2px 6px rgba(0, 0, 0, .65), 0 0 20px rgba(212, 175, 55, .2);
     line-height: 1;
   }
   #datum {
@@ -118,7 +119,7 @@
     border-radius: 50%;
     animation: ef-disi 6s ease-in-out infinite;
   }
-  .ef-halo-sunce   { background: radial-gradient(closest-side, transparent 50%, rgba(255,196,77,.6) 72%, rgba(255,196,77,0) 100%); }
+  .ef-halo-sunce   { background: radial-gradient(closest-side, transparent 50%, rgba(255,196,77,.45) 72%, rgba(255,196,77,0) 100%); }
   .ef-halo-kisa    { background: radial-gradient(closest-side, transparent 50%, rgba(88,115,142,.85) 72%, rgba(88,115,142,0) 100%); }
   .ef-halo-oluja   { background: radial-gradient(closest-side, transparent 50%, rgba(88,120,158,.78) 72%, rgba(88,120,158,0) 100%); }
   .ef-halo-sneg    { background: radial-gradient(closest-side, transparent 50%, rgba(225,238,252,.85) 72%, rgba(225,238,252,0) 100%); }
@@ -201,7 +202,7 @@
     content: "";
     position: absolute; inset: -22px;
     border-radius: 50%;
-    background: repeating-conic-gradient(from 0deg, rgba(255, 205, 70, .5) 0deg 5deg, transparent 5deg 30deg);
+    background: repeating-conic-gradient(from 0deg, rgba(255, 205, 70, .45) 0deg 2deg, transparent 2deg 30deg);
     -webkit-mask: radial-gradient(circle, transparent 54%, #000 56%, #000 94%, transparent 96%);
     mask: radial-gradient(circle, transparent 54%, #000 56%, #000 94%, transparent 96%);
     animation: nebo-zraci 30s linear infinite;
@@ -248,7 +249,7 @@
     row-gap: 6px;
     flex-wrap: wrap;
     font-size: 13px;
-    color: rgba(245, 241, 230, .82);
+    color: rgba(245, 241, 230, .92);
   }
   .meta-prelom { flex-basis: 100%; height: 0; }
   #grad { font-weight: 600; color: var(--text); }
@@ -274,14 +275,7 @@
   .models td { padding: 4px 2px; color: rgba(245, 241, 230, .82); border-bottom: 1px solid rgba(212,175,55,.08); }
   .models tr:last-child td { border-bottom: none; }
   .models td:last-child { text-align: right; color: var(--text); font-weight: 600; }
-  /* ——— Modeli — izvori: bordo panel ——— */
-  .panel.models {
-    background: linear-gradient(160deg, rgba(122, 26, 34, .55), rgba(66, 14, 20, .6));
-    border-color: rgba(228, 120, 108, .35);
-  }
-  .panel.models h3 { color: #f3b0a4; }
-  .panel.models td { color: #f0d8d2; border-bottom-color: rgba(228, 130, 118, .16); }
-  .panel.models td:last-child { color: #ffe9e6; }
+  /* ——— Modeli — izvori: v3.22 vraćeni u standardno plavo staklo, isti sistem kao i ostali paneli ——— */
   /* ——— Pozornica prati nebo: dan diše, noć tone ——— */
   body.mood-sunce   { background: radial-gradient(ellipse at 50% 20%, #1d5aa8 0%, #103a75 60%, #081c3a 100%); }
   body.mood-oblacno { background: radial-gradient(ellipse at 50% 20%, #35506e 0%, #1f3350 60%, #0d1626 100%); }
@@ -392,7 +386,7 @@
     position: absolute; top: 50%; left: 50%;
     width: 260px; height: 260px; margin: -130px 0 0 -130px;
     border-radius: 50%;
-    background: repeating-conic-gradient(rgba(255,216,120,.3) 0deg 4deg, rgba(255,216,120,0) 4deg 8deg);
+    background: repeating-conic-gradient(rgba(255,216,120,.22) 0deg 4deg, rgba(255,216,120,0) 4deg 8deg);
     -webkit-mask-image: radial-gradient(circle, rgba(0,0,0,.95) 28%, transparent 68%);
     mask-image: radial-gradient(circle, rgba(0,0,0,.95) 28%, transparent 68%);
     animation: ef-zrak-vrti 26s linear infinite;
@@ -407,8 +401,9 @@
   .panel.sati .sat-item b { color: var(--text); }
   .panel.sati .sat-item img { border-color: rgba(255, 255, 255, .12); }
   /* ——— Po danima: neutralno staklo ——— */
-  .dan-emoji { font-size: 17px; line-height: 1; }
-  .sat-emoji { font-size: 18px; line-height: 1; }
+  .dan-emoji, .sat-emoji { display: inline-flex; align-items: center; vertical-align: middle; line-height: 0; }
+  .sat-emoji svg { width: 18px; height: 18px; }
+  .dan-emoji svg { width: 16px; height: 16px; }
   .sansa-sat { font-size: 11px; font-weight: 600; color: rgba(165, 195, 235, .95); line-height: 1; }
   .sansa-dan { font-size: 12px; font-weight: 600; color: rgba(165, 195, 235, .95); min-width: 34px; text-align: right; }
   .sati-traka {
@@ -507,7 +502,7 @@
   .lok-rez-btn:active { background: rgba(212, 175, 55, .18); }
   .foot {
     font-size: 11px;
-    color: rgba(245, 241, 230, .6);
+    color: rgba(245, 241, 230, .75);
     text-align: center;
     margin-top: 14px;
     letter-spacing: 1px;
@@ -690,6 +685,19 @@ var WCODE = {
   95: ["Grmljavinska oluja",     "oluja",  "Grom k'o iz topa", "⛈️"],
   96: ["Oluja s gradom",         "oluja",  "Oluja je punog sadržaja — grom i led", "⛈️"],
   99: ["Jaka oluja s gradom",    "oluja",  "Sedi gde si — čekaj da prođe", "⛈️"]
+};
+// ——— Naše zlatne ikone: nacrtane u kodu, identične na svakom uređaju (zamenjuju sistemske emoji) ———
+var IKONE = {
+  "☀️": '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="4.6" fill="#ffc933"/><g stroke="#ffc933" stroke-width="1.9" stroke-linecap="round"><path d="M12 2.1v2.6"/><path d="M12 19.3v2.6"/><path d="M2.1 12h2.6"/><path d="M19.3 12h2.6"/><path d="M5 5l1.9 1.9"/><path d="M17.1 17.1L19 19"/><path d="M19 5l-1.9 1.9"/><path d="M6.9 17.1L5 19"/></g></svg>',
+  "🌤️": '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="7.8" cy="7.2" r="3.3" fill="#ffc933"/><g stroke="#ffc933" stroke-width="1.7" stroke-linecap="round"><path d="M7.8 1.6v1.8"/><path d="M2.2 7.2h1.8"/><path d="M3.5 2.9l1.3 1.3"/></g><g fill="#f3ead8"><circle cx="11.8" cy="14.8" r="3.4"/><circle cx="16.2" cy="13.6" r="4.3"/><rect x="8.4" y="14.6" width="12.4" height="5" rx="2.5"/></g></svg>',
+  "⛅": '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="3.8" fill="#ffc933"/><g fill="#f3ead8"><circle cx="12.4" cy="15" r="3.8"/><circle cx="16.6" cy="13.6" r="4.7"/><rect x="8.6" y="14.8" width="12.6" height="5.2" rx="2.6"/></g></svg>',
+  "☁️": '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g fill="#f3ead8"><circle cx="9.4" cy="12.4" r="4.3"/><circle cx="15" cy="11.2" r="5.1"/><rect x="5.4" y="12.2" width="13.6" height="5.4" rx="2.7"/></g></svg>',
+  "🌫️": '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g fill="#f3ead8"><circle cx="9.2" cy="9.2" r="3.5"/><circle cx="14.2" cy="8.2" r="4.2"/><rect x="5.6" y="9" width="12" height="4.6" rx="2.3"/></g><g stroke="#f3ead8" stroke-width="1.8" stroke-linecap="round"><path d="M5.6 16.6h12.8"/><path d="M8 19.6h8"/></g></svg>',
+  "🌦️": '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g fill="#f3ead8"><circle cx="9.2" cy="9.2" r="3.6"/><circle cx="14.6" cy="8.4" r="4.4"/><rect x="5.4" y="9" width="12.6" height="4.8" rx="2.4"/></g><g stroke="#cfe0f2" stroke-width="1.9" stroke-linecap="round"><path d="M9 15.4l-1.1 3.2"/><path d="M14.6 15.4l-1.1 3.2"/></g></svg>',
+  "🌧️": '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g fill="#f3ead8"><circle cx="9" cy="8.4" r="3.4"/><circle cx="14.4" cy="7.6" r="4.2"/><rect x="5.2" y="8.2" width="12.6" height="4.6" rx="2.3"/></g><g stroke="#cfe0f2" stroke-width="1.8" stroke-linecap="round"><path d="M8 14.2l-1.2 3.4"/><path d="M12 14.2l-1.2 3.4"/><path d="M16 14.2l-1.2 3.4"/><path d="M9.8 18.8l-.8 2.2"/><path d="M14.6 18.8l-.8 2.2"/></g></svg>',
+  "🌨️": '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g fill="#f3ead8"><circle cx="9" cy="8.6" r="3.4"/><circle cx="14.4" cy="7.8" r="4.2"/><rect x="5.2" y="8.4" width="12.6" height="4.6" rx="2.3"/></g><g stroke="#cfe0f2" stroke-width="1.8" stroke-linecap="round"><path d="M8.6 14.6l-.9 2.6"/></g><g fill="#cfe0f2"><circle cx="12.4" cy="17" r="1.5"/><circle cx="16.4" cy="16.4" r="1.5"/></g></svg>',
+  "❄️": '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g stroke="#cfe0f2" stroke-width="1.7" stroke-linecap="round"><path d="M12 2.8v18.4"/><path d="M3.9 7.5l16.2 9"/><path d="M20.1 7.5L3.9 16.5"/></g><circle cx="12" cy="12" r="1.6" fill="#cfe0f2"/></svg>',
+  "⛈️": '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g fill="#f3ead8"><circle cx="9" cy="8.6" r="3.4"/><circle cx="14.4" cy="7.8" r="4.2"/><rect x="5.2" y="8.4" width="12.6" height="4.6" rx="2.3"/></g><path d="M12.8 13.6l-3.6 5h2.6l-1.3 4 4.6-5.4h-2.6z" fill="#ffc933"/></svg>'
 };
 var MOOD_LAT = { sunce: "sunce", kisa: "kiša", oluja: "oluja", oblacno: "oblačno", sneg: "sneg" };
 var DANI_SR = ["Nedelja", "Ponedeljak", "Utorak", "Sreda", "Četvrtak", "Petak", "Subota"];
@@ -991,7 +999,7 @@ function renderSate(h, trenutno) {
     d.className = "sat-item";
     d.innerHTML = "<span>" + h.time[i].slice(11, 13) + "h</span>" +
                   "<img src=\"" + LAVOVI[info[1]] + "\" alt=\"\">" +
-                  "<span class=\"sat-emoji\">" + (info[3] || "") + "</span>" +
+                  "<span class=\"sat-emoji\">" + (IKONE[info[3]] || info[3] || "") + "</span>" +
                   "<b>" + Math.round(h.temperature_2m[i]) + "°</b>" +
                   ((h.precipitation_probability && h.precipitation_probability[i] >= 30) ? "<span class=\"sansa-sat\">" + Math.round(h.precipitation_probability[i]) + "%</span>" : "");
     traka.appendChild(d);
@@ -1012,7 +1020,7 @@ function renderDana(d) {
     red.className = "dan-red";
     red.innerHTML = "<span class=\"dan-ime\">" + ime + "</span>" +
       "<img src=\"" + LAVOVI[info[1]] + "\" alt=\"\">" +
-      "<span class=\"dan-opis\">" + info[0] + " <span class=\"dan-emoji\">" + (info[3] || "") + "</span></span>" +
+      "<span class=\"dan-opis\">" + info[0] + " <span class=\"dan-emoji\">" + (IKONE[info[3]] || info[3] || "") + "</span></span>" +
       ((d.precipitation_probability_max && d.precipitation_probability_max[i] >= 30) ? "<span class=\"sansa-dan\">" + Math.round(d.precipitation_probability_max[i]) + "%</span>" : "") +
       "<span class=\"dan-temp\">" + Math.round(d.temperature_2m_max[i]) + "° / " + Math.round(d.temperature_2m_min[i]) + "°</span>";
     lista.appendChild(red);
@@ -1071,6 +1079,8 @@ function obradi(tekst) {
     document.getElementById("mood").textContent = "Sumrak lije zlato preko brkova 🌇";
     postaviLava("sumrak");
   }
+  // Jak vetar: poruka prati vetar — važi iznad doba dana i temperature
+  if (v > 40) document.getElementById("mood").textContent = "Vetar nosi i lavove 💨";
   // Doba dana: svaki vremenski lav ima svog noćnog, zoru i sumrak
   if (jeNoc(tekst) && LAVOVI[moodKlasa + "Noc"]) postaviLava(moodKlasa + "Noc");
   if (jeJutro(tekst) && LAVOVI[moodKlasa + "Jutro"]) postaviLava(moodKlasa + "Jutro");
