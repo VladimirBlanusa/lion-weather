@@ -8,6 +8,10 @@
 <link rel="apple-touch-icon" href="https://oss-macaron-ai.macaron.im/image/text_to_image/6ac38d04a512cea1a59526b7.webp">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0a0f1a">
+<meta property="og:title" content="Lion Weather">
+<meta property="og:description" content="Vremenska prognoza sa lavom koji zna šta priča 🦁 — sat, temperatura, 7 dana unapred, sve u zlatu.">
+<meta property="og:image" content="https://oss-macaron-ai.macaron.im/image/text_to_image/6ac38d04a512cea1a59526b7.webp">
+<meta property="og:type" content="website">
 <style>
   :root {
     --bg-mid: #111826;
@@ -1045,6 +1049,13 @@ function obradi(tekst) {
   else document.body.classList.remove("je-jutro");
   if (jeSumrak(tekst)) document.body.classList.add("je-sumrak");
   else document.body.classList.remove("je-sumrak");
+  // Traka brauzera prati nebo
+  var TEMA = { sunce: "#103a75", oblacno: "#1f3350", magla: "#2c3543", kisa: "#12335c", sneg: "#224678", oluja: "#31415f", noc: "#0a0e20" };
+  var tema = TEMA[moodKlasa] || "#0a0f1a";
+  if (moodKlasa === "sunce" && jeJutro(tekst)) tema = "#7ba3d6";
+  if (moodKlasa === "sunce" && jeSumrak(tekst)) tema = "#7a4666";
+  var temaMeta = document.querySelector('meta[name="theme-color"]');
+  if (temaMeta) temaMeta.setAttribute("content", tema);
   podesiMesec();
   var lavVrsta = moodKlasa === "noc" ? (jePunMesec() ? "nocPun" : "noc") : info[1];
   if (jeJutroS) lavVrsta = "jutro";
