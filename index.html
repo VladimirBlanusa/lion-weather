@@ -429,10 +429,10 @@
   body.mood-sunce.je-sumrak .card { background: linear-gradient(180deg, rgba(166, 104, 80, .6), rgba(48, 34, 62, .84)); }
   /* ——— Scena u kvadratu: kapi, pahulje, blesak, oblaci, zvezde ——— */
   .sc-kapa {
-    position: absolute; width: 4px; border-radius: 50%;
-    background: linear-gradient(rgba(185,210,232,.05) 0%, rgba(185,210,232,.55) 55%, rgba(185,210,232,.9) 100%);
-    animation: sc-kisa-pad 2.4s linear infinite;
+    position: absolute; width: 8px; height: 24px; background: transparent;
+    animation: sc-kisa-pad 2.6s linear infinite;
   }
+  .sc-kapa svg { display: block; width: 100%; height: 100%; }
   @keyframes sc-kisa-pad {
     0% { transform: translateY(-24px); opacity: 0; }
     12% { opacity: .9; }
@@ -862,9 +862,10 @@ var LAVOVI = {
 
 // ——— Galerija lavova: svi lavovi koje smo ikad napravili — i oni iz fioke (Vlad 3.9) ———
 var FIOKA_RAVNA = "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac63471a512cea1a59bc1ad.webp";
-var GAL_NIZ = ["sunce","kisa","sneg","oluja","oblacno","magla","noc","kisaNoc","snegNoc","olujaNoc","oblacnoNoc","maglaNoc","nocPun","jutro","kisaJutro","snegJutro","olujaJutro","oblacnoJutro","maglaJutro","sumrak","kisaSumrak","snegSumrak","olujaSumrak","oblacnoSumrak","maglaSumrak","ravna"];
-var GAL_IMENA = { sunce:"Sunčani dan", kisa:"Kiša", sneg:"Sneg", oluja:"Oluja", oblacno:"Oblačno", magla:"Magla", noc:"Vedra noć", kisaNoc:"Kiša — noć", snegNoc:"Sneg — noć", olujaNoc:"Oluja — noć", oblacnoNoc:"Oblačno — noć", maglaNoc:"Magla — noć", nocPun:"Pun mesec", jutro:"Zora", kisaJutro:"Kiša — zora", snegJutro:"Sneg — zora", olujaJutro:"Oluja — zora", oblacnoJutro:"Oblačno — zora", maglaJutro:"Magla — zora", sumrak:"Sumrak", kisaSumrak:"Kiša — sumrak", snegSumrak:"Sneg — sumrak", olujaSumrak:"Oluja — sumrak", oblacnoSumrak:"Oblačno — sumrak", maglaSumrak:"Magla — sumrak", ravna:"Ikonica — ravna" };
-function GAL_URL(k) { return k === "ravna" ? FIOKA_RAVNA : LAVOVI[k]; }
+var FIOKA_DZEBRA = "https://macaron-sandbox-workspace.oss-accelerate.aliyuncs.com/prod/01a05aef-9b6e-7737-bec4-ae31a3069526/workspace/lav-vreme/img-dzebra.jpg";
+var GAL_NIZ = ["sunce","kisa","sneg","oluja","oblacno","magla","noc","kisaNoc","snegNoc","olujaNoc","oblacnoNoc","maglaNoc","nocPun","dzebra","jutro","kisaJutro","snegJutro","olujaJutro","oblacnoJutro","maglaJutro","sumrak","kisaSumrak","snegSumrak","olujaSumrak","oblacnoSumrak","maglaSumrak","ravna"];
+var GAL_IMENA = { sunce:"Sunčani dan", kisa:"Kiša", sneg:"Sneg", oluja:"Oluja", oblacno:"Oblačno", magla:"Magla", noc:"Vedra noć", kisaNoc:"Kiša — noć", snegNoc:"Sneg — noć", olujaNoc:"Oluja — noć", oblacnoNoc:"Oblačno — noć", maglaNoc:"Magla — noć", nocPun:"Pun mesec", dzebra:"Џебра Д Лајон", jutro:"Zora", kisaJutro:"Kiša — zora", snegJutro:"Sneg — zora", olujaJutro:"Oluja — zora", oblacnoJutro:"Oblačno — zora", maglaJutro:"Magla — zora", sumrak:"Sumrak", kisaSumrak:"Kiša — sumrak", snegSumrak:"Sneg — sumrak", olujaSumrak:"Oluja — sumrak", oblacnoSumrak:"Oblačno — sumrak", maglaSumrak:"Magla — sumrak", ravna:"Ikonica — ravna" };
+function GAL_URL(k) { return k === "ravna" ? FIOKA_RAVNA : (k === "dzebra" ? FIOKA_DZEBRA : LAVOVI[k]); }
 function lavDana() { var d = Math.floor(Date.now() / 86400000); return GAL_NIZ[d % GAL_NIZ.length]; }
 function otvoriGaleriju() {
   var lepeza = document.getElementById("galerija-lepeza");
@@ -926,6 +927,24 @@ var WCODE = {
   95: ["Grmljavinska oluja",     "oluja",  "Grom k'o iz topa", "⛈️"],
   96: ["Oluja s gradom",         "oluja",  "Oluja je punog sadržaja — grom i led", "⛈️"],
   99: ["Jaka oluja s gradom",    "oluja",  "Sedi gde si — čekaj da prođe", "⛈️"]
+};
+// ——— Doba dana u porukama: noć, zora i sumrak nose svoje rečenice (Vlad: poruka mora da isprati fazu) ———
+var FAZA_PORUKE = {
+  kisa:    { noc: "Noćna kiša — k'o uspavanka za Lavove 🌧️",
+             jutro: "Kiša prati zoru — dan kreće vlažan 🌧️",
+             sumrak: "Kiša u sumrak — ulice blistaju u kapima 🌧️" },
+  sneg:    { noc: "Snežna noć — sve spava pod belim ćilimom ❄️",
+             jutro: "Sneg je stigao pre zore — sve je netaknuto ❄️",
+             sumrak: "Snežni sumrak — grad se tiho uvlači u belo ❄️" },
+  oblacno: { noc: "Oblaci kriju zvezde — Lav pazi u mraku 🌌",
+             jutro: "Zora pod oblacima — dan se budi bez buke 🌥️",
+             sumrak: "Sumrak pod oblacima — nebo se sklapa k'o knjiga ☁️" },
+  oluja:   { noc: "Oluja u noći — grom svira duboku pesmu ⛈️",
+             jutro: "Gromovi iz zore — Lav se budi pre alarma ⛈️",
+             sumrak: "Oluja potamni sumrak — munje prave šou ⛈️" },
+  magla:   { noc: "Magla u noći — svetlost pliva kroz mleko 🌫️",
+             jutro: "Magla sa zore — svet se budi polako 🌫️",
+             sumrak: "Sumrak u magli — fenjeri lebde sami 🌫️" }
 };
 // ——— Naše zlatne ikone: nacrtane u kodu, identične na svakom uređaju (zamenjuju sistemske emoji) ———
 var IKONE = {
@@ -1119,6 +1138,7 @@ function podesiMesec() {
 // Scena u kvadratu oko lava — cela pozornica se menja sa vremenom
 // Vlad 3.0: organska oblak-silueta — pufnaste mase, talasasta donja ivica (referenca: Vladovi meki kumulusi)
 var OB_SVG = '<svg viewBox="0 0 200 124" preserveAspectRatio="none"><path style="fill:var(--ob-z)" opacity=".55" d="M40,92C24,90 16,74 26,60C18,44 36,32 52,36C62,18 92,12 104,24C118,8 146,12 150,32C170,30 186,48 178,64C190,76 186,94 170,94C128,102 76,100 40,92Z"/><path style="fill:var(--ob-g)" d="M32,98C20,96 12,84 16,70C10,56 22,42 38,46C42,26 66,16 80,28C90,12 118,12 128,26C140,14 166,20 166,40C184,44 190,66 176,76C188,84 182,98 168,96C152,105 142,96 128,100C114,109 102,99 88,103C74,111 60,101 48,103C40,105 34,102 32,98Z"/><path style="fill:var(--ob-h)" opacity=".8" d="M50,56C48,38 68,26 86,32C72,38 60,46 54,60C52,59 50,58 50,56Z"/></svg>';
+var KAP_SVG = '<svg viewBox="0 0 8 16" preserveAspectRatio="none"><path d="M4,0.5 C4,3 7,8 7,12 A3.5,3.5 0 1,1 1,12 C1,8 4,3 4,0.5 Z" fill="rgba(205,226,248,.92)"/></svg>';
 function postaviScenu(vrsta) {
   var sc = document.getElementById("scena");
   if (!sc) return;
@@ -1144,10 +1164,11 @@ function postaviScenu(vrsta) {
     for (i = 0; i < broj; i++) {
       s = document.createElement("span");
       s.className = "sc-kapa";
+      s.innerHTML = KAP_SVG;
       s.style.left = Math.floor(Math.random() * 100) + "%";
-      s.style.height = (14 + Math.floor(Math.random() * 6)) + "px";
+      s.style.height = (20 + Math.floor(Math.random() * 10)) + "px";
       s.style.animationDelay = (Math.random() * 1.2).toFixed(2) + "s";
-      s.style.animationDuration = (2.1 + Math.random() * 0.9).toFixed(2) + "s";
+      s.style.animationDuration = (2.4 + Math.random() * 0.9).toFixed(2) + "s";
       if (vrsta === "oluja") s.style.animationDuration = "1.7s";
       sc.appendChild(s);
     }
@@ -1379,6 +1400,9 @@ function obradi(tekst) {
   if (["sunce", "oblacno", "kisa", "sneg", "oluja", "magla"].indexOf(PROBA_EFEKT) >= 0) moodKlasa = PROBA_EFEKT;
   // Noć: vedro/pretežno vedro noću → mesečina umesto sunca
   if (jeNoc(tekst) && moodKlasa === "sunce") moodKlasa = "noc";
+  // Doba dana: i kiša, sneg, oblačno, oluja i magla imaju svoje noćne, zorne i sumračne rečenice
+  var fazaPor = jeNoc(tekst) ? "noc" : (jeJutro(tekst) ? "jutro" : (jeSumrak(tekst) ? "sumrak" : "dan"));
+  if (fazaPor !== "dan" && FAZA_PORUKE[moodKlasa] && FAZA_PORUKE[moodKlasa][fazaPor]) document.getElementById("mood").textContent = FAZA_PORUKE[moodKlasa][fazaPor];
   if (moodKlasa === "noc") document.getElementById("mood").textContent = "Vreme je za mesečinu 🌙";
   if (moodKlasa === "noc") postaviLava(jePunMesec() ? "nocPun" : "noc");
   // Zora i sumrak: vedro jutro/veče nose svoje lava, nebo prati izlazak i zalazak
