@@ -282,15 +282,15 @@
     background: radial-gradient(circle at 50% 42%, rgba(205, 215, 232, .20), rgba(205, 215, 232, .06) 72%, rgba(255, 255, 255, .04));
   }
   .je-noc .ugao-nebo {
-    background: radial-gradient(circle at 50% 42%, rgba(186, 200, 240, .16), rgba(186, 200, 240, .05) 72%, rgba(255, 255, 255, .04));
+    background: radial-gradient(circle at 50% 42%, rgba(240, 228, 200, .15), rgba(186, 200, 240, .06) 70%, rgba(255, 255, 255, .04));
   }
   .nebo-mesec {
     width: 32px; height: 32px; border-radius: 50%;
-    box-shadow: inset -10px 3px 0 0 #f4f7ff;
-    transform: rotate(-12deg);
-    filter: drop-shadow(0 0 10px rgba(230, 238, 255, .55));
+    transform: rotate(-5deg);
     animation: ef-disi 6s ease-in-out infinite;
   }
+  .nebo-mesec svg { display: block; width: 100%; height: 100%;
+    filter: drop-shadow(0 0 5px rgba(245, 232, 200, .45)); }
   .temp-row {
     display: flex;
     align-items: baseline;
@@ -539,12 +539,16 @@
   .ef-oblak svg { display: block; width: 100%; height: 100%; filter: drop-shadow(0 10px 12px var(--ob-s)); }
   .ef-oblak-siv   { --ob-g: #c9d4e1; --ob-z: #9aa9bd; --ob-h: #e0e8f1; --ob-s: rgba(7, 23, 16, .2); }
   .ef-oblak-sneg  { --ob-g: #eaf2fb; --ob-z: #a5c0e2; --ob-h: #ffffff; --ob-s: rgba(7, 23, 16, .16); }
-  .ef-oblak-taman { --ob-g: #505b76; --ob-z: #3a4256; --ob-h: #8592ad; --ob-s: rgba(7, 23, 16, .28); opacity: .9; }
+  .ef-oblak-taman { --ob-g: #5e6a87; --ob-z: #475264; --ob-h: #9aa6c0; --ob-s: rgba(7, 23, 16, .28); opacity: .9; }
   .je-noc .ef-oblak svg, .je-noc .sc-kulisa svg { filter: brightness(.75) saturate(.8) drop-shadow(0 10px 12px var(--ob-s)); }
   /* Vlad: oblaci u sumraku prate toplu svetlost — ne hladno dnevno */
   .je-sumrak .ef-oblak svg, .je-sumrak .sc-kulisa svg { filter: sepia(.28) saturate(.82) brightness(1) drop-shadow(0 10px 12px var(--ob-s)); }
   /* Vlad: oblaci u zori prate sveze zlatno-plavo svetlo izlaska sunca */
   .je-jutro .ef-oblak svg, .je-jutro .sc-kulisa svg { filter: sepia(.14) saturate(.85) brightness(1.04) drop-shadow(0 10px 12px var(--ob-s)); }
+  /* Vlad: oblacne ikonice u sat karticama prate fazu dana — ista svetlost kao glavni oblaci; velicina 18px netaknuta */
+  .sat-item.faza-jutro .sat-emoji { filter: sepia(.14) saturate(.85) brightness(1.04); }
+  .sat-item.faza-sumrak .sat-emoji { filter: sepia(.28) saturate(.82) brightness(1); }
+  .sat-item.faza-noc .sat-emoji { filter: brightness(.75) saturate(.8); }
   /* Vlad 3.0: oblačna kulisa — deo većeg neba ulazi iz donjeg desnog ugla */
   .sc-kulisa {
     position: absolute; right: -26px; bottom: 30%; width: 172px;
@@ -555,7 +559,7 @@
   }
   .sc-kulisa svg { display: block; width: 100%; height: 100%; }
   .mood-kisa .sc-kulisa  { --ob-g: #c9d4e1; --ob-z: #9aa9bd; --ob-h: #e0e8f1; }
-  .mood-oluja .sc-kulisa { --ob-g: #505b76; --ob-z: #3a4256; --ob-h: #8592ad; opacity: .68; }
+  .mood-oluja .sc-kulisa { --ob-g: #5e6a87; --ob-z: #475264; --ob-h: #9aa6c0; opacity: .68; }
   .mood-sneg .sc-kulisa  { --ob-g: #e7f0fb; --ob-z: #a5c0e2; --ob-h: #fdfefe; opacity: .5; }
   @keyframes ef-oblak-pluta {
     0%, 100% { transform: translateX(-6px); }
@@ -999,6 +1003,16 @@ function jeSumrak(tekst) {
   return (t >= z - 120) && (t < z);
 }
 
+// Faza za dati sat kartice: jutro/sumrak/noc po izlasku i zalasku — sat traka pravi priču kao glavna scena
+function fazaSata(iso, sunrise0, sunset0) {
+  if (!sunrise0 || !sunset0) return null;
+  var t = minuDana(iso), r = minuDana(sunrise0), z = minuDana(sunset0);
+  if (t >= r && t < r + 120) return "Jutro";
+  if (t >= z - 120 && t < z) return "Sumrak";
+  if (t < r || t >= z) return "Noc";
+  return null;
+}
+
 // Mesečeve mene: faza 0 = nov mesec, 0.5 = pun mesec
 function mesecFaza() {
   var sinodska = 29.530588853;                        // dužina ciklusa u danima
@@ -1019,21 +1033,21 @@ function podesiMesec() {
   var el = document.querySelector(".nebo-mesec");
   if (!el) return;
   var f = mesecFaza();
-  if (f < 0.03 || f > 0.97) {                          // nov mesec — jedva vidljiv obruč
-    el.style.background = "transparent";
-    el.style.boxShadow = "inset 0 0 0 2px rgba(240, 246, 255, .35)";
-    return;
-  }
-  var k = (1 - Math.cos(2 * Math.PI * f)) / 2;         // osvetljeni deo, 0..1
-  if (k > 0.93) {                                      // pun mesec — beli disk
-    el.style.background = "radial-gradient(circle at 38% 34%, #ffffff, #dfe6f4 72%)";
-    el.style.boxShadow = "0 0 14px rgba(235, 242, 255, .55)";
-    return;
-  }
-  var smer = (f < 0.5) ? 1 : -1;                       // rastući → svetlo desno, opadajući → levo
-  var d = 32;                                          // prečnik diska u kutijici
-  el.style.background = "transparent";
-  el.style.boxShadow = "inset " + (smer * (k * d * 0.9 + 0.8)).toFixed(1) + "px 0 0 0 #f4f7ff";
+  var mt = parseFloat(new URLSearchParams(location.search).get("mfaza"));  // probni rezim: ?mfaza=0..1
+  if (!isNaN(mt) && mt >= 0 && mt <= 1) f = mt;
+  var k = Math.round(f * 8) % 8;                       // osam pravih mena — tacni terminatori
+  var DEFS = '<defs><radialGradient id="mg" cx="38%" cy="34%" r="80%"><stop offset="0" stop-color="#fdf8ea"/><stop offset="1" stop-color="#eee1c2"/></radialGradient></defs>';
+  var MENE = [
+    '<circle cx="20" cy="20" r="15" fill="none" stroke="rgba(247,239,218,.45)" stroke-width="1.6"/>',
+    '<path d="M20,5 A15,15 0 0 1 20,35 A10.6,15 0 0 0 20,5 Z" fill="#fbf4e2"/>',
+    '<path d="M20,5 A15,15 0 0 1 20,35 Z" fill="#fbf4e2"/>',
+    '<path d="M20,5 A15,15 0 0 1 20,35 A10.6,15 0 1 0 20,5 Z" fill="#fbf4e2"/>',
+    DEFS + '<circle cx="20" cy="20" r="15" fill="url(#mg)"/>',
+    '<path d="M20,5 A15,15 0 0 0 20,35 A10.6,15 0 1 1 20,5 Z" fill="#fbf4e2"/>',
+    '<path d="M20,5 A15,15 0 0 0 20,35 Z" fill="#fbf4e2"/>',
+    '<path d="M20,5 A15,15 0 0 0 20,35 A10.6,15 0 0 1 20,5 Z" fill="#fbf4e2"/>'
+  ];
+  el.innerHTML = '<svg viewBox="0 0 40 40">' + MENE[k] + '</svg>';
 }
 
 // Scena u kvadratu oko lava — cela pozornica se menja sa vremenom
@@ -1046,7 +1060,7 @@ function postaviScenu(vrsta) {
   GRM_GEN++; // nova scena → stara grmljavina se gasi
   var i, s;
   if (vrsta === "kisa" || vrsta === "oluja") {
-    var NBO = [[10, 10, 96, 0], [57, 12, 124, 1.3], [17, 34, 68, 2.2]];
+    var NBO = [[10, 10, 96, 0], [57, 12, 124, 1.3], [17, 34, 68, 2.2], [4, 55, 88, 3.1]];
     var NBK = vrsta === "kisa" ? "ef-oblak ef-oblak-siv" : "ef-oblak ef-oblak-taman";
     for (i = 0; i < NBO.length; i++) {
       s = document.createElement("span");
@@ -1056,8 +1070,8 @@ function postaviScenu(vrsta) {
       s.style.top = NBO[i][1] + "%";
       s.style.width = NBO[i][2] + "px";
       s.style.animationDelay = NBO[i][3].toFixed(1) + "s";
-      s.style.filter = i === 1 ? "blur(2px)" : (i === 2 ? "blur(1px)" : "");
-      s.style.opacity = i === 1 ? ".72" : (i === 2 ? ".8" : "");
+      s.style.filter = i === 1 ? "blur(2px)" : (i === 2 ? "blur(1px)" : (i === 3 ? "blur(.8px)" : ""));
+      s.style.opacity = i === 1 ? ".72" : (i === 2 ? ".8" : (i === 3 ? ".75" : ""));
       sc.appendChild(s);
     }
     var broj = vrsta === "kisa" ? 26 : 30;
@@ -1103,7 +1117,7 @@ function postaviScenu(vrsta) {
       s.style.animationDelay = (Math.random() * 4.5).toFixed(2) + "s";
       sc.appendChild(s);
     }
-    var SNC = [[10, 10, 96, 0], [57, 12, 124, 1.3], [17, 34, 68, 2.2]];
+    var SNC = [[10, 10, 96, 0], [57, 12, 124, 1.3], [17, 34, 68, 2.2], [4, 55, 88, 3.1]];
     for (i = 0; i < SNC.length; i++) {
       s = document.createElement("span");
       s.className = "ef-oblak ef-oblak-sneg";
@@ -1112,8 +1126,8 @@ function postaviScenu(vrsta) {
       s.style.top = SNC[i][1] + "%";
       s.style.width = SNC[i][2] + "px";
       s.style.animationDelay = SNC[i][3].toFixed(1) + "s";
-      s.style.filter = i === 1 ? "blur(2px)" : (i === 2 ? "blur(1px)" : "");
-      s.style.opacity = i === 1 ? ".72" : (i === 2 ? ".8" : "");
+      s.style.filter = i === 1 ? "blur(2px)" : (i === 2 ? "blur(1px)" : (i === 3 ? "blur(.8px)" : ""));
+      s.style.opacity = i === 1 ? ".72" : (i === 2 ? ".8" : (i === 3 ? ".75" : ""));
       sc.appendChild(s);
     }
   } else if (vrsta === "magla") {
@@ -1127,7 +1141,7 @@ function postaviScenu(vrsta) {
       sc.appendChild(s);
     }
   } else if (vrsta === "oblacno") {
-    var OBC = [[10, 10, 96, 0], [57, 12, 124, 1.3], [17, 34, 68, 2.2]];
+    var OBC = [[10, 10, 96, 0], [57, 12, 124, 1.3], [17, 34, 68, 2.2], [4, 55, 88, 3.1]];
     for (i = 0; i < OBC.length; i++) {
       s = document.createElement("span");
       s.className = "ef-oblak";
@@ -1136,8 +1150,8 @@ function postaviScenu(vrsta) {
       s.style.top = OBC[i][1] + "%";
       s.style.width = OBC[i][2] + "px";
       s.style.animationDelay = OBC[i][3].toFixed(1) + "s";
-      s.style.filter = i === 1 ? "blur(2px)" : (i === 2 ? "blur(1px)" : "");
-      s.style.opacity = i === 1 ? ".72" : (i === 2 ? ".8" : "");
+      s.style.filter = i === 1 ? "blur(2px)" : (i === 2 ? "blur(1px)" : (i === 3 ? "blur(.8px)" : ""));
+      s.style.opacity = i === 1 ? ".72" : (i === 2 ? ".8" : (i === 3 ? ".75" : ""));
       sc.appendChild(s);
     }
   } else if (vrsta === "noc") {
@@ -1212,7 +1226,7 @@ function pokreniGrmljavinu() {
 }
 
 // Traka po satima — 24 sata od trenutnog sata
-function renderSate(h, trenutno) {
+function renderSate(h, trenutno, sunrise0, sunset0) {
   var traka = document.getElementById("sati-traka");
   traka.innerHTML = "";
   if (!h || !h.time) return;
@@ -1221,10 +1235,15 @@ function renderSate(h, trenutno) {
   var kraj = Math.min(idx + 24, h.time.length);
   for (var i = idx; i < kraj; i++) {
     var info = WCODE[h.weather_code[i]] || ["", "oblacno", ""];
+    // Vlad: sat kartice prate fazu dana — lav i oblak menjaju svetlost kao glavna scena
+    var f = fazaSata(h.time[i], sunrise0, sunset0);
+    var lavKey = info[1];
+    if (f === "Jutro" || f === "Sumrak") { if (LAVOVI[info[1] + f]) lavKey = info[1] + f; }
+    else if (f === "Noc") { lavKey = LAVOVI[info[1] + "Noc"] ? info[1] + "Noc" : "noc"; }
     var d = document.createElement("div");
-    d.className = "sat-item";
+    d.className = "sat-item" + (f ? " faza-" + f.toLowerCase() : "");
     d.innerHTML = "<span>" + h.time[i].slice(11, 13) + "h</span>" +
-                  "<img src=\"" + LAVOVI[info[1]] + "\" alt=\"\">" +
+                  "<img src=\"" + LAVOVI[lavKey] + "\" alt=\"\">" +
                   "<span class=\"sat-emoji\">" + (IKONE[info[3]] || info[3] || "") + "</span>" +
                   "<b>" + Math.round(h.temperature_2m[i]) + "°</b>" +
                   ((h.precipitation_probability && h.precipitation_probability[i] >= 30) ? "<span class=\"sansa-sat\">" + Math.round(h.precipitation_probability[i]) + "%</span>" : "");
@@ -1349,7 +1368,7 @@ function obradi(tekst) {
     document.getElementById("izlazak").textContent = e.sunrise[0].slice(11, 16);
     document.getElementById("zalazak").textContent = e.sunset[0].slice(11, 16);
   }
-  renderSate(tekst.hourly, tekst.current.time);
+  renderSate(tekst.hourly, tekst.current.time, tekst.daily && tekst.daily.sunrise && tekst.daily.sunrise[0], tekst.daily && tekst.daily.sunset && tekst.daily.sunset[0]);
   renderDana(tekst.daily);
 }
 
