@@ -528,21 +528,31 @@
     animation: ef-zrak-vrti 26s linear infinite;
   }
   /* ——— Oblaci oko lava: beli, sivi, snežni, tamni — prirodno nebo u istom rukopisu ——— */
+  /* Vlad 2.0: organski puff silhueta — svetlija grba, senčeno stopalo, bez blura */
   .ef-oblak {
-    position: absolute; height: 38px; border-radius: 24px;
-    background: #f3ead8;
-    box-shadow: 0 6px 12px rgba(7, 23, 16, .18);
-    opacity: .92;
+    position: absolute; height: 34px;
+    border-radius: 22px 26px 24px 30px / 28px 32px 26px 22px;
+    background: linear-gradient(180deg, #fdf8ec 0%, #efe5cf 55%, #dccfb2 100%);
+    box-shadow: 0 10px 18px rgba(7, 23, 16, .16);
+    opacity: .97;
     animation: ef-oblak-pluta 9s ease-in-out infinite;
   }
   .ef-oblak::before, .ef-oblak::after {
-    content: ""; position: absolute; border-radius: 50%; background: inherit;
+    content: ""; position: absolute; border-radius: 50%;
   }
-  .ef-oblak::before { width: 46%; height: 130%; left: 12%; top: -52%; }
-  .ef-oblak::after  { width: 34%; height: 96%;  right: 12%; top: -34%; }
-  .ef-oblak-siv   { background: #b8c2ce; box-shadow: 0 6px 12px rgba(7, 23, 16, .22); }
-  .ef-oblak-sneg  { background: #e3ebf5; box-shadow: 0 6px 12px rgba(7, 23, 16, .16); }
-  .ef-oblak-taman { background: #4d5666; box-shadow: 0 4px 10px rgba(7, 23, 16, .3); opacity: .95; }
+  .ef-oblak::before { width: 42%; height: 118%; left: 11%; top: -46%;
+    background: linear-gradient(180deg, #fdf8ec 0%, #efe5cf 72%); }
+  .ef-oblak::after  { width: 30%; height: 88%; right: 15%; top: -30%;
+    background: linear-gradient(180deg, #fbf4e4 0%, #eee3cc 78%); }
+  .ef-oblak-siv   { background: linear-gradient(180deg, #d3dbe4 0%, #b3bfcd 55%, #98a6ba 100%); box-shadow: 0 10px 18px rgba(7, 23, 16, .2); }
+  .ef-oblak-siv::before { background: linear-gradient(180deg, #d3dbe4 0%, #b3bfcd 72%); }
+  .ef-oblak-siv::after  { background: linear-gradient(180deg, #ccd5df 0%, #b3bfcd 78%); }
+  .ef-oblak-sneg  { background: linear-gradient(180deg, #f6fafe 0%, #e2ecf7 55%, #cfdff0 100%); box-shadow: 0 10px 18px rgba(7, 23, 16, .14); }
+  .ef-oblak-sneg::before { background: linear-gradient(180deg, #f6fafe 0%, #e2ecf7 72%); }
+  .ef-oblak-sneg::after  { background: linear-gradient(180deg, #f0f6fc 0%, #e2ecf7 78%); }
+  .ef-oblak-taman { background: linear-gradient(180deg, #616a7c 0%, #4a5265 55%, #394051 100%); box-shadow: 0 8px 16px rgba(7, 23, 16, .28); opacity: .9; }
+  .ef-oblak-taman::before { background: linear-gradient(180deg, #616a7c 0%, #4a5265 72%); }
+  .ef-oblak-taman::after  { background: linear-gradient(180deg, #5b6476 0%, #4a5265 78%); }
   @keyframes ef-oblak-pluta {
     0%, 100% { transform: translateX(-6px); }
     50% { transform: translateX(6px); }
@@ -1030,7 +1040,7 @@ function postaviScenu(vrsta) {
   GRM_GEN++; // nova scena → stara grmljavina se gasi
   var i, s;
   if (vrsta === "kisa" || vrsta === "oluja") {
-    var NBO = vrsta === "kisa" ? [[2, 4, 96, 0], [60, 4, 88, 1.4]] : [[1, 4, 112, 0], [58, 5, 104, 1.1], [2, 36, 88, 2]];
+    var NBO = vrsta === "kisa" ? [[10, 10, 96, 0], [57, 4, 124, 1.3]] : [[10, 10, 96, 0], [57, 4, 124, 1.3], [17, 36, 58, 2.2]];
     var NBK = vrsta === "kisa" ? "ef-oblak ef-oblak-siv" : "ef-oblak ef-oblak-taman";
     for (i = 0; i < NBO.length; i++) {
       s = document.createElement("span");
@@ -1039,6 +1049,8 @@ function postaviScenu(vrsta) {
       s.style.top = NBO[i][1] + "%";
       s.style.width = NBO[i][2] + "px";
       s.style.animationDelay = NBO[i][3].toFixed(1) + "s";
+      s.style.filter = i === 1 ? "blur(2px)" : (i === 2 ? "blur(3.5px)" : "");
+      s.style.opacity = i === 1 ? ".72" : (i === 2 ? ".45" : "");
       sc.appendChild(s);
     }
     var broj = vrsta === "kisa" ? 26 : 30;
@@ -1084,7 +1096,7 @@ function postaviScenu(vrsta) {
       s.style.animationDelay = (Math.random() * 4.5).toFixed(2) + "s";
       sc.appendChild(s);
     }
-    var SNC = [[2, 4, 96, 0], [60, 4, 88, 1.4]];
+    var SNC = [[10, 10, 96, 0], [57, 4, 124, 1.3]];
     for (i = 0; i < SNC.length; i++) {
       s = document.createElement("span");
       s.className = "ef-oblak ef-oblak-sneg";
@@ -1092,6 +1104,8 @@ function postaviScenu(vrsta) {
       s.style.top = SNC[i][1] + "%";
       s.style.width = SNC[i][2] + "px";
       s.style.animationDelay = SNC[i][3].toFixed(1) + "s";
+      s.style.filter = i === 1 ? "blur(2px)" : "";
+      s.style.opacity = i === 1 ? ".72" : "";
       sc.appendChild(s);
     }
   } else if (vrsta === "magla") {
@@ -1105,7 +1119,7 @@ function postaviScenu(vrsta) {
       sc.appendChild(s);
     }
   } else if (vrsta === "oblacno") {
-    var OBC = [[2, 6, 104, 0], [58, 4, 110, 1.2], [2, 34, 88, 2.1]];
+    var OBC = [[10, 10, 96, 0], [57, 4, 124, 1.3], [17, 36, 58, 2.2]];
     for (i = 0; i < OBC.length; i++) {
       s = document.createElement("span");
       s.className = "ef-oblak";
@@ -1113,6 +1127,8 @@ function postaviScenu(vrsta) {
       s.style.top = OBC[i][1] + "%";
       s.style.width = OBC[i][2] + "px";
       s.style.animationDelay = OBC[i][3].toFixed(1) + "s";
+      s.style.filter = i === 1 ? "blur(2px)" : (i === 2 ? "blur(3.5px)" : "");
+      s.style.opacity = i === 1 ? ".72" : (i === 2 ? ".45" : "");
       sc.appendChild(s);
     }
   } else if (vrsta === "noc") {
