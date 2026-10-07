@@ -4,13 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Lion Weather</title>
-<link rel="icon" href="https://oss-macaron-ai.macaron.im/image/text_to_image/6ac38d04a512cea1a59526b7.webp">
-<link rel="apple-touch-icon" href="https://oss-macaron-ai.macaron.im/image/text_to_image/6ac38d04a512cea1a59526b7.webp">
+<link rel="icon" href="https://oss-macaron-ai.macaron.im/image/text_to_image/6ac637a0a512cea1a59bcb21.webp">
+<link rel="apple-touch-icon" href="https://oss-macaron-ai.macaron.im/image/text_to_image/6ac637a0a512cea1a59bcb21.webp">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0a0f1a">
 <meta property="og:title" content="Lion Weather">
 <meta property="og:description" content="Vremenska prognoza sa lavom koji zna šta priča 🦁 — sat, temperatura, 7 dana unapred, sve u zlatu.">
-<meta property="og:image" content="https://oss-macaron-ai.macaron.im/image/text_to_image/6ac38d04a512cea1a59526b7.webp">
+<meta property="og:image" content="https://oss-macaron-ai.macaron.im/image/text_to_image/6ac637a0a512cea1a59bcb21.webp">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
 <style>
@@ -900,16 +900,6 @@ function postaviEfekte(vrsta) {
   }
   var i, s;
   if (vrsta === "kisa") {
-    var KIO = [[-26, 12, 98, 0], [50, 18, 86, 1.5]];
-    for (i = 0; i < KIO.length; i++) {
-      s = document.createElement("span");
-      s.className = "ef-oblak ef-oblak-siv";
-      s.style.left = KIO[i][0] + "%";
-      s.style.top = KIO[i][1] + "%";
-      s.style.width = KIO[i][2] + "px";
-      s.style.animationDelay = KIO[i][3].toFixed(1) + "s";
-      wrap.appendChild(s);
-    }
     for (i = 0; i < 16; i++) {
       s = document.createElement("span");
       s.className = "ef-kisa-crp";
@@ -920,16 +910,6 @@ function postaviEfekte(vrsta) {
       wrap.appendChild(s);
     }
   } else if (vrsta === "sneg") {
-    var SNO = [[-28, 14, 100, 0], [52, 20, 84, 1.8]];
-    for (i = 0; i < SNO.length; i++) {
-      s = document.createElement("span");
-      s.className = "ef-oblak ef-oblak-sneg";
-      s.style.left = SNO[i][0] + "%";
-      s.style.top = SNO[i][1] + "%";
-      s.style.width = SNO[i][2] + "px";
-      s.style.animationDelay = SNO[i][3].toFixed(1) + "s";
-      wrap.appendChild(s);
-    }
     for (i = 0; i < 9; i++) {
       s = document.createElement("span");
       s.className = "ef-pahulja";
@@ -942,16 +922,6 @@ function postaviEfekte(vrsta) {
       wrap.appendChild(s);
     }
   } else if (vrsta === "oluja") {
-    var OLU = [[-40, 22, 116, 0], [50, 14, 96, 1.1], [-8, 58, 92, 2.2]];
-    for (i = 0; i < OLU.length; i++) {
-      s = document.createElement("span");
-      s.className = "ef-oblak ef-oblak-taman";
-      s.style.left = OLU[i][0] + "%";
-      s.style.top = OLU[i][1] + "%";
-      s.style.width = OLU[i][2] + "px";
-      s.style.animationDelay = OLU[i][3].toFixed(1) + "s";
-      wrap.appendChild(s);
-    }
     s = document.createElement("div");
     s.className = "ef-blesak-zlatni";
     wrap.appendChild(s);
@@ -965,16 +935,6 @@ function postaviEfekte(vrsta) {
       wrap.appendChild(s);
     }
   } else if (vrsta === "oblacno") {
-    var OBL = [[-34, 14, 112, 0], [46, 16, 94, 1.2], [-22, 80, 96, 2.4]];
-    for (i = 0; i < OBL.length; i++) {
-      s = document.createElement("span");
-      s.className = "ef-oblak";
-      s.style.left = OBL[i][0] + "%";
-      s.style.top = OBL[i][1] + "%";
-      s.style.width = OBL[i][2] + "px";
-      s.style.animationDelay = OBL[i][3].toFixed(1) + "s";
-      wrap.appendChild(s);
-    }
   } else if (vrsta === "magla") {
     var POZE = [[-10, 14], [72, 6], [0, 80]];
     for (i = 0; i < POZE.length; i++) {
@@ -1070,6 +1030,17 @@ function postaviScenu(vrsta) {
   GRM_GEN++; // nova scena → stara grmljavina se gasi
   var i, s;
   if (vrsta === "kisa" || vrsta === "oluja") {
+    var NBO = vrsta === "kisa" ? [[2, 4, 96, 0], [60, 4, 88, 1.4]] : [[1, 4, 112, 0], [58, 5, 104, 1.1], [2, 36, 88, 2]];
+    var NBK = vrsta === "kisa" ? "ef-oblak ef-oblak-siv" : "ef-oblak ef-oblak-taman";
+    for (i = 0; i < NBO.length; i++) {
+      s = document.createElement("span");
+      s.className = NBK;
+      s.style.left = NBO[i][0] + "%";
+      s.style.top = NBO[i][1] + "%";
+      s.style.width = NBO[i][2] + "px";
+      s.style.animationDelay = NBO[i][3].toFixed(1) + "s";
+      sc.appendChild(s);
+    }
     var broj = vrsta === "kisa" ? 26 : 30;
     for (i = 0; i < broj; i++) {
       s = document.createElement("span");
@@ -1113,6 +1084,16 @@ function postaviScenu(vrsta) {
       s.style.animationDelay = (Math.random() * 4.5).toFixed(2) + "s";
       sc.appendChild(s);
     }
+    var SNC = [[2, 4, 96, 0], [60, 4, 88, 1.4]];
+    for (i = 0; i < SNC.length; i++) {
+      s = document.createElement("span");
+      s.className = "ef-oblak ef-oblak-sneg";
+      s.style.left = SNC[i][0] + "%";
+      s.style.top = SNC[i][1] + "%";
+      s.style.width = SNC[i][2] + "px";
+      s.style.animationDelay = SNC[i][3].toFixed(1) + "s";
+      sc.appendChild(s);
+    }
   } else if (vrsta === "magla") {
     for (i = 0; i < 5; i++) {
       s = document.createElement("span");
@@ -1124,13 +1105,14 @@ function postaviScenu(vrsta) {
       sc.appendChild(s);
     }
   } else if (vrsta === "oblacno") {
-    var POZE = [[8, 10], [52, 6], [30, 16]];
-    for (i = 0; i < POZE.length; i++) {
+    var OBC = [[2, 6, 104, 0], [58, 4, 110, 1.2], [2, 34, 88, 2.1]];
+    for (i = 0; i < OBC.length; i++) {
       s = document.createElement("span");
-      s.className = "sc-oblak";
-      s.style.left = POZE[i][0] + "%";
-      s.style.top = POZE[i][1] + "%";
-      s.style.animationDelay = (i * 1.4).toFixed(2) + "s";
+      s.className = "ef-oblak";
+      s.style.left = OBC[i][0] + "%";
+      s.style.top = OBC[i][1] + "%";
+      s.style.width = OBC[i][2] + "px";
+      s.style.animationDelay = OBC[i][3].toFixed(1) + "s";
       sc.appendChild(s);
     }
   } else if (vrsta === "noc") {

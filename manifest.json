@@ -10,13 +10,13 @@
   "theme_color": "#071710",
   "icons": [
     {
-      "src": "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac38d04a512cea1a59526b7.webp",
+      "src": "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac637a0a512cea1a59bcb21.webp",
       "sizes": "1024x1024",
       "type": "image/webp",
       "purpose": "any"
     },
     {
-      "src": "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac38d04a512cea1a59526b7.webp",
+      "src": "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac637a0a512cea1a59bcb21.webp",
       "sizes": "512x512",
       "type": "image/webp",
       "purpose": "maskable"
