@@ -700,8 +700,15 @@ function postaviEfekte(vrsta) {
   }
 }
 
+// ——— Probni režim: ?faza=jutro|sumrak|noc forsira doba dana, ?efekt= vreme ———
+var PROBA = new URLSearchParams(window.location.search);
+var PROBA_FAZA = (PROBA.get("faza") || "").toLowerCase();
+var PROBA_EFEKT = (PROBA.get("efekt") || "").toLowerCase();
+
 // Da li je noć (posle zalaska / pre izlaska sunca)
 function jeNoc(tekst) {
+  if (PROBA_FAZA === "noc") return true;
+  if (PROBA_FAZA === "jutro" || PROBA_FAZA === "sumrak") return false;
   if (!tekst.daily || !tekst.daily.sunrise || !tekst.daily.sunset) return false;
   var t = tekst.current.time;
   return (t < tekst.daily.sunrise[0]) || (t >= tekst.daily.sunset[0]);
@@ -714,6 +721,8 @@ function minuDana(iso) {
 
 // Zora: od izlaska sunca pa 2 sata — jutro diše zlatom
 function jeJutro(tekst) {
+  if (PROBA_FAZA === "jutro") return true;
+  if (PROBA_FAZA === "sumrak" || PROBA_FAZA === "noc") return false;
   if (!tekst.daily || !tekst.daily.sunrise) return false;
   var t = minuDana(tekst.current.time), i = minuDana(tekst.daily.sunrise[0]);
   return (t >= i) && (t < i + 120);
@@ -721,6 +730,8 @@ function jeJutro(tekst) {
 
 // Sumrak: 2 sata pred zalazak sunca
 function jeSumrak(tekst) {
+  if (PROBA_FAZA === "sumrak") return true;
+  if (PROBA_FAZA === "jutro" || PROBA_FAZA === "noc") return false;
   if (!tekst.daily || !tekst.daily.sunset) return false;
   var t = minuDana(tekst.current.time), z = minuDana(tekst.daily.sunset[0]);
   return (t >= z - 120) && (t < z);
@@ -892,6 +903,8 @@ function obradi(tekst) {
   }
   postaviLava(info[1]);
   var moodKlasa = (kod === 45 || kod === 48) ? "magla" : info[1];
+  // Probni režim: ?efekt= forsira raspoloženje (sunce, oblacno, kisa, sneg, oluja, magla)
+  if (["sunce", "oblacno", "kisa", "sneg", "oluja", "magla"].indexOf(PROBA_EFEKT) >= 0) moodKlasa = PROBA_EFEKT;
   // Noć: vedro/pretežno vedro noću → mesečina umesto sunca
   if (jeNoc(tekst) && moodKlasa === "sunce") moodKlasa = "noc";
   if (moodKlasa === "noc") document.getElementById("mood").textContent = "Vreme je za mesečinu 🌙";
