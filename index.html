@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Lion Weather</title>
 <link rel="icon" href="https://oss-macaron-ai.macaron.im/image/text_to_image/6ac637a0a512cea1a59bcb21.webp">
-<link rel="apple-touch-icon" href="https://oss-macaron-ai.macaron.im/image/text_to_image/6ac637a0a512cea1a59bcb21.webp">
+<link rel="apple-touch-icon" href="https://macaron-sandbox-workspace.oss-accelerate.aliyuncs.com/prod/01a05aef-9b6e-7737-bec4-ae31a3069526/workspace/lav-vreme/apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0a0f1a">
 <meta property="og:title" content="Lion Weather">
 <meta property="og:description" content="Vremenska prognoza sa lavom koji zna šta priča 🦁 — sat, temperatura, 7 dana unapred, sve u zlatu.">
-<meta property="og:image" content="https://oss-macaron-ai.macaron.im/image/text_to_image/6ac637a0a512cea1a59bcb21.webp">
+<meta property="og:image" content="https://macaron-sandbox-workspace.oss-accelerate.aliyuncs.com/prod/01a05aef-9b6e-7737-bec4-ae31a3069526/workspace/lav-vreme/og-lav.jpg">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
 <style>
@@ -1483,6 +1483,25 @@ if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("sw.js").catch(function(){});
 }
 
+// ——— Keš poslednje prognoze: kad nema neta, lav pamti ———
+var KES_KEY = "lav-vreme-kes";
+function sacuvajKes(j) {
+  try { localStorage.setItem(KES_KEY, JSON.stringify({ vreme: Date.now(), lat: LOK.lat, lon: LOK.lon, podaci: j })); } catch (e) {}
+}
+function prikaziKes(razlog) {
+  var kes = null;
+  try { kes = JSON.parse(localStorage.getItem(KES_KEY)); } catch (e) {}
+  if (kes && kes.podaci && kes.podaci.current && kes.lat === LOK.lat && kes.lon === LOK.lon) {
+    obradi(kes.podaci);
+    var d = new Date(kes.vreme), h = d.getHours(), m = d.getMinutes();
+    var el = document.getElementById("msg");
+    el.style.display = "block";
+    el.textContent = "Lav pamti prognozu · osveženo u " + (h<10?"0":"") + h + ":" + (m<10?"0":"") + m;
+  } else {
+    greska(razlog);
+  }
+}
+
 // Prognoza za trenutnu lokaciju (LOK)
 function ucitajPrognozu() {
   document.getElementById("err").style.display = "none";
@@ -1497,8 +1516,8 @@ function ucitajPrognozu() {
     "&forecast_days=7&timezone=auto"
   )
     .then(function(r){ return r.json(); })
-    .then(function(j){ obradi(j); })
-    .catch(function(){ greska("prognoza nije stigla"); });
+    .then(function(j){ sacuvajKes(j); obradi(j); })
+    .catch(function(){ prikaziKes("prognoza nije stigla"); });
 
   // Uporedni modeli (ECMWF dolazi iz glavnog poziva)
   fetch(
