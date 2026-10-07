@@ -114,7 +114,7 @@
   }
   .ef-halo-sunce   { background: radial-gradient(closest-side, transparent 50%, rgba(255,196,77,.6) 72%, rgba(255,196,77,0) 100%); }
   .ef-halo-kisa    { background: radial-gradient(closest-side, transparent 50%, rgba(88,115,142,.85) 72%, rgba(88,115,142,0) 100%); }
-  .ef-halo-oluja   { background: radial-gradient(closest-side, transparent 50%, rgba(96,214,150,.7) 72%, rgba(96,214,150,0) 100%); }
+  .ef-halo-oluja   { background: radial-gradient(closest-side, transparent 50%, rgba(88,120,158,.78) 72%, rgba(88,120,158,0) 100%); }
   .ef-halo-sneg    { background: radial-gradient(closest-side, transparent 50%, rgba(225,238,252,.85) 72%, rgba(225,238,252,0) 100%); }
   .ef-halo-oblacno { background: radial-gradient(closest-side, transparent 48%, rgba(158,172,182,.8) 70%, rgba(158,172,182,0) 100%); }
   @keyframes ef-disi {
@@ -122,42 +122,46 @@
     50% { transform: scale(1.07); opacity: 1; }
   }
   .ef-kisa-crp {
-    position: absolute; width: 2px; height: 16px; border-radius: 2px;
-    background: linear-gradient(rgba(185,210,232,0), rgba(185,210,232,.9));
-    animation: ef-kisapad 1.4s linear infinite;
+    position: absolute; width: 2px; height: 19px; border-radius: 2px;
+    background: linear-gradient(rgba(185,210,232,0), rgba(205,228,250,.95));
+    filter: drop-shadow(0 0 2px rgba(170,205,240,.4));
+    animation: ef-kisapad .9s linear infinite;
   }
   @keyframes ef-kisapad {
-    0% { transform: translateY(-20px); opacity: 0; }
-    14% { opacity: .95; }
-    80% { opacity: .75; }
-    100% { transform: translateY(300px); opacity: 0; }
-  }
-  .ef-sneg-tacka {
-    position: absolute; width: 5px; height: 5px; border-radius: 50%;
-    background: rgba(255,255,255,.95); box-shadow: 0 0 6px rgba(255,255,255,.7);
-    animation: ef-snegpad 4.6s linear infinite;
-  }
-  @keyframes ef-snegpad {
-    0% { transform: translateY(-16px); opacity: 0; }
+    0% { transform: translateY(-24px) rotate(8deg); opacity: 0; }
     12% { opacity: .95; }
-    85% { opacity: .8; }
-    100% { transform: translateY(280px); opacity: 0; }
+    80% { opacity: .8; }
+    100% { transform: translateY(300px) rotate(8deg); opacity: 0; }
   }
-  .ef-blesak-zelen {
+  .ef-pahulja {
+    position: absolute; top: -8%;
+    color: rgba(255,255,255,.96);
+    text-shadow: 0 0 8px rgba(235,242,255,.5);
+    line-height: 1;
+    animation: ef-pahuljopad 6s linear infinite;
+  }
+  @keyframes ef-pahuljopad {
+    0% { transform: translateY(-16px) rotate(0deg); opacity: 0; }
+    10% { opacity: .95; }
+    50% { transform: translateY(140px) translateX(7px) rotate(190deg); opacity: .95; }
+    90% { opacity: .8; }
+    100% { transform: translateY(280px) translateX(-5px) rotate(360deg); opacity: 0; }
+  }
+  .ef-blesak-zlatni {
     position: absolute; top: 50%; left: 50%;
     width: 260px; height: 260px; margin: -130px 0 0 -130px;
     border-radius: 50%;
-    background: radial-gradient(closest-side, transparent 46%, rgba(150,255,196,.75) 70%, rgba(150,255,196,0) 100%);
-    animation: ef-blesak 2.8s steps(1) infinite;
+    background: radial-gradient(closest-side, rgba(255,255,250,.98) 30%, rgba(246,211,110,.72) 62%, rgba(246,211,110,0) 100%);
+    animation: ef-blesak-dupli 3.4s steps(1) infinite;
   }
   .ef-magla {
     position: absolute; width: 96px; height: 34px; border-radius: 50%;
     background: rgba(178,190,200,.8); filter: blur(7px);
     animation: ef-pluta 5.5s ease-in-out infinite;
   }
-  @keyframes ef-blesak {
-    0%, 55%, 62%, 100% { opacity: 0; }
-    57%, 60% { opacity: 1; }
+  @keyframes ef-blesak-dupli {
+    0%, 30%, 36%, 58%, 64%, 100% { opacity: 0; }
+    31%, 34%, 59%, 62% { opacity: 1; }
   }
   @keyframes ef-pluta {
     0%, 100% { transform: translateX(-4px); opacity: .7; }
@@ -272,7 +276,7 @@
   body.je-noc.mood-sneg    { background: radial-gradient(ellipse at 50% 20%, #1c2c42 0%, #101a2a 65%, #060a12 100%); }
   body.je-noc.mood-oluja   { background: radial-gradient(ellipse at 50% 20%, #10121e 0%, #080a12 65%, #030408 100%); }
   /* Zora i sumrak: nebo prati izlazak i zalazak sunca */
-  body.je-jutro  { background: radial-gradient(ellipse at 50% 20%, #f0b06a 0%, #a05a72 45%, #234575 100%); }
+  body.je-jutro  { background: radial-gradient(ellipse at 50% 20%, #f6cf8e 0%, #7ba3d6 45%, #1d3f70 100%); }
   body.je-sumrak { background: radial-gradient(ellipse at 50% 20%, #e0955a 0%, #7a4666 45%, #172743 100%); }
   /* ——— Vremenski mood: KVADRAT oko lava se menja sa vremenom ——— */
   #scena {
@@ -297,7 +301,7 @@
   .je-noc.mood-sneg    .card { background-color: rgba(70, 85, 110, .65); }
   .je-noc.mood-oluja   .card { background-color: rgba(10, 12, 22, .88); }
   /* Zora i sumrak: kartica topla na ivici dana */
-  body.je-jutro .card  { background: linear-gradient(180deg, rgba(196, 134, 98, .58), rgba(94, 52, 74, .8)); }
+  body.je-jutro .card  { background: linear-gradient(180deg, rgba(128, 158, 204, .55), rgba(26, 50, 92, .8)); }
   body.je-sumrak .card { background: linear-gradient(180deg, rgba(166, 104, 80, .6), rgba(48, 34, 62, .84)); }
   /* ——— Scena u kvadratu: kapi, pahulje, blesak, oblaci, zvezde ——— */
   .sc-kapa {
@@ -322,12 +326,12 @@
   }
   .sc-blesak {
     position: absolute; inset: 0;
-    background: rgba(150,255,196,.3);
+    background: rgba(255,249,228,.46);
     animation: sc-blesak 3.2s steps(1) infinite;
   }
   @keyframes sc-blesak {
-    0%, 54%, 62%, 100% { opacity: 0; }
-    56%, 59% { opacity: 1; }
+    0%, 21%, 27%, 50%, 56%, 100% { opacity: 0; }
+    22%, 25%, 51%, 54% { opacity: 1; }
   }
   .sc-oblak {
     position: absolute; width: 130px; height: 44px; border-radius: 50%;
@@ -593,12 +597,12 @@ postaviGradUI(LOK.ime);
 
 var LAVOVI = {
   sunce:   "https://oss-macaron-ai.macaron.im/image/chat_image/ca4f56fb-a7ce-4642-b069-1c299d6264ce.webp",
-  kisa:    "https://oss-macaron-ai.macaron.im/image/chat_image/0a390ccb-651a-47a9-b480-b8769b6ae5e0.webp",
-  oluja:   "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac3d05be1c9684dbf1fdeff.webp",
-  oblacno: "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac3d08be1c9684dbf1fdfbf.webp",
-  sneg:    "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac3d0bfa512cea1a5960762.webp",
-  noc:     "https://oss-macaron-ai.macaron.im/image/chat_image/2a63c741-5bd6-4204-953c-df0d37098c05.webp",
-  nocPun:  "https://oss-macaron-ai.macaron.im/image/chat_image/848912a5-1027-4777-8284-df5971fc4e4b.webp",
+  kisa:    "https://oss-macaron-ai.macaron.im/image/chat_image/2cff9af9-ca33-474a-8e70-3fce3f44eb50.webp",
+  oluja:   "https://oss-macaron-ai.macaron.im/image/chat_image/d8b6da9f-0dab-4958-80f5-bbf400102e33.webp",
+  oblacno: "https://oss-macaron-ai.macaron.im/image/chat_image/90cae59e-e7c8-444f-bd72-5c12d7d0de8a.webp",
+  sneg:    "https://oss-macaron-ai.macaron.im/image/chat_image/4ddff560-c883-4882-8164-19d8fe578adc.webp",
+  noc:     "https://oss-macaron-ai.macaron.im/image/chat_image/ae9e074d-8494-4a38-b275-4eca14cb76a6.webp",
+  nocPun:  "https://oss-macaron-ai.macaron.im/image/chat_image/fd798ca0-0565-430b-a119-191c7de41f33.webp",
   jutro:   "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac5dd8fa512cea1a59b3ed3.webp",
   sumrak:  "https://oss-macaron-user.macaron.im/photo/cd4f94e2-d5ca-4d93-80d2-d68f3738c282.jpeg"
 };
@@ -666,27 +670,40 @@ function postaviEfekte(vrsta) {
   }
   var i, s;
   if (vrsta === "kisa") {
-    for (i = 0; i < 6; i++) {
+    for (i = 0; i < 16; i++) {
       s = document.createElement("span");
       s.className = "ef-kisa-crp";
       s.style.left = (-4 + Math.floor(Math.random() * 102)) + "%";
       s.style.top = "-12%";
       s.style.animationDelay = (Math.random() * 1.3).toFixed(2) + "s";
+      s.style.animationDuration = (0.6 + Math.random() * 0.5).toFixed(2) + "s";
       wrap.appendChild(s);
     }
   } else if (vrsta === "sneg") {
-    for (i = 0; i < 7; i++) {
+    for (i = 0; i < 13; i++) {
       s = document.createElement("span");
-      s.className = "ef-sneg-tacka";
+      s.className = "ef-pahulja";
+      s.textContent = "❄";
       s.style.left = Math.floor(Math.random() * 100) + "%";
-      s.style.top = "-10%";
+      s.style.top = "-8%";
+      s.style.fontSize = (11 + Math.floor(Math.random() * 12)) + "px";
       s.style.animationDelay = (Math.random() * 4.2).toFixed(2) + "s";
+      s.style.animationDuration = (4.5 + Math.random() * 3.5).toFixed(2) + "s";
       wrap.appendChild(s);
     }
   } else if (vrsta === "oluja") {
     s = document.createElement("div");
-    s.className = "ef-blesak-zelen";
+    s.className = "ef-blesak-zlatni";
     wrap.appendChild(s);
+    for (i = 0; i < 16; i++) {
+      s = document.createElement("span");
+      s.className = "ef-kisa-crp";
+      s.style.left = (-4 + Math.floor(Math.random() * 102)) + "%";
+      s.style.top = "-12%";
+      s.style.animationDelay = (Math.random() * 1.3).toFixed(2) + "s";
+      s.style.animationDuration = (0.6 + Math.random() * 0.5).toFixed(2) + "s";
+      wrap.appendChild(s);
+    }
   } else if (vrsta === "oblacno" || vrsta === "magla") {
     var POZE = [[-10, 14], [72, 6], [0, 80]];
     for (i = 0; i < POZE.length; i++) {
@@ -781,13 +798,14 @@ function postaviScenu(vrsta) {
   sc.innerHTML = "";
   var i, s;
   if (vrsta === "kisa" || vrsta === "oluja") {
-    var broj = vrsta === "kisa" ? 26 : 20;
+    var broj = vrsta === "kisa" ? 26 : 30;
     for (i = 0; i < broj; i++) {
       s = document.createElement("span");
       s.className = "sc-kapa";
       s.style.left = Math.floor(Math.random() * 100) + "%";
       s.style.height = (12 + Math.floor(Math.random() * 12)) + "px";
       s.style.animationDelay = (Math.random() * 1.2).toFixed(2) + "s";
+      if (vrsta === "oluja") s.style.animationDuration = "0.8s";
       sc.appendChild(s);
     }
     if (vrsta === "oluja") {
@@ -880,6 +898,9 @@ function renderDana(d) {
 function obradi(tekst) {
   var t = Math.round(tekst.current.temperature_2m);
   var kod = tekst.current.weather_code;
+  // Probni režim: ?efekt= obara i prikaz, lava i rečenicu na forsirano vreme
+  var PROBA_KOD = ({ sunce: 0, oblacno: 3, kisa: 63, sneg: 73, oluja: 95, magla: 45 })[PROBA_EFEKT];
+  if (PROBA_KOD !== undefined) kod = PROBA_KOD;
   var v = Math.round(tekst.current.wind_speed_10m);
   var k = (tekst.current.precipitation || 0);
   var info = WCODE[kod] || ["Nepoznato", "oblacno", "Lav je zbunjen 🤔"];
