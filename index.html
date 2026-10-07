@@ -121,7 +121,7 @@
     border-radius: 50%;
     animation: ef-disi 6s ease-in-out infinite;
   }
-  .ef-halo-sunce   { background: radial-gradient(closest-side, transparent 50%, rgba(255,196,77,.45) 72%, rgba(255,196,77,0) 100%); }
+  .ef-halo-sunce   { background: radial-gradient(closest-side, transparent 52%, rgba(255,196,77,.62) 74%, rgba(255,196,77,0) 100%); }
   .ef-halo-kisa    { background: radial-gradient(closest-side, transparent 50%, rgba(88,115,142,.85) 72%, rgba(88,115,142,0) 100%); }
   .ef-halo-oluja   { background: radial-gradient(closest-side, transparent 50%, rgba(88,120,158,.78) 72%, rgba(88,120,158,0) 100%); }
   .ef-halo-sneg    { background: radial-gradient(closest-side, transparent 50%, rgba(225,238,252,.85) 72%, rgba(225,238,252,0) 100%); }
@@ -275,8 +275,9 @@
   .mood-oluja .nebo-munja { display: block; }
   .mood-oblacno .nebo-sunce, .mood-kisa .nebo-sunce, .mood-sneg .nebo-sunce, .mood-oluja .nebo-sunce, .mood-magla .nebo-sunce { display: none; }
   .mood-oblacno .nebo-oblak, .mood-kisa .nebo-oblak, .mood-sneg .nebo-oblak, .mood-oluja .nebo-oblak, .mood-magla .nebo-oblak { display: block; }
-  .je-noc.mood-oblacno .nebo-mesec, .je-noc.mood-kisa .nebo-mesec, .je-noc.mood-sneg .nebo-mesec, .je-noc.mood-oluja .nebo-mesec, .je-noc.mood-magla .nebo-mesec { display: none; }
-  .je-noc.mood-oblacno .nebo-oblak, .je-noc.mood-kisa .nebo-oblak, .je-noc.mood-sneg .nebo-oblak, .je-noc.mood-oluja .nebo-oblak, .je-noc.mood-magla .nebo-oblak { display: block; }
+  /* Vlad: ćošak = samo Mesec (mesečeve mene) — danju sve vreme ide kroz kvadrat oko lava */
+  body:not(.je-noc) .ugao-nebo { display: none; }
+  body.je-noc .nebo-sunce, body.je-noc .nebo-oblak { display: none; }
   .mood-oblacno .ugao-nebo, .mood-kisa .ugao-nebo, .mood-sneg .ugao-nebo, .mood-oluja .ugao-nebo, .mood-magla .ugao-nebo {
     background: radial-gradient(circle at 50% 42%, rgba(205, 215, 232, .20), rgba(205, 215, 232, .06) 72%, rgba(255, 255, 255, .04));
   }
@@ -376,6 +377,12 @@
     z-index: 0;
   }
   .card > *:not(#scena):not(.ugao-nebo) { position: relative; z-index: 1; }
+  /* Sunce diše na celoj kartici — zlatno svetlo od lava preko kvadrata */
+  .mood-sunce #scena::before {
+    content: ""; position: absolute; inset: 0;
+    background: radial-gradient(circle at 50% 26%, rgba(255,216,120,.15), rgba(255,216,120,.05) 55%, transparent 78%);
+    animation: ef-disi 6s ease-in-out infinite;
+  }
   .mood-sunce   .card { background: linear-gradient(180deg, rgba(72, 148, 220, .6), rgba(22, 62, 132, .72)); }
   .mood-oblacno .card { background-color: rgba(120, 135, 155, .62); }
   .mood-magla   .card { background-color: rgba(185, 190, 196, .58); }
@@ -402,6 +409,52 @@
     0% { transform: translateY(-24px); opacity: 0; }
     12% { opacity: .9; }
     100% { transform: translateY(400px); opacity: 0; }
+  }
+  /* Kiša na staklu: kap sleti, zastane, pa se sliva — tanak trag se gasi za njom */
+  .sc-kap {
+    position: absolute;
+    width: 9px; height: 12px;
+    border-radius: 50% 50% 55% 55% / 62% 62% 45% 45%;
+    background: radial-gradient(circle at 30% 25%, rgba(255,255,255,.98) 0 8%, rgba(210,230,250,.75) 34%, rgba(170,205,240,.45) 68%, rgba(170,205,240,0) 100%);
+    box-shadow: inset 0 0 3px rgba(255,255,255,.6), 0 0 6px rgba(190,220,250,.22);
+    opacity: 0;
+    animation: sc-kap-zivot-a 9s linear infinite;
+  }
+  .sc-kap::after {
+    content: ""; position: absolute; left: 20%; bottom: 88%;
+    width: 62%; height: 42px;
+    background: linear-gradient(to bottom, rgba(190,215,240,0), rgba(200,225,250,.12) 55%, rgba(205,228,250,.5));
+    border-radius: 3px;
+    filter: blur(.6px);
+  }
+  .sc-kap.levo { animation-name: sc-kap-zivot-b; }
+  @keyframes sc-kap-zivot-a {
+    0%   { transform: translate(0px, -6px) scale(.5); opacity: 0; }
+    5%   { transform: translate(0px, 0px) scale(1.2); opacity: 1; }
+    8%   { transform: translate(0px, 3px) scale(1); opacity: .95; }
+    9%   { transform: translate(0px, 3px) scale(1); opacity: .95; }
+    22%  { transform: translate(2px, 130px) scale(1); opacity: .95; }
+    23%  { transform: translate(2px, 135px) scale(1); opacity: .95; }
+    38%  { transform: translate(-1px, 310px) scale(1); opacity: .92; }
+    39%  { transform: translate(-1px, 316px) scale(1); opacity: .92; }
+    54%  { transform: translate(3px, 490px) scale(1); opacity: .88; }
+    55%  { transform: translate(3px, 497px) scale(1); opacity: .88; }
+    70%  { transform: translate(0px, 570px) scale(.97); opacity: .55; }
+    100% { transform: translate(0px, 660px) scale(.9); opacity: 0; }
+  }
+  @keyframes sc-kap-zivot-b {
+    0%   { transform: translate(0px, -6px) scale(.5); opacity: 0; }
+    5%   { transform: translate(0px, 0px) scale(1.2); opacity: 1; }
+    8%   { transform: translate(0px, 3px) scale(1); opacity: .95; }
+    9%   { transform: translate(0px, 3px) scale(1); opacity: .95; }
+    22%  { transform: translate(-2px, 130px) scale(1); opacity: .95; }
+    23%  { transform: translate(-2px, 135px) scale(1); opacity: .95; }
+    38%  { transform: translate(1px, 310px) scale(1); opacity: .92; }
+    39%  { transform: translate(1px, 316px) scale(1); opacity: .92; }
+    54%  { transform: translate(-3px, 490px) scale(1); opacity: .88; }
+    55%  { transform: translate(-3px, 497px) scale(1); opacity: .88; }
+    70%  { transform: translate(0px, 570px) scale(.97); opacity: .55; }
+    100% { transform: translate(0px, 660px) scale(.9); opacity: 0; }
   }
   .sc-pahulja {
     position: absolute; width: 6px; height: 6px; border-radius: 50%;
@@ -457,12 +510,42 @@
   .ef-halo-noc   { background: radial-gradient(closest-side, transparent 48%, rgba(210,220,255,.42) 72%, rgba(210,220,255,0) 100%); }
   .ef-zrak {
     position: absolute; top: 50%; left: 50%;
-    width: 260px; height: 260px; margin: -130px 0 0 -130px;
+    width: 300px; height: 300px; margin: -150px 0 0 -150px;
     border-radius: 50%;
-    background: repeating-conic-gradient(rgba(255,216,120,.22) 0deg 4deg, rgba(255,216,120,0) 4deg 8deg);
-    -webkit-mask-image: radial-gradient(circle, rgba(0,0,0,.95) 28%, transparent 68%);
-    mask-image: radial-gradient(circle, rgba(0,0,0,.95) 28%, transparent 68%);
+    background: repeating-conic-gradient(from 0deg, rgba(255,216,120,0) 0deg 14.3deg, rgba(255,216,120,.5) 14.65deg 15.35deg, rgba(255,216,120,0) 15.7deg 30deg);
+    -webkit-mask-image: radial-gradient(circle closest-side, transparent 76%, #000 86%, #000 96%, transparent 100%);
+    mask-image: radial-gradient(circle closest-side, transparent 76%, #000 86%, #000 96%, transparent 100%);
     animation: ef-zrak-vrti 26s linear infinite;
+  }
+  /* Odsjaj: bele iskrice između zlatnih iglica — sunce treperi zlato-beo */
+  .ef-zrak-beli {
+    position: absolute; top: 50%; left: 50%;
+    width: 300px; height: 300px; margin: -150px 0 0 -150px;
+    border-radius: 50%;
+    background: repeating-conic-gradient(from 0deg, rgba(255,250,235,0) 0deg 0.1deg, rgba(255,250,235,.68) 0.35deg 0.85deg, rgba(255,250,235,0) 1.2deg 30deg);
+    -webkit-mask-image: radial-gradient(circle closest-side, transparent 79%, #000 84%, #000 88%, transparent 92%);
+    mask-image: radial-gradient(circle closest-side, transparent 79%, #000 84%, #000 88%, transparent 92%);
+    animation: ef-zrak-vrti 26s linear infinite;
+  }
+  /* ——— Oblaci oko lava: beli, sivi, snežni, tamni — prirodno nebo u istom rukopisu ——— */
+  .ef-oblak {
+    position: absolute; height: 38px; border-radius: 24px;
+    background: #f3ead8;
+    box-shadow: 0 6px 12px rgba(7, 23, 16, .18);
+    opacity: .92;
+    animation: ef-oblak-pluta 9s ease-in-out infinite;
+  }
+  .ef-oblak::before, .ef-oblak::after {
+    content: ""; position: absolute; border-radius: 50%; background: inherit;
+  }
+  .ef-oblak::before { width: 46%; height: 130%; left: 12%; top: -52%; }
+  .ef-oblak::after  { width: 34%; height: 96%;  right: 12%; top: -34%; }
+  .ef-oblak-siv   { background: #b8c2ce; box-shadow: 0 6px 12px rgba(7, 23, 16, .22); }
+  .ef-oblak-sneg  { background: #e3ebf5; box-shadow: 0 6px 12px rgba(7, 23, 16, .16); }
+  .ef-oblak-taman { background: #4d5666; box-shadow: 0 4px 10px rgba(7, 23, 16, .3); opacity: .95; }
+  @keyframes ef-oblak-pluta {
+    0%, 100% { transform: translateX(-6px); }
+    50% { transform: translateX(6px); }
   }
   @keyframes ef-zrak-vrti {
     from { transform: rotate(0deg); }
@@ -811,9 +894,22 @@ function postaviEfekte(vrsta) {
     var z = document.createElement("div");
     z.className = "ef-zrak";
     wrap.appendChild(z);
+    var zb = document.createElement("div");
+    zb.className = "ef-zrak-beli";
+    wrap.appendChild(zb);
   }
   var i, s;
   if (vrsta === "kisa") {
+    var KIO = [[-26, 12, 98, 0], [50, 18, 86, 1.5]];
+    for (i = 0; i < KIO.length; i++) {
+      s = document.createElement("span");
+      s.className = "ef-oblak ef-oblak-siv";
+      s.style.left = KIO[i][0] + "%";
+      s.style.top = KIO[i][1] + "%";
+      s.style.width = KIO[i][2] + "px";
+      s.style.animationDelay = KIO[i][3].toFixed(1) + "s";
+      wrap.appendChild(s);
+    }
     for (i = 0; i < 16; i++) {
       s = document.createElement("span");
       s.className = "ef-kisa-crp";
@@ -824,18 +920,38 @@ function postaviEfekte(vrsta) {
       wrap.appendChild(s);
     }
   } else if (vrsta === "sneg") {
-    for (i = 0; i < 13; i++) {
+    var SNO = [[-28, 14, 100, 0], [52, 20, 84, 1.8]];
+    for (i = 0; i < SNO.length; i++) {
+      s = document.createElement("span");
+      s.className = "ef-oblak ef-oblak-sneg";
+      s.style.left = SNO[i][0] + "%";
+      s.style.top = SNO[i][1] + "%";
+      s.style.width = SNO[i][2] + "px";
+      s.style.animationDelay = SNO[i][3].toFixed(1) + "s";
+      wrap.appendChild(s);
+    }
+    for (i = 0; i < 9; i++) {
       s = document.createElement("span");
       s.className = "ef-pahulja";
       s.innerHTML = IKONE["\u2744\ufe0f"];
       s.style.left = Math.floor(Math.random() * 100) + "%";
-      s.style.top = "-8%";
+      s.style.top = "-4%";
       s.style.fontSize = (11 + Math.floor(Math.random() * 12)) + "px";
       s.style.animationDelay = (Math.random() * 4.2).toFixed(2) + "s";
       s.style.animationDuration = (4.5 + Math.random() * 3.5).toFixed(2) + "s";
       wrap.appendChild(s);
     }
   } else if (vrsta === "oluja") {
+    var OLU = [[-40, 22, 116, 0], [50, 14, 96, 1.1], [-8, 58, 92, 2.2]];
+    for (i = 0; i < OLU.length; i++) {
+      s = document.createElement("span");
+      s.className = "ef-oblak ef-oblak-taman";
+      s.style.left = OLU[i][0] + "%";
+      s.style.top = OLU[i][1] + "%";
+      s.style.width = OLU[i][2] + "px";
+      s.style.animationDelay = OLU[i][3].toFixed(1) + "s";
+      wrap.appendChild(s);
+    }
     s = document.createElement("div");
     s.className = "ef-blesak-zlatni";
     wrap.appendChild(s);
@@ -848,7 +964,18 @@ function postaviEfekte(vrsta) {
       s.style.animationDuration = (0.6 + Math.random() * 0.5).toFixed(2) + "s";
       wrap.appendChild(s);
     }
-  } else if (vrsta === "oblacno" || vrsta === "magla") {
+  } else if (vrsta === "oblacno") {
+    var OBL = [[-34, 14, 112, 0], [46, 16, 94, 1.2], [-22, 80, 96, 2.4]];
+    for (i = 0; i < OBL.length; i++) {
+      s = document.createElement("span");
+      s.className = "ef-oblak";
+      s.style.left = OBL[i][0] + "%";
+      s.style.top = OBL[i][1] + "%";
+      s.style.width = OBL[i][2] + "px";
+      s.style.animationDelay = OBL[i][3].toFixed(1) + "s";
+      wrap.appendChild(s);
+    }
+  } else if (vrsta === "magla") {
     var POZE = [[-10, 14], [72, 6], [0, 80]];
     for (i = 0; i < POZE.length; i++) {
       s = document.createElement("span");
@@ -951,6 +1078,18 @@ function postaviScenu(vrsta) {
       s.style.height = (12 + Math.floor(Math.random() * 12)) + "px";
       s.style.animationDelay = (Math.random() * 1.2).toFixed(2) + "s";
       if (vrsta === "oluja") s.style.animationDuration = "0.8s";
+      sc.appendChild(s);
+    }
+    var kapice = vrsta === "kisa" ? 9 : 12;
+    for (i = 0; i < kapice; i++) {
+      s = document.createElement("span");
+      s.className = "sc-kap" + (Math.random() < .5 ? "" : " levo");
+      s.style.left = (3 + Math.floor(Math.random() * 93)) + "%";
+      s.style.top = (1 + Math.floor(Math.random() * 26)) + "%";
+      s.style.width = (8 + Math.floor(Math.random() * 5)) + "px";
+      s.style.height = (11 + Math.floor(Math.random() * 5)) + "px";
+      s.style.animationDuration = (vrsta === "kisa" ? 7 + Math.random() * 4 : 4 + Math.random() * 2.5).toFixed(2) + "s";
+      s.style.animationDelay = (-Math.random() * 8).toFixed(2) + "s";
       sc.appendChild(s);
     }
     if (vrsta === "oluja") {
