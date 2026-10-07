@@ -163,6 +163,33 @@
     0%, 100% { transform: translateX(-4px); opacity: .7; }
     50% { transform: translateX(4px); opacity: 1; }
   }
+  /* ——— Kutijica u uglu: Sunce danju, Mesec noću ——— */
+  .ugao-nebo {
+    position: absolute; top: 12px; right: 12px;
+    width: 46px; height: 46px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, .045);
+    border: 1px solid rgba(255, 255, 255, .08);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 2;
+  }
+  .nebo-telo { display: none; }
+  .nebo-sunce {
+    display: block;
+    width: 17px; height: 17px; border-radius: 50%;
+    background: radial-gradient(circle at 38% 34%, #ffe9a8, #d4af37 72%);
+    box-shadow: 0 0 12px rgba(255, 222, 130, .55), 0 0 26px rgba(255, 210, 100, .22);
+    animation: ef-disi 6s ease-in-out infinite;
+  }
+  .je-noc .nebo-sunce { display: none; }
+  .je-noc .nebo-mesec { display: block; }
+  .nebo-mesec {
+    width: 20px; height: 20px; border-radius: 50%;
+    box-shadow: inset -6px 2px 0 0 #ffe9a8;
+    transform: rotate(-12deg);
+    filter: drop-shadow(0 0 6px rgba(255, 222, 130, .5));
+    animation: ef-disi 6s ease-in-out infinite;
+  }
   .temp-row {
     display: flex;
     align-items: baseline;
@@ -244,7 +271,7 @@
     pointer-events: none;
     z-index: 0;
   }
-  .card > *:not(#scena) { position: relative; z-index: 1; }
+  .card > *:not(#scena):not(.ugao-nebo) { position: relative; z-index: 1; }
   .mood-sunce   .card { background: linear-gradient(180deg, rgba(72, 148, 220, .6), rgba(22, 62, 132, .72)); }
   .mood-oblacno .card { background-color: rgba(120, 135, 155, .62); }
   .mood-magla   .card { background-color: rgba(185, 190, 196, .58); }
@@ -468,6 +495,7 @@
 
   <div class="card">
     <div id="scena"></div>
+    <div class="ugao-nebo"><span class="nebo-telo nebo-sunce"></span><span class="nebo-telo nebo-mesec"></span></div>
     <div id="lav-wrap">
       <img id="lav" src="https://oss-macaron-ai.macaron.im/image/text_to_image/6ac3d08be1c9684dbf1fdfbf.webp" alt="Lav — vremensko raspoloženje" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20210%20210%22%3E%3Ctext%20x=%22105%22%20y=%22140%22%20font-size=%22100%22%20text-anchor=%22middle%22%3E%F0%9F%A6%81%3C%2Ftext%3E%3C%2Fsvg%3E';">
       <div id="efekti"></div>
@@ -554,7 +582,8 @@ var LAVOVI = {
   kisa:    "https://oss-macaron-ai.macaron.im/image/chat_image/0a390ccb-651a-47a9-b480-b8769b6ae5e0.webp",
   oluja:   "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac3d05be1c9684dbf1fdeff.webp",
   oblacno: "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac3d08be1c9684dbf1fdfbf.webp",
-  sneg:    "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac3d0bfa512cea1a5960762.webp"
+  sneg:    "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac3d0bfa512cea1a5960762.webp",
+  noc:     "https://oss-macaron-ai.macaron.im/image/chat_image/2a63c741-5bd6-4204-953c-df0d37098c05.webp"
 };
 var WCODE = {
   0:  ["Vedro",                 "sunce",  "Vreme je za sunčanje 😎", "☀️"],
@@ -659,6 +688,37 @@ function jeNoc(tekst) {
   if (!tekst.daily || !tekst.daily.sunrise || !tekst.daily.sunset) return false;
   var t = tekst.current.time;
   return (t < tekst.daily.sunrise[0]) || (t >= tekst.daily.sunset[0]);
+}
+
+// Mesečeve mene: faza 0 = nov mesec, 0.5 = pun mesec
+function mesecFaza() {
+  var sinodska = 29.530588853;                        // dužina ciklusa u danima
+  var ref = Date.UTC(2000, 0, 6, 18, 14) / 86400000;  // poznat nov mesec: 6.1.2000.
+  var f = ((Date.now() / 86400000 - ref) / sinodska) % 1;
+  if (f < 0) f += 1;
+  return f;
+}
+
+// Kutijica u uglu: srp prati pravi Mesec na nebu
+function podesiMesec() {
+  var el = document.querySelector(".nebo-mesec");
+  if (!el) return;
+  var f = mesecFaza();
+  if (f < 0.03 || f > 0.97) {                          // nov mesec — jedva vidljiv obruč
+    el.style.background = "transparent";
+    el.style.boxShadow = "inset 0 0 0 1px rgba(255, 233, 168, .28)";
+    return;
+  }
+  var k = (1 - Math.cos(2 * Math.PI * f)) / 2;         // osvetljeni deo, 0..1
+  if (k > 0.93) {                                      // pun mesec — zlatni disk
+    el.style.background = "radial-gradient(circle at 38% 34%, #ffe9a8, #d4af37 72%)";
+    el.style.boxShadow = "0 0 10px rgba(255, 222, 130, .5)";
+    return;
+  }
+  var smer = (f < 0.5) ? 1 : -1;                       // rastući → svetlo desno, opadajući → levo
+  var d = 20;                                          // prečnik diska u kutijici
+  el.style.background = "transparent";
+  el.style.boxShadow = "inset " + (smer * (k * d * 0.9 + 0.8)).toFixed(1) + "px 0 0 0 #ffe9a8";
 }
 
 // Scena u kvadratu oko lava — cela pozornica se menja sa vremenom
@@ -793,6 +853,7 @@ function obradi(tekst) {
   // Noć: vedro/pretežno vedro noću → mesečina umesto sunca
   if (jeNoc(tekst) && moodKlasa === "sunce") moodKlasa = "noc";
   if (moodKlasa === "noc") document.getElementById("mood").textContent = "Vreme je za mesečinu 🌙";
+  if (moodKlasa === "noc") postaviLava("noc");
   postaviEfekte(moodKlasa);
   postaviScenu(moodKlasa);
   var stare = document.body.className.match(/mood-\S+/g) || [];
@@ -800,7 +861,8 @@ function obradi(tekst) {
   document.body.classList.add("mood-" + moodKlasa);
   if (jeNoc(tekst)) document.body.classList.add("je-noc");
   else document.body.classList.remove("je-noc");
-  document.getElementById("lav-top").src = LAVOVI[info[1]];
+  podesiMesec();
+  document.getElementById("lav-top").src = LAVOVI[moodKlasa === "noc" ? "noc" : info[1]];
   document.getElementById("msg").style.display = "none";
 
   var e = tekst.daily ? tekst.daily : null;
