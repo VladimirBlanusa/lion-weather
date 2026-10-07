@@ -2,7 +2,7 @@
 <html lang="sr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5">
 <title>Lion Weather</title>
 <link rel="icon" href="https://oss-macaron-ai.macaron.im/image/text_to_image/6ac637a0a512cea1a59bcb21.webp">
 <link rel="apple-touch-icon" href="https://macaron-sandbox-workspace.oss-accelerate.aliyuncs.com/prod/01a05aef-9b6e-7737-bec4-ae31a3069526/workspace/lav-vreme/apple-touch-icon.png">
@@ -342,6 +342,13 @@
     color: var(--gold-light);
     text-shadow: 0 1px 12px rgba(0, 0, 0, .65);
     min-height: 18px;
+  }
+  #kisa-paznja {
+    margin-top: 8px;
+    font-size: 13px;
+    color: #cfe0f2;
+    text-shadow: 0 1px 10px rgba(0, 0, 0, .6);
+    display: none;
   }
   .meta {
     margin-top: 16px;
@@ -756,6 +763,7 @@
     </div>
     <div id="desc">Provera vremena…</div>
     <div id="mood">Lav se budi…</div>
+    <div id="kisa-paznja"></div>
     <div class="meta">
       <span id="grad">Stara Pazova</span>
       <span> vetar: <b id="wind">–</b> km/h</span>
@@ -1361,6 +1369,28 @@ function renderDana(d) {
   }
 }
 
+// ——— Upozorenje na kišu: lav gleda dva sata unapred ———
+function proveriKisu(tekst) {
+  var el = document.getElementById("kisa-paznja");
+  if (!el) return;
+  el.style.display = "none";
+  if (!tekst || !tekst.current || !tekst.hourly || !tekst.hourly.time || !tekst.hourly.precipitation_probability) return;
+  var k = tekst.current.weather_code;
+  var VEC_PADA = (k >= 51 && k <= 67) || (k >= 80 && k <= 82) || (k >= 95);
+  if (VEC_PADA) return;
+  var si = tekst.hourly.time.indexOf(tekst.current.time.slice(0, 13) + ":00");
+  if (si < 0) return;
+  var kad = ["kroz sat", "za dva sata"];
+  for (var p = 1; p <= 2; p++) {
+    var s = tekst.hourly.precipitation_probability[si + p];
+    if (s !== undefined && s >= 50) {
+      el.textContent = "Lav kaže: kiša stiže " + kad[p - 1] + " — ponesi kišobran ☔";
+      el.style.display = "block";
+      return;
+    }
+  }
+}
+
 function obradi(tekst) {
   var t = Math.round(tekst.current.temperature_2m);
   var kod = tekst.current.weather_code;
@@ -1394,6 +1424,7 @@ function obradi(tekst) {
       sr.style.display = "";
     } else { sr.style.display = "none"; }
   }
+  proveriKisu(tekst);
   postaviLava(info[1]);
   var moodKlasa = (kod === 45 || kod === 48) ? "magla" : info[1];
   // Probni režim: ?efekt= forsira raspoloženje (sunce, oblacno, kisa, sneg, oluja, magla)
