@@ -291,6 +291,34 @@
   }
   .nebo-mesec svg { display: block; width: 100%; height: 100%;
     filter: drop-shadow(0 0 5px rgba(245, 232, 200, .45)); }
+  /* ——— Galerija lavova: muzej svih lavova — klik na ikonicu gore desno (Vlad 3.9) ——— */
+  .lav-top { cursor: pointer; transition: transform .25s ease, box-shadow .25s ease; }
+  .lav-top:hover { transform: scale(1.06); }
+  .galerija { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center;
+    background: radial-gradient(circle at 50% 38%, rgba(56, 42, 20, .93), rgba(22, 16, 7, .97) 78%);
+    opacity: 0; visibility: hidden; transition: opacity .32s ease, visibility .32s; }
+  .galerija.otvorena { opacity: 1; visibility: visible; }
+  .galerija-unutra { width: min(680px, 92vw); max-height: 86vh; overflow-y: auto; text-align: center; padding: 26px 18px 34px;
+    transform: scale(.96); transition: transform .32s ease; scrollbar-width: thin; scrollbar-color: rgba(216,181,106,.4) transparent; }
+  .galerija.otvorena .galerija-unutra { transform: scale(1); }
+  .galerija-unutra::-webkit-scrollbar { width: 6px; }
+  .galerija-unutra::-webkit-scrollbar-thumb { background: rgba(216,181,106,.35); border-radius: 3px; }
+  .galerija h3 { margin: 0 0 20px; font-size: 13px; letter-spacing: .4em; text-transform: uppercase; color: var(--gold); font-weight: 600; }
+  .galerija-lepeza { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 20px 14px; }
+  .galerija-stavka { background: none; border: none; padding: 0; cursor: pointer; }
+  .galerija-stavka img { width: 84px; height: 84px; border-radius: 50%; object-fit: cover; display: block; margin: 0 auto;
+    box-shadow: 0 0 0 2px rgba(216, 181, 106, .5), 0 0 22px rgba(216, 181, 106, .16);
+    transition: transform .25s ease, box-shadow .25s ease; }
+  .galerija-stavka:hover img { transform: scale(1.07); box-shadow: 0 0 0 2px var(--gold), 0 0 30px rgba(216, 181, 106, .38); }
+  .galerija-stavka span { display: block; margin-top: 8px; font-size: 12px; color: rgba(243, 234, 216, .8); letter-spacing: .03em; }
+  .galerija-krupno { display: none; }
+  .galerija-krupno img { width: min(240px, 58vw); height: min(240px, 58vw); border-radius: 50%; object-fit: cover;
+    box-shadow: 0 0 0 3px var(--gold), 0 0 46px rgba(216, 181, 106, .25); }
+  .galerija-krupno .potpis { margin-top: 16px; font-size: 15px; color: #f3ead8; letter-spacing: .06em; }
+  .galerija-krupno .hint { margin-top: 10px; font-size: 12px; color: rgba(243, 234, 216, .55); }
+  .galerija-zatvori { position: absolute; top: 16px; right: 20px; background: none; border: none; color: rgba(243, 234, 216, .65);
+    font-size: 30px; line-height: 1; cursor: pointer; padding: 4px 8px; }
+  .galerija-zatvori:hover { color: #f3ead8; }
   .temp-row {
     display: flex;
     align-items: baseline;
@@ -831,6 +859,44 @@ var LAVOVI = {
   oblacnoSumrak: "https://oss-macaron-ai.macaron.im/image/chat_image/86d4a317-3d6f-4656-83ba-778eecc914bd.webp",
   maglaSumrak:   "https://oss-macaron-ai.macaron.im/image/chat_image/e726fb79-fbc7-4c7a-8c81-f45ab04531e0.webp"
 };
+
+// ——— Galerija lavova: svi lavovi koje smo ikad napravili — i oni iz fioke (Vlad 3.9) ———
+var FIOKA_RAVNA = "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac63471a512cea1a59bc1ad.webp";
+var GAL_NIZ = ["sunce","kisa","sneg","oluja","oblacno","magla","noc","kisaNoc","snegNoc","olujaNoc","oblacnoNoc","maglaNoc","nocPun","jutro","kisaJutro","snegJutro","olujaJutro","oblacnoJutro","maglaJutro","sumrak","kisaSumrak","snegSumrak","olujaSumrak","oblacnoSumrak","maglaSumrak","ravna"];
+var GAL_IMENA = { sunce:"Sunčani dan", kisa:"Kiša", sneg:"Sneg", oluja:"Oluja", oblacno:"Oblačno", magla:"Magla", noc:"Vedra noć", kisaNoc:"Kiša — noć", snegNoc:"Sneg — noć", olujaNoc:"Oluja — noć", oblacnoNoc:"Oblačno — noć", maglaNoc:"Magla — noć", nocPun:"Pun mesec", jutro:"Zora", kisaJutro:"Kiša — zora", snegJutro:"Sneg — zora", olujaJutro:"Oluja — zora", oblacnoJutro:"Oblačno — zora", maglaJutro:"Magla — zora", sumrak:"Sumrak", kisaSumrak:"Kiša — sumrak", snegSumrak:"Sneg — sumrak", olujaSumrak:"Oluja — sumrak", oblacnoSumrak:"Oblačno — sumrak", maglaSumrak:"Magla — sumrak", ravna:"Ikonica — ravna" };
+function GAL_URL(k) { return k === "ravna" ? FIOKA_RAVNA : LAVOVI[k]; }
+function lavDana() { var d = Math.floor(Date.now() / 86400000); return GAL_NIZ[d % GAL_NIZ.length]; }
+function otvoriGaleriju() {
+  var lepeza = document.getElementById("galerija-lepeza");
+  lepeza.innerHTML = "";
+  GAL_NIZ.forEach(function(k) {
+    var b = document.createElement("button");
+    b.className = "galerija-stavka"; b.type = "button";
+    b.innerHTML = '<img src="' + GAL_URL(k) + '" alt="' + GAL_IMENA[k] + '" loading="lazy"><span>' + GAL_IMENA[k] + '</span>';
+    b.addEventListener("click", function(ev) { ev.stopPropagation(); prikaziKrupno(k); });
+    lepeza.appendChild(b);
+  });
+  document.getElementById("galerija-krupno").style.display = "none";
+  lepeza.style.display = "grid";
+  document.getElementById("galerija").classList.add("otvorena");
+}
+function prikaziKrupno(k) {
+  document.getElementById("galerija-krupno-img").src = GAL_URL(k);
+  document.getElementById("galerija-krupno-potpis").textContent = GAL_IMENA[k];
+  document.getElementById("galerija-lepeza").style.display = "none";
+  document.getElementById("galerija-krupno").style.display = "block";
+}
+function zatvoriGaleriju() { document.getElementById("galerija").classList.remove("otvorena"); }
+document.addEventListener("DOMContentLoaded", function() {
+  document.getElementById("lav-top").addEventListener("click", otvoriGaleriju);
+  document.getElementById("galerija-zatvori").addEventListener("click", zatvoriGaleriju);
+  document.getElementById("galerija").addEventListener("click", function(ev) { if (ev.target === this) zatvoriGaleriju(); });
+  document.getElementById("galerija-krupno").addEventListener("click", function() {
+    this.style.display = "none";
+    document.getElementById("galerija-lepeza").style.display = "grid";
+  });
+});
+
 var WCODE = {
   0:  ["Vedro",                 "sunce",  "Vreme je za sunčanje 😎", "☀️"],
   1:  ["Pretežno vedro",         "sunce",  "Malo sunca, malo hlada — taman 😁", "🌤️"],
@@ -1357,7 +1423,7 @@ function obradi(tekst) {
   if (jeNoc(tekst) && LAVOVI[moodKlasa + "Noc"]) lavVrsta = moodKlasa + "Noc";
   if (jeJutro(tekst) && LAVOVI[moodKlasa + "Jutro"]) lavVrsta = moodKlasa + "Jutro";
   if (jeSumrak(tekst) && LAVOVI[moodKlasa + "Sumrak"]) lavVrsta = moodKlasa + "Sumrak";
-  document.getElementById("lav-top").src = LAVOVI[lavVrsta];
+  document.getElementById("lav-top").src = GAL_URL(lavDana());
   document.getElementById("msg").style.display = "none";
 
   var e = tekst.daily ? tekst.daily : null;
@@ -1489,5 +1555,17 @@ document.getElementById("lok-unos").addEventListener("keydown", function(e){
   if (e.key === "Enter") traziGrad();
 });
 </script>
+<div class="galerija" id="galerija" role="dialog" aria-label="Galerija lavova">
+  <button class="galerija-zatvori" id="galerija-zatvori" type="button" aria-label="Zatvori galeriju">&times;</button>
+  <div class="galerija-unutra">
+    <h3>Lavovi</h3>
+    <div class="galerija-lepeza" id="galerija-lepeza"></div>
+    <div class="galerija-krupno" id="galerija-krupno">
+      <img id="galerija-krupno-img" src="" alt="">
+      <div class="potpis" id="galerija-krupno-potpis"></div>
+      <div class="hint">tap bilo gde za nazad</div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
