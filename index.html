@@ -271,7 +271,7 @@
   body.mood-magla   { background: radial-gradient(ellipse at 50% 20%, #4a5568 0%, #2c3543 60%, #12161e 100%); }
   body.mood-kisa    { background: radial-gradient(ellipse at 50% 20%, #1e4a7a 0%, #12335c 60%, #061527 100%); }
   body.mood-sneg    { background: radial-gradient(ellipse at 50% 20%, #3a6aa8 0%, #224678 60%, #0b1c33 100%); }
-  body.mood-oluja   { background: radial-gradient(ellipse at 50% 20%, #1a2340 0%, #101628 60%, #05070d 100%); }
+  body.mood-oluja   { background: radial-gradient(ellipse at 50% 20%, #52658a 0%, #31415f 60%, #17243c 100%); }
   body.mood-noc     { background: radial-gradient(ellipse at 50% 20%, #101630 0%, #0a0e20 65%, #040610 100%); }
   /* Noć: duboke verzije istih tona */
   body.je-noc.mood-sunce   { background: radial-gradient(ellipse at 50% 20%, #142c46 0%, #0b1828 65%, #050b14 100%); }
@@ -281,8 +281,8 @@
   body.je-noc.mood-sneg    { background: radial-gradient(ellipse at 50% 20%, #1c2c42 0%, #101a2a 65%, #060a12 100%); }
   body.je-noc.mood-oluja   { background: radial-gradient(ellipse at 50% 20%, #10121e 0%, #080a12 65%, #030408 100%); }
   /* Zora i sumrak: nebo prati izlazak i zalazak sunca */
-  body.je-jutro  { background: radial-gradient(ellipse at 50% 20%, #f6cf8e 0%, #7ba3d6 45%, #1d3f70 100%); }
-  body.je-sumrak { background: radial-gradient(ellipse at 50% 20%, #e0955a 0%, #7a4666 45%, #172743 100%); }
+  body.mood-sunce.je-jutro  { background: radial-gradient(ellipse at 50% 20%, #f6cf8e 0%, #7ba3d6 45%, #1d3f70 100%); }
+  body.mood-sunce.je-sumrak { background: radial-gradient(ellipse at 50% 20%, #e0955a 0%, #7a4666 45%, #172743 100%); }
   /* ——— Vremenski mood: KVADRAT oko lava se menja sa vremenom ——— */
   #scena {
     position: absolute; inset: 0;
@@ -297,7 +297,7 @@
   .mood-magla   .card { background-color: rgba(185, 190, 196, .58); }
   .mood-kisa    .card { background-color: rgba(28, 78, 148, .7); }
   .mood-sneg    .card { background-color: rgba(170, 200, 235, .6); }
-  .mood-oluja   .card { background-color: rgba(25, 28, 45, .85); }
+  .mood-oluja   .card { background-color: rgba(52, 63, 92, .8); }
   .mood-noc     .card { background-color: rgba(16, 22, 48, .78); }
   /* Noćne varijante neba kad je mrak */
   .je-noc.mood-oblacno .card { background-color: rgba(45, 52, 66, .72); }
@@ -306,8 +306,8 @@
   .je-noc.mood-sneg    .card { background-color: rgba(70, 85, 110, .65); }
   .je-noc.mood-oluja   .card { background-color: rgba(10, 12, 22, .88); }
   /* Zora i sumrak: kartica topla na ivici dana */
-  body.je-jutro .card  { background: linear-gradient(180deg, rgba(128, 158, 204, .55), rgba(26, 50, 92, .8)); }
-  body.je-sumrak .card { background: linear-gradient(180deg, rgba(166, 104, 80, .6), rgba(48, 34, 62, .84)); }
+  body.mood-sunce.je-jutro .card  { background: linear-gradient(180deg, rgba(128, 158, 204, .55), rgba(26, 50, 92, .8)); }
+  body.mood-sunce.je-sumrak .card { background: linear-gradient(180deg, rgba(166, 104, 80, .6), rgba(48, 34, 62, .84)); }
   /* ——— Scena u kvadratu: kapi, pahulje, blesak, oblaci, zvezde ——— */
   .sc-kapa {
     position: absolute; width: 2px; border-radius: 2px;
@@ -618,6 +618,7 @@ var LAVOVI = {
   oluja:   "https://oss-macaron-ai.macaron.im/image/chat_image/ba9905b2-87fc-4c8f-8da7-05f782362636.webp",
   oblacno: "https://oss-macaron-ai.macaron.im/image/chat_image/90cae59e-e7c8-444f-bd72-5c12d7d0de8a.webp",
   sneg:    "https://oss-macaron-ai.macaron.im/image/chat_image/4ddff560-c883-4882-8164-19d8fe578adc.webp",
+  magla:   "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac601d1a512cea1a59b6fc3.webp",
   noc:     "https://oss-macaron-ai.macaron.im/image/chat_image/ae9e074d-8494-4a38-b275-4eca14cb76a6.webp",
   nocPun:  "https://oss-macaron-ai.macaron.im/image/chat_image/fd798ca0-0565-430b-a119-191c7de41f33.webp",
   jutro:   "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac5dd8fa512cea1a59b3ed3.webp",
@@ -628,20 +629,27 @@ var WCODE = {
   1:  ["Pretežno vedro",         "sunce",  "Malo sunca, malo hlada — taman 😁", "🌤️"],
   2:  ["Delimično oblačno",      "oblacno","Oblak tu, sunce tamo — dogovoriće se već", "⛅"],
   3:  ["Oblačno",                "oblacno","Sunce je uzelo slobodno do daljnjeg", "☁️"],
-  45: ["Magla",                  "oblacno","Ne vidim ni do brkova", "🌫️"],
-  48: ["Magla s mrazom",         "oblacno","Magla i mraz — dan za jazbinu", "🌫️"],
+  45: ["Magla",                  "magla",  "Ne vidim ni do brkova", "🌫️"],
+  48: ["Magla s mrazom",         "magla",  "Magla i mraz — dan za jazbinu", "🌫️"],
   51: ["Slaba kiša",             "kisa",   "Ja bih poneo kišobran, a ti odluči šta ćeš", "🌦️"],
   53: ["Lagana kiša",            "kisa",   "Kap po kap — dan ide polako", "🌦️"],
   55: ["Jaka kiša",              "kisa",   "Pada i ne misli da stane", "🌧️"],
+  56: ["Slaba ledena kiša",      "kisa",   "Pada i ledi — gledaj gde staješ", "🌧️"],
+  57: ["Ledena kiša",            "kisa",   "Kiša koja ledi — bolje u jazbini", "🌧️"],
   61: ["Slaba kiša",             "kisa",   "Slaba kiša — kapuljača reši sve", "🌦️"],
   63: ["Kiša",                   "kisa",   "Kiša k'o kiša — dan ide dalje", "🌧️"],
   65: ["Jaka kiša",              "kisa",   "Pada kao da nema sutra", "🌧️"],
+  66: ["Slaba kiša sa snegom",   "sneg",   "Ni kiša ni sneg — a opet oboje", "🌨️"],
+  67: ["Kiša sa snegom",         "sneg",   "Nebo ne može da se odluči", "🌨️"],
   71: ["Slab sneg",              "sneg",   "Više najava nego sneg", "🌨️"],
   73: ["Sneg",                   "sneg",   "Dan k'o razglednica — beli se svuda", "🌨️"],
   75: ["Jak sneg",               "sneg",   "Ko će sutra da čisti sneg 🤦", "❄️"],
+  77: ["Sneg u zrnima",          "sneg",   "Sitna zrna — bode do brkova", "🌨️"],
   80: ["Slab pljusak",           "kisa",   "Slabiji pljusak — dobar znak za brzi korak", "🌦️"],
   81: ["Pljusak",                "kisa",   "Lije k'o iz kabla — ali kratko", "🌧️"],
   82: ["Jak pljusak",            "kisa",   "Nebo se otvorilo", "⛈️"],
+  85: ["Slabi snežni pljuskovi", "sneg",   "Padne pa stane — snežni ritam", "🌨️"],
+  86: ["Snežni pljuskovi",       "sneg",   "Nebo tresne snegom", "❄️"],
   95: ["Grmljavinska oluja",     "oluja",  "Grom k'o iz topa", "⛈️"],
   96: ["Oluja s gradom",         "oluja",  "Oluja je punog sadržaja — grom i led", "⛈️"],
   99: ["Jaka oluja s gradom",    "oluja",  "Sedi gde si — čekaj da prođe", "⛈️"]
@@ -986,7 +994,13 @@ function obradi(tekst) {
 
   document.getElementById("temp").textContent = t;
   document.getElementById("desc").textContent = info[0];
-  document.getElementById("mood").textContent = info[2];
+  var poruka = info[2];
+  if (kod === 0) {
+    if (t >= 25) poruka = "Vreme je za sunčanje 😎";
+    else if (t >= 12) poruka = "Sunčano i prijatno — dan za šetnju 😌";
+    else poruka = "Vedro, ali zima ❄️";
+  }
+  document.getElementById("mood").textContent = poruka;
   document.getElementById("wind").textContent = v;
   document.getElementById("rain").textContent = k;
   var sansa = null;
