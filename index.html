@@ -660,7 +660,11 @@
     border-bottom: 1px solid rgba(212, 175, 55, .08);
     font-size: 13px;
     color: rgba(245, 241, 230, .82);
+    cursor: pointer;
+    transition: background .2s ease;
   }
+  .dan-red:hover { background: rgba(212, 175, 55, .05); }
+  .dan-red.dan-izabran { background: rgba(212, 175, 55, .09); border-radius: 8px; padding: 9px 10px; }
   .dan-red:last-child { border-bottom: none; }
   .dan-red img {
     width: 46px;
@@ -780,7 +784,7 @@
   </div>
 
   <div class="panel sati">
-    <h3>Po satima</h3>
+    <h3 id="sati-naslov">Po satima</h3>
     <div id="sati-traka" class="sati-traka"></div>
   </div>
 
@@ -1349,6 +1353,39 @@ function renderSate(h, trenutno, sunrise0, sunset0) {
   }
 }
 
+// ——— Klik na dan: traka gore prelazi na taj dan (Vlad: rasklop u listi je bruka, traka diše tiše) ———
+var IZBRANI_DAN = -1;
+var POSLEDNJI_TEKST = null;
+
+function renderSateZaDan(tekst, danIdx) {
+  var h = tekst.hourly, d = tekst.daily;
+  var datumStr = d.time[danIdx];
+  var novi = { time: [], weather_code: [], temperature_2m: [], precipitation_probability: [] };
+  for (var j = 0; j < h.time.length; j++) {
+    if (h.time[j].slice(0, 10) === datumStr) {
+      novi.time.push(h.time[j]);
+      novi.weather_code.push(h.weather_code[j]);
+      novi.temperature_2m.push(h.temperature_2m[j]);
+      if (h.precipitation_probability) novi.precipitation_probability.push(h.precipitation_probability[j]);
+    }
+  }
+  renderSate(novi, novi.time[0] ? novi.time[0] : "", d.sunrise && d.sunrise[danIdx], d.sunset && d.sunset[danIdx]);
+}
+
+function postaviTraku() {
+  var naslov = document.getElementById("sati-naslov");
+  if (!POSLEDNJI_TEKST) return;
+  var d = POSLEDNJI_TEKST.daily;
+  if (IZBRANI_DAN >= 0 && d && IZBRANI_DAN < d.time.length) {
+    renderSateZaDan(POSLEDNJI_TEKST, IZBRANI_DAN);
+    var dt = new Date(d.time[IZBRANI_DAN] + "T12:00:00");
+    naslov.textContent = "Po satima — " + DANI_SR[dt.getDay()].toLowerCase();
+  } else {
+    renderSate(POSLEDNJI_TEKST.hourly, POSLEDNJI_TEKST.current.time, d && d.sunrise && d.sunrise[0], d && d.sunset && d.sunset[0]);
+    naslov.textContent = "Po satima";
+  }
+}
+
 // 7 dana — dan, lav, opis, min/max
 function renderDana(d) {
   var lista = document.getElementById("dani-lista");
@@ -1360,7 +1397,12 @@ function renderDana(d) {
     var datum = dt.getDate() + "." + (dt.getMonth() + 1) + ".";
     var ime = i === 0 ? "Danas" : DANI_SR_KRATKO[dt.getDay()] + " " + datum;
     var red = document.createElement("div");
-    red.className = "dan-red";
+    red.className = "dan-red" + (i === IZBRANI_DAN ? " dan-izabran" : "");
+    red.onclick = (function(idx) { return function() {
+      IZBRANI_DAN = (IZBRANI_DAN === idx || idx === 0) ? -1 : idx;
+      renderDana(POSLEDNJI_TEKST.daily);
+      postaviTraku();
+    }; })(i);
     var sansa = (d.precipitation_probability_max && d.precipitation_probability_max[i] >= 30) ? Math.round(d.precipitation_probability_max[i]) : 0;
     red.innerHTML = "<span class=\"dan-ime\">" + ime + "</span>" +
       "<img src=\"" + LAVOVI[info[1]] + "\" alt=\"\">" +
@@ -1394,6 +1436,7 @@ function proveriKisu(tekst) {
 }
 
 function obradi(tekst) {
+  POSLEDNJI_TEKST = tekst;
   var t = Math.round(tekst.current.temperature_2m);
   var kod = tekst.current.weather_code;
   // Probni režim: ?efekt= obara i prikaz, lava i rečenicu na forsirano vreme
@@ -1492,7 +1535,7 @@ function obradi(tekst) {
     document.getElementById("izlazak").textContent = e.sunrise[0].slice(11, 16);
     document.getElementById("zalazak").textContent = e.sunset[0].slice(11, 16);
   }
-  renderSate(tekst.hourly, tekst.current.time, tekst.daily && tekst.daily.sunrise && tekst.daily.sunrise[0], tekst.daily && tekst.daily.sunset && tekst.daily.sunset[0]);
+  postaviTraku();
   renderDana(tekst.daily);
 }
 
