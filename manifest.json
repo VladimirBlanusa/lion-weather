@@ -1,7 +1,7 @@
 {
   "name": "Lion Weather",
   "short_name": "Lion Weather",
-  "description": "Vremenska prognoza za Stara Pazovu — s lavom.",
+  "description": "Vremenska prognoza sa lavom koji zna šta priča — sat, temperatura, 7 dana unapred, sve u zlatu.",
   "start_url": "index.html",
   "scope": ".",
   "display": "standalone",
