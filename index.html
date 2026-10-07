@@ -1151,7 +1151,7 @@ function podesiMesec() {
 
 // Scena u kvadratu oko lava — cela pozornica se menja sa vremenom
 // Vlad 3.0: organska oblak-silueta — pufnaste mase, talasasta donja ivica (referenca: Vladovi meki kumulusi)
-var OB_SVG = '<svg viewBox="0 0 200 124" preserveAspectRatio="none"><path style="fill:var(--ob-z)" opacity=".55" d="M40,92C24,90 16,74 26,60C18,44 36,32 52,36C62,18 92,12 104,24C118,8 146,12 150,32C170,30 186,48 178,64C190,76 186,94 170,94C128,102 76,100 40,92Z"/><path style="fill:var(--ob-g)" d="M32,98C20,96 12,84 16,70C10,56 22,42 38,46C42,26 66,16 80,28C90,12 118,12 128,26C140,14 166,20 166,40C184,44 190,66 176,76C188,84 182,98 168,96C152,105 142,96 128,100C114,109 102,99 88,103C74,111 60,101 48,103C40,105 34,102 32,98Z"/><path style="fill:var(--ob-h)" opacity=".8" d="M50,56C48,38 68,26 86,32C72,38 60,46 54,60C52,59 50,58 50,56Z"/></svg>';
+var OB_SVG = '<svg viewBox="0 0 200 124" preserveAspectRatio="none"><path style="fill:var(--ob-g)" d="M32,98C20,96 12,84 16,70C10,56 22,42 38,46C42,26 66,16 80,28C90,12 118,12 128,26C140,14 166,20 166,40C184,44 190,66 176,76C188,84 182,98 168,96C152,105 142,96 128,100C114,109 102,99 88,103C74,111 60,101 48,103C40,105 34,102 32,98Z"/><path style="fill:var(--ob-h)" opacity=".8" d="M50,56C48,38 68,26 86,32C72,38 60,46 54,60C52,59 50,58 50,56Z"/></svg>'; // v3.50: zadnji sloj skinut — jedan cist oblik, bez senke-ruba preko oblaka
 var KAP_SVG = '<svg viewBox="0 0 8 16" preserveAspectRatio="none"><path d="M4,0.5 C4,3 7,8 7,12 A3.5,3.5 0 1,1 1,12 C1,8 4,3 4,0.5 Z" fill="rgba(205,226,248,.92)"/></svg>';
 function postaviScenu(vrsta) {
   var sc = document.getElementById("scena");
@@ -1270,7 +1270,7 @@ function postaviScenu(vrsta) {
     var ku = document.createElement("div");
     ku.className = "sc-kulisa";
     ku.innerHTML = OB_SVG;
-    sc.appendChild(ku);
+    sc.insertBefore(ku, sc.firstChild); // kulisa je pozadina — crta se ISPOD oblaka, ne preko njih
   }
 }
 
