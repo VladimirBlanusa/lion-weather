@@ -203,14 +203,15 @@
     margin-top: 6px;
     font-size: 16px;
     line-height: 1.35;
-    color: rgba(245, 241, 230, .75);
+    color: rgba(245, 241, 230, .82);
     min-height: 22px;
   }
   #mood {
     margin-top: 10px;
-    font-size: 13px;
+    font-size: 14px;
     font-style: italic;
     color: var(--gold-light);
+    text-shadow: 0 1px 12px rgba(0, 0, 0, .65);
     min-height: 18px;
   }
   .meta {
@@ -221,7 +222,7 @@
     row-gap: 6px;
     flex-wrap: wrap;
     font-size: 13px;
-    color: rgba(245, 241, 230, .75);
+    color: rgba(245, 241, 230, .82);
   }
   .meta-prelom { flex-basis: 100%; height: 0; }
   #grad { font-weight: 600; color: var(--text); }
@@ -244,7 +245,7 @@
     font-weight: 600;
   }
   .models table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .models td { padding: 4px 2px; color: rgba(245, 241, 230, .75); border-bottom: 1px solid rgba(212,175,55,.08); }
+  .models td { padding: 4px 2px; color: rgba(245, 241, 230, .82); border-bottom: 1px solid rgba(212,175,55,.08); }
   .models tr:last-child td { border-bottom: none; }
   .models td:last-child { text-align: right; color: var(--text); font-weight: 600; }
   /* ——— Modeli — izvori: bordo panel ——— */
@@ -255,14 +256,24 @@
   .panel.models h3 { color: #f3b0a4; }
   .panel.models td { color: #f0d8d2; border-bottom-color: rgba(228, 130, 118, .16); }
   .panel.models td:last-child { color: #ffe9e6; }
-  /* ——— Pozornica prati nebo: dubok ton po vremenu ——— */
-  body.mood-sunce   { background: radial-gradient(ellipse at 50% 20%, #142c46 0%, #0b1828 65%, #050b14 100%); }
-  body.mood-oblacno { background: radial-gradient(ellipse at 50% 20%, #1a222e 0%, #10151e 65%, #070a0e 100%); }
-  body.mood-magla   { background: radial-gradient(ellipse at 50% 20%, #23272c 0%, #15181c 65%, #090b0d 100%); }
-  body.mood-kisa    { background: radial-gradient(ellipse at 50% 20%, #10233c 0%, #0a1626 65%, #040810 100%); }
-  body.mood-sneg    { background: radial-gradient(ellipse at 50% 20%, #1c2c42 0%, #101a2a 65%, #060a12 100%); }
-  body.mood-oluja   { background: radial-gradient(ellipse at 50% 20%, #10121e 0%, #080a12 65%, #030408 100%); }
+  /* ——— Pozornica prati nebo: dan diše, noć tone ——— */
+  body.mood-sunce   { background: radial-gradient(ellipse at 50% 20%, #1d5aa8 0%, #103a75 60%, #081c3a 100%); }
+  body.mood-oblacno { background: radial-gradient(ellipse at 50% 20%, #35506e 0%, #1f3350 60%, #0d1626 100%); }
+  body.mood-magla   { background: radial-gradient(ellipse at 50% 20%, #4a5568 0%, #2c3543 60%, #12161e 100%); }
+  body.mood-kisa    { background: radial-gradient(ellipse at 50% 20%, #1e4a7a 0%, #12335c 60%, #061527 100%); }
+  body.mood-sneg    { background: radial-gradient(ellipse at 50% 20%, #3a6aa8 0%, #224678 60%, #0b1c33 100%); }
+  body.mood-oluja   { background: radial-gradient(ellipse at 50% 20%, #1a2340 0%, #101628 60%, #05070d 100%); }
   body.mood-noc     { background: radial-gradient(ellipse at 50% 20%, #101630 0%, #0a0e20 65%, #040610 100%); }
+  /* Noć: duboke verzije istih tona */
+  body.je-noc.mood-sunce   { background: radial-gradient(ellipse at 50% 20%, #142c46 0%, #0b1828 65%, #050b14 100%); }
+  body.je-noc.mood-oblacno { background: radial-gradient(ellipse at 50% 20%, #1a222e 0%, #10151e 65%, #070a0e 100%); }
+  body.je-noc.mood-magla   { background: radial-gradient(ellipse at 50% 20%, #23272c 0%, #15181c 65%, #090b0d 100%); }
+  body.je-noc.mood-kisa    { background: radial-gradient(ellipse at 50% 20%, #10233c 0%, #0a1626 65%, #040810 100%); }
+  body.je-noc.mood-sneg    { background: radial-gradient(ellipse at 50% 20%, #1c2c42 0%, #101a2a 65%, #060a12 100%); }
+  body.je-noc.mood-oluja   { background: radial-gradient(ellipse at 50% 20%, #10121e 0%, #080a12 65%, #030408 100%); }
+  /* Zora i sumrak: nebo prati izlazak i zalazak sunca */
+  body.je-jutro  { background: radial-gradient(ellipse at 50% 20%, #f0b06a 0%, #a05a72 45%, #234575 100%); }
+  body.je-sumrak { background: radial-gradient(ellipse at 50% 20%, #e0955a 0%, #7a4666 45%, #172743 100%); }
   /* ——— Vremenski mood: KVADRAT oko lava se menja sa vremenom ——— */
   #scena {
     position: absolute; inset: 0;
@@ -285,6 +296,9 @@
   .je-noc.mood-kisa    .card { background-color: rgba(22, 30, 55, .75); }
   .je-noc.mood-sneg    .card { background-color: rgba(70, 85, 110, .65); }
   .je-noc.mood-oluja   .card { background-color: rgba(10, 12, 22, .88); }
+  /* Zora i sumrak: kartica topla na ivici dana */
+  body.je-jutro .card  { background: linear-gradient(180deg, rgba(196, 134, 98, .58), rgba(94, 52, 74, .8)); }
+  body.je-sumrak .card { background: linear-gradient(180deg, rgba(166, 104, 80, .6), rgba(48, 34, 62, .84)); }
   /* ——— Scena u kvadratu: kapi, pahulje, blesak, oblaci, zvezde ——— */
   .sc-kapa {
     position: absolute; width: 2px; border-radius: 2px;
@@ -351,7 +365,7 @@
   }
   /* ——— Sati traka: neutralno staklo ——— */
   .panel.sati h3 { color: var(--gold-light); }
-  .panel.sati .sat-item { color: rgba(245, 241, 230, .75); }
+  .panel.sati .sat-item { color: rgba(245, 241, 230, .82); }
   .panel.sati .sat-item b { color: var(--text); }
   .panel.sati .sat-item img { border-color: rgba(255, 255, 255, .12); }
   /* ——— Po danima: neutralno staklo ——— */
@@ -382,7 +396,7 @@
     align-items: center;
     gap: 4px;
     font-size: 12px;
-    color: rgba(245, 241, 230, .75);
+    color: rgba(245, 241, 230, .82);
   }
   .sat-item img {
     width: 40px;
@@ -400,7 +414,7 @@
     padding: 9px 0;
     border-bottom: 1px solid rgba(212, 175, 55, .08);
     font-size: 13px;
-    color: rgba(245, 241, 230, .75);
+    color: rgba(245, 241, 230, .82);
   }
   .dan-red:last-child { border-bottom: none; }
   .dan-red img {
@@ -412,7 +426,7 @@
     filter: brightness(1.18);
   }
   .dan-ime { width: 84px; text-align: left; color: var(--text); font-weight: 600; }
-  .dan-opis { flex: 1; text-align: left; font-size: 12px; line-height: 1.35; color: rgba(245, 241, 230, .75); }
+  .dan-opis { flex: 1; text-align: left; font-size: 12px; line-height: 1.35; color: rgba(245, 241, 230, .82); }
   .dan-temp { color: var(--text); font-weight: 600; }
   .lok-red {
     display: flex;
@@ -441,7 +455,7 @@
     cursor: pointer;
   }
   #lok-gps { font-size: 16px; padding: 10px 12px; }
-  #lok-rez { margin-top: 8px; display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: rgba(245, 241, 230, .75); }
+  #lok-rez { margin-top: 8px; display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: rgba(245, 241, 230, .82); }
   .lok-rez-btn {
     text-align: left;
     background: rgba(18, 22, 31, .6);
@@ -583,7 +597,10 @@ var LAVOVI = {
   oluja:   "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac3d05be1c9684dbf1fdeff.webp",
   oblacno: "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac3d08be1c9684dbf1fdfbf.webp",
   sneg:    "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac3d0bfa512cea1a5960762.webp",
-  noc:     "https://oss-macaron-ai.macaron.im/image/chat_image/2a63c741-5bd6-4204-953c-df0d37098c05.webp"
+  noc:     "https://oss-macaron-ai.macaron.im/image/chat_image/2a63c741-5bd6-4204-953c-df0d37098c05.webp",
+  nocPun:  "https://oss-macaron-ai.macaron.im/image/chat_image/848912a5-1027-4777-8284-df5971fc4e4b.webp",
+  jutro:   "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac5dd8fa512cea1a59b3ed3.webp",
+  sumrak:  "https://oss-macaron-user.macaron.im/photo/cd4f94e2-d5ca-4d93-80d2-d68f3738c282.jpeg"
 };
 var WCODE = {
   0:  ["Vedro",                 "sunce",  "Vreme je za sunčanje 😎", "☀️"],
@@ -690,6 +707,25 @@ function jeNoc(tekst) {
   return (t < tekst.daily.sunrise[0]) || (t >= tekst.daily.sunset[0]);
 }
 
+// Minuti u danu iz ISO vremena ("2026-10-07T06:44" → 404)
+function minuDana(iso) {
+  return (+iso.slice(11, 13)) * 60 + (+iso.slice(14, 16));
+}
+
+// Zora: od izlaska sunca pa 2 sata — jutro diše zlatom
+function jeJutro(tekst) {
+  if (!tekst.daily || !tekst.daily.sunrise) return false;
+  var t = minuDana(tekst.current.time), i = minuDana(tekst.daily.sunrise[0]);
+  return (t >= i) && (t < i + 120);
+}
+
+// Sumrak: 2 sata pred zalazak sunca
+function jeSumrak(tekst) {
+  if (!tekst.daily || !tekst.daily.sunset) return false;
+  var t = minuDana(tekst.current.time), z = minuDana(tekst.daily.sunset[0]);
+  return (t >= z - 120) && (t < z);
+}
+
 // Mesečeve mene: faza 0 = nov mesec, 0.5 = pun mesec
 function mesecFaza() {
   var sinodska = 29.530588853;                        // dužina ciklusa u danima
@@ -697,6 +733,12 @@ function mesecFaza() {
   var f = ((Date.now() / 86400000 - ref) / sinodska) % 1;
   if (f < 0) f += 1;
   return f;
+}
+
+// Pun mesec: noći oko pune (±1.5 dana ciklusa) nose lava pod punim mesecom
+function jePunMesec() {
+  var f = mesecFaza();
+  return Math.abs(f - 0.5) < 0.05;
 }
 
 // Kutijica u uglu: srp prati pravi Mesec na nebu
@@ -853,7 +895,18 @@ function obradi(tekst) {
   // Noć: vedro/pretežno vedro noću → mesečina umesto sunca
   if (jeNoc(tekst) && moodKlasa === "sunce") moodKlasa = "noc";
   if (moodKlasa === "noc") document.getElementById("mood").textContent = "Vreme je za mesečinu 🌙";
-  if (moodKlasa === "noc") postaviLava("noc");
+  if (moodKlasa === "noc") postaviLava(jePunMesec() ? "nocPun" : "noc");
+  // Zora i sumrak: vedro jutro/veče nose svoje lava, nebo prati izlazak i zalazak
+  var jeJutroS = jeJutro(tekst) && moodKlasa === "sunce";
+  var jeSumrakS = jeSumrak(tekst) && moodKlasa === "sunce";
+  if (jeJutroS) {
+    document.getElementById("mood").textContent = "Zora lije zlato — Lav se budi 🌅";
+    postaviLava("jutro");
+  }
+  if (jeSumrakS) {
+    document.getElementById("mood").textContent = "Sumrak lije zlato preko brkova 🌇";
+    postaviLava("sumrak");
+  }
   postaviEfekte(moodKlasa);
   postaviScenu(moodKlasa);
   var stare = document.body.className.match(/mood-\S+/g) || [];
@@ -861,8 +914,15 @@ function obradi(tekst) {
   document.body.classList.add("mood-" + moodKlasa);
   if (jeNoc(tekst)) document.body.classList.add("je-noc");
   else document.body.classList.remove("je-noc");
+  if (jeJutro(tekst)) document.body.classList.add("je-jutro");
+  else document.body.classList.remove("je-jutro");
+  if (jeSumrak(tekst)) document.body.classList.add("je-sumrak");
+  else document.body.classList.remove("je-sumrak");
   podesiMesec();
-  document.getElementById("lav-top").src = LAVOVI[moodKlasa === "noc" ? "noc" : info[1]];
+  var lavVrsta = moodKlasa === "noc" ? (jePunMesec() ? "nocPun" : "noc") : info[1];
+  if (jeJutroS) lavVrsta = "jutro";
+  if (jeSumrakS) lavVrsta = "sumrak";
+  document.getElementById("lav-top").src = LAVOVI[lavVrsta];
   document.getElementById("msg").style.display = "none";
 
   var e = tekst.daily ? tekst.daily : null;
