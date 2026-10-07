@@ -6,17 +6,17 @@
   "scope": ".",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#071710",
-  "theme_color": "#071710",
+  "background_color": "#0a0f1a",
+  "theme_color": "#0a0f1a",
   "icons": [
     {
-      "src": "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac637a0a512cea1a59bcb21.webp",
+      "src": "https://macaron-sandbox-workspace.oss-accelerate.aliyuncs.com/prod/01a05aef-9b6e-7737-bec4-ae31a3069526/workspace/lav-vreme/ikonica-zlatna-1024.webp",
       "sizes": "1024x1024",
       "type": "image/webp",
       "purpose": "any"
     },
     {
-      "src": "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac637a0a512cea1a59bcb21.webp",
+      "src": "https://macaron-sandbox-workspace.oss-accelerate.aliyuncs.com/prod/01a05aef-9b6e-7737-bec4-ae31a3069526/workspace/lav-vreme/ikonica-zlatna-512.webp",
       "sizes": "512x512",
       "type": "image/webp",
       "purpose": "maskable"

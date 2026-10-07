@@ -1,43 +1,37 @@
-// Lion Weather service worker — omogućava instalaciju kao aplikaciju (PWA)
-// v3-5: keš se puni na mreži (offline radi), stari keš se briše, update ide odmah
-var CACHE = "lav-vreme-v3-5";
-var FAJLOVI = ["./", "./index.html", "./manifest.json"];
+// ——— Service worker: prvi pogled i bez neta ———
+// Keš "lav-vreme-v1" nosi okvir appa; slike i ostalo se keširaju kako se koriste.
+// API pozivi (open-meteo) se ne diraju — kad nema mreze, podatke drzi localStorage kes u index.html.
+var KES = "lav-vreme-v2"; // v3.51: nova zlatna ikonica — stari keš se automatski baca
+var OKVIR = ["index.html", "manifest.json", "apple-touch-icon.png", "og-lav.jpg"];
 
-self.addEventListener("install", function (e) {
-  self.skipWaiting();
+self.addEventListener("install", function(e) {
   e.waitUntil(
-    caches.open(CACHE).then(function (c) {
-      return c.addAll(FAJLOVI);
-    })
+    caches.open(KES).then(function(c) { return c.addAll(OKVIR); }).then(function() { return self.skipWaiting(); })
   );
 });
 
-self.addEventListener("activate", function (e) {
+self.addEventListener("activate", function(e) {
   e.waitUntil(
-    caches.keys().then(function (imena) {
-      return Promise.all(imena.filter(function (ime) {
-        return ime !== CACHE;
-      }).map(function (ime) {
-        return caches.delete(ime);
-      }));
-    }).then(function () {
-      return self.clients.claim();
-    })
+    caches.keys().then(function(keys) {
+      return Promise.all(keys.filter(function(k) { return k !== KES; }).map(function(k) { return caches.delete(k); }));
+    }).then(function() { return self.clients.claim(); })
   );
 });
 
-self.addEventListener("fetch", function (e) {
+self.addEventListener("fetch", function(e) {
   if (e.request.method !== "GET") return;
+  var url = new URL(e.request.url);
+  // API uvek sa mreze — fallback je localStorage kes iz appa
+  if (url.hostname === "api.open-meteo.com" || url.hostname === "geocoding-api.open-meteo.com") return;
+  // Ostalo: mreza pa kes — offline podize poslednje videno
   e.respondWith(
-    fetch(e.request).then(function (odgovor) {
-      if (odgovor && odgovor.ok) {
-        var kopija = odgovor.clone();
-        caches.open(CACHE).then(function (c) { c.put(e.request, kopija); });
-      }
-      return odgovor;
-    }).catch(function () {
-      return caches.match(e.request).then(function (r) {
-        return r || caches.match("./index.html");
+    fetch(e.request).then(function(r) {
+      var kopija = r.clone();
+      caches.open(KES).then(function(c) { c.put(e.request, kopija); });
+      return r;
+    }).catch(function() {
+      return caches.match(e.request).then(function(p) {
+        return p || caches.match("index.html");
       });
     })
   );

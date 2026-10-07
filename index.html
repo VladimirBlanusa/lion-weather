@@ -6,7 +6,7 @@
 <title>Lion Weather</title>
 <meta name="description" content="Vremenska prognoza sa lavom koji zna šta priča 🦁 — sat, temperatura, 7 dana unapred, sve u zlatu.">
 <link rel="icon" type="image/png" href="https://macaron-sandbox-workspace.oss-accelerate.aliyuncs.com/prod/01a05aef-9b6e-7737-bec4-ae31a3069526/workspace/lav-vreme/favicon.png">
-<link rel="icon" type="image/webp" href="https://oss-macaron-ai.macaron.im/image/text_to_image/6ac637a0a512cea1a59bcb21.webp">
+<link rel="icon" type="image/webp" href="https://macaron-sandbox-workspace.oss-accelerate.aliyuncs.com/prod/01a05aef-9b6e-7737-bec4-ae31a3069526/workspace/lav-vreme/ikonica-zlatna-1024.webp"> <!-- v3.51: zlatni sunčani lav umesto plavog logo-lava -->
 <link rel="apple-touch-icon" href="https://macaron-sandbox-workspace.oss-accelerate.aliyuncs.com/prod/01a05aef-9b6e-7737-bec4-ae31a3069526/workspace/lav-vreme/apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0a0f1a">
@@ -875,11 +875,10 @@ var LAVOVI = {
 };
 
 // ——— Galerija lavova: svi lavovi koje smo ikad napravili — i oni iz fioke (Vlad 3.9) ———
-var FIOKA_RAVNA = "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac63471a512cea1a59bc1ad.webp";
 var FIOKA_DZEBRA = "https://macaron-sandbox-workspace.oss-accelerate.aliyuncs.com/prod/01a05aef-9b6e-7737-bec4-ae31a3069526/workspace/lav-vreme/img-dzebra.jpg";
-var GAL_NIZ = ["sunce","kisa","sneg","oluja","oblacno","magla","noc","kisaNoc","snegNoc","olujaNoc","oblacnoNoc","maglaNoc","nocPun","dzebra","jutro","kisaJutro","snegJutro","olujaJutro","oblacnoJutro","maglaJutro","sumrak","kisaSumrak","snegSumrak","olujaSumrak","oblacnoSumrak","maglaSumrak","ravna"];
-var GAL_IMENA = { sunce:"Sunčani dan", kisa:"Kiša", sneg:"Sneg", oluja:"Oluja", oblacno:"Oblačno", magla:"Magla", noc:"Vedra noć", kisaNoc:"Kiša — noć", snegNoc:"Sneg — noć", olujaNoc:"Oluja — noć", oblacnoNoc:"Oblačno — noć", maglaNoc:"Magla — noć", nocPun:"Pun mesec", dzebra:"Џебра Д Лајон", jutro:"Zora", kisaJutro:"Kiša — zora", snegJutro:"Sneg — zora", olujaJutro:"Oluja — zora", oblacnoJutro:"Oblačno — zora", maglaJutro:"Magla — zora", sumrak:"Sumrak", kisaSumrak:"Kiša — sumrak", snegSumrak:"Sneg — sumrak", olujaSumrak:"Oluja — sumrak", oblacnoSumrak:"Oblačno — sumrak", maglaSumrak:"Magla — sumrak", ravna:"Ikonica — ravna" };
-function GAL_URL(k) { return k === "ravna" ? FIOKA_RAVNA : (k === "dzebra" ? FIOKA_DZEBRA : LAVOVI[k]); }
+var GAL_NIZ = ["sunce","kisa","sneg","oluja","oblacno","magla","noc","kisaNoc","snegNoc","olujaNoc","oblacnoNoc","maglaNoc","nocPun","dzebra","jutro","kisaJutro","snegJutro","olujaJutro","oblacnoJutro","maglaJutro","sumrak","kisaSumrak","snegSumrak","olujaSumrak","oblacnoSumrak","maglaSumrak"]; // v3.51: plava "Ikonica — ravna" napolje iz galerije — ne prati priču
+var GAL_IMENA = { sunce:"Sunčani dan", kisa:"Kiša", sneg:"Sneg", oluja:"Oluja", oblacno:"Oblačno", magla:"Magla", noc:"Vedra noć", kisaNoc:"Kiša — noć", snegNoc:"Sneg — noć", olujaNoc:"Oluja — noć", oblacnoNoc:"Oblačno — noć", maglaNoc:"Magla — noć", nocPun:"Pun mesec", dzebra:"Џебра Д Лајон", jutro:"Zora", kisaJutro:"Kiša — zora", snegJutro:"Sneg — zora", olujaJutro:"Oluja — zora", oblacnoJutro:"Oblačno — zora", maglaJutro:"Magla — zora", sumrak:"Sumrak", kisaSumrak:"Kiša — sumrak", snegSumrak:"Sneg — sumrak", olujaSumrak:"Oluja — sumrak", oblacnoSumrak:"Oblačno — sumrak", maglaSumrak:"Magla — sumrak" };
+function GAL_URL(k) { return k === "dzebra" ? FIOKA_DZEBRA : LAVOVI[k]; }
 function lavDana() { var d = Math.floor(Date.now() / 86400000); return GAL_NIZ[d % GAL_NIZ.length]; }
 function otvoriGaleriju() {
   var lepeza = document.getElementById("galerija-lepeza");
