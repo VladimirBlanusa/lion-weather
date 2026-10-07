@@ -151,17 +151,20 @@
     position: absolute; top: 50%; left: 50%;
     width: 260px; height: 260px; margin: -130px 0 0 -130px;
     border-radius: 50%;
-    background: radial-gradient(closest-side, rgba(255,255,250,.98) 30%, rgba(246,211,110,.72) 62%, rgba(246,211,110,0) 100%);
-    animation: ef-blesak-dupli 3.4s steps(1) infinite;
+    background: radial-gradient(closest-side, rgba(255,255,250,.5) 30%, rgba(246,211,110,.36) 62%, rgba(246,211,110,0) 100%);
+    opacity: 0;
+    animation: ef-blesak-mek 7.5s ease-in-out infinite;
   }
   .ef-magla {
     position: absolute; width: 96px; height: 34px; border-radius: 50%;
     background: rgba(178,190,200,.8); filter: blur(7px);
     animation: ef-pluta 5.5s ease-in-out infinite;
   }
-  @keyframes ef-blesak-dupli {
-    0%, 30%, 36%, 58%, 64%, 100% { opacity: 0; }
-    31%, 34%, 59%, 62% { opacity: 1; }
+  @keyframes ef-blesak-mek {
+    0%, 72%, 100% { opacity: 0; }
+    75% { opacity: .9; }
+    80% { opacity: .3; }
+    87% { opacity: 0; }
   }
   @keyframes ef-pluta {
     0%, 100% { transform: translateX(-4px); opacity: .7; }
@@ -326,12 +329,15 @@
   }
   .sc-blesak {
     position: absolute; inset: 0;
-    background: rgba(255,249,228,.46);
-    animation: sc-blesak 3.2s steps(1) infinite;
+    background: rgba(255,249,228,.2);
+    opacity: 0;
+    animation: sc-blesak-mek 7.5s ease-in-out infinite;
   }
-  @keyframes sc-blesak {
-    0%, 21%, 27%, 50%, 56%, 100% { opacity: 0; }
-    22%, 25%, 51%, 54% { opacity: 1; }
+  @keyframes sc-blesak-mek {
+    0%, 72%, 100% { opacity: 0; }
+    75% { opacity: .9; }
+    80% { opacity: .3; }
+    87% { opacity: 0; }
   }
   .sc-oblak {
     position: absolute; width: 130px; height: 44px; border-radius: 50%;
