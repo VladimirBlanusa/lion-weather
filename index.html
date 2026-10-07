@@ -61,17 +61,19 @@
   }
   #sat {
     font-size: 40px;
-    font-weight: 400;
+    font-weight: 700;
     letter-spacing: 2px;
     color: #d4af37;
-    text-shadow: 0 0 18px rgba(212, 175, 55, .35);
+    text-shadow: 0 2px 6px rgba(0, 0, 0, .65), 0 0 20px rgba(212, 175, 55, .4);
     line-height: 1;
   }
   #datum {
-    font-size: 12px;
+    font-size: 13px;
+    font-weight: 600;
     letter-spacing: 1px;
-    color: rgba(212, 175, 55, .85);
+    color: #d4af37;
     margin-top: 4px;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, .6), 0 0 12px rgba(212, 175, 55, .3);
   }
   .vb-avatar {
     position: fixed;
@@ -179,8 +181,8 @@
   /* ——— Kutijica u uglu: Sunce danju, Mesec noću ——— */
   .ugao-nebo {
     position: absolute; top: 12px; right: 12px;
-    width: 46px; height: 46px;
-    border-radius: 14px;
+    width: 78px; height: 78px;
+    border-radius: 24px;
     background: rgba(255, 255, 255, .045);
     border: 1px solid rgba(255, 255, 255, .08);
     display: flex; align-items: center; justify-content: center;
@@ -189,18 +191,29 @@
   .nebo-telo { display: none; }
   .nebo-sunce {
     display: block;
-    width: 17px; height: 17px; border-radius: 50%;
-    background: radial-gradient(circle at 38% 34%, #ffe9a8, #d4af37 72%);
-    box-shadow: 0 0 12px rgba(255, 222, 130, .55), 0 0 26px rgba(255, 210, 100, .22);
+    position: relative;
+    width: 30px; height: 30px; border-radius: 50%;
+    background: radial-gradient(circle at 38% 34%, #fff3c4, #ffd23e 70%, #ffb200);
+    box-shadow: 0 0 18px rgba(255, 215, 90, .7), 0 0 44px rgba(255, 200, 60, .28);
     animation: ef-disi 6s ease-in-out infinite;
   }
+  .nebo-sunce::before {
+    content: "";
+    position: absolute; inset: -22px;
+    border-radius: 50%;
+    background: repeating-conic-gradient(from 0deg, rgba(255, 205, 70, .5) 0deg 5deg, transparent 5deg 30deg);
+    -webkit-mask: radial-gradient(circle, transparent 54%, #000 56%, #000 94%, transparent 96%);
+    mask: radial-gradient(circle, transparent 54%, #000 56%, #000 94%, transparent 96%);
+    animation: nebo-zraci 30s linear infinite;
+  }
+  @keyframes nebo-zraci { to { transform: rotate(360deg); } }
   .je-noc .nebo-sunce { display: none; }
   .je-noc .nebo-mesec { display: block; }
   .nebo-mesec {
-    width: 20px; height: 20px; border-radius: 50%;
-    box-shadow: inset -6px 2px 0 0 #ffe9a8;
+    width: 32px; height: 32px; border-radius: 50%;
+    box-shadow: inset -10px 3px 0 0 #f4f7ff;
     transform: rotate(-12deg);
-    filter: drop-shadow(0 0 6px rgba(255, 222, 130, .5));
+    filter: drop-shadow(0 0 10px rgba(230, 238, 255, .55));
     animation: ef-disi 6s ease-in-out infinite;
   }
   .temp-row {
@@ -623,10 +636,30 @@ var LAVOVI = {
   oblacno: "https://oss-macaron-ai.macaron.im/image/chat_image/90cae59e-e7c8-444f-bd72-5c12d7d0de8a.webp",
   sneg:    "https://oss-macaron-ai.macaron.im/image/chat_image/4ddff560-c883-4882-8164-19d8fe578adc.webp",
   magla:   "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac601d1a512cea1a59b6fc3.webp",
+  kisaNoc:    "https://oss-macaron-ai.macaron.im/image/chat_image/569f944d-d905-4b06-9e0d-223970bdc4e1.webp",
+  snegNoc:    "https://oss-macaron-ai.macaron.im/image/chat_image/ae2fbb17-7c68-44de-906f-e1be04e2e156.webp",
+  olujaNoc:   "https://oss-macaron-ai.macaron.im/image/chat_image/49e12163-4f2f-49fb-987a-12f8abe07bd5.webp",
+  oblacnoNoc: "https://oss-macaron-ai.macaron.im/image/chat_image/7abf8a8f-4675-4673-b65b-772a9166a85b.webp",
+  maglaNoc:   "https://oss-macaron-ai.macaron.im/image/chat_image/3121adae-92ba-48cc-b5f3-aba7e20c0248.webp",
   noc:     "https://oss-macaron-ai.macaron.im/image/chat_image/ae9e074d-8494-4a38-b275-4eca14cb76a6.webp",
   nocPun:  "https://oss-macaron-ai.macaron.im/image/chat_image/fd798ca0-0565-430b-a119-191c7de41f33.webp",
   jutro:   "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac5dd8fa512cea1a59b3ed3.webp",
-  sumrak:  "https://oss-macaron-user.macaron.im/photo/cd4f94e2-d5ca-4d93-80d2-d68f3738c282.jpeg"
+  sumrak:  "https://oss-macaron-user.macaron.im/photo/cd4f94e2-d5ca-4d93-80d2-d68f3738c282.jpeg",
+  kisaNoc:    "https://oss-macaron-ai.macaron.im/image/chat_image/c53afbf7-3352-4331-b9a7-247d0519d736.webp",
+  snegNoc:    "https://oss-macaron-ai.macaron.im/image/chat_image/af36507a-a112-445c-a09e-6b6514bc4df2.webp",
+  olujaNoc:   "https://oss-macaron-ai.macaron.im/image/chat_image/49e12163-4f2f-49fb-987a-12f8abe07bd5.webp",
+  oblacnoNoc: "https://oss-macaron-ai.macaron.im/image/chat_image/1bfd613b-d7d7-4ab9-a75f-6ffdaaee8b1e.webp",
+  maglaNoc:   "https://oss-macaron-ai.macaron.im/image/chat_image/3121adae-92ba-48cc-b5f3-aba7e20c0248.webp",
+  kisaJutro:    "https://oss-macaron-ai.macaron.im/image/chat_image/5ed031c8-6517-4382-9b2c-6e5975a4b3b0.webp",
+  snegJutro:    "https://oss-macaron-ai.macaron.im/image/chat_image/7d94e245-06da-40b5-9722-90d8b466a2c0.webp",
+  olujaJutro:   "https://oss-macaron-ai.macaron.im/image/chat_image/4f3fe302-8ea9-44ca-8c57-603f2d2d4b1d.webp",
+  oblacnoJutro: "https://oss-macaron-ai.macaron.im/image/chat_image/6b2a0b71-a6ba-4327-8eaa-d4222f305a73.webp",
+  maglaJutro:   "https://oss-macaron-ai.macaron.im/image/chat_image/4edbd822-67f7-4583-aa2f-5d4098ebe4c7.webp",
+  kisaSumrak:    "https://oss-macaron-ai.macaron.im/image/chat_image/b468fb0d-63ae-43c9-8254-2b96a7927071.webp",
+  snegSumrak:    "https://oss-macaron-ai.macaron.im/image/chat_image/6185e113-0246-468b-9ea7-0d4de70ccb7f.webp",
+  olujaSumrak:   "https://oss-macaron-ai.macaron.im/image/chat_image/c19d7e1d-112a-4691-90cb-8a813f402207.webp",
+  oblacnoSumrak: "https://oss-macaron-ai.macaron.im/image/chat_image/86d4a317-3d6f-4656-83ba-778eecc914bd.webp",
+  maglaSumrak:   "https://oss-macaron-ai.macaron.im/image/chat_image/e726fb79-fbc7-4c7a-8c81-f45ab04531e0.webp"
 };
 var WCODE = {
   0:  ["Vedro",                 "sunce",  "Vreme je za sunčanje 😎", "☀️"],
@@ -805,19 +838,19 @@ function podesiMesec() {
   var f = mesecFaza();
   if (f < 0.03 || f > 0.97) {                          // nov mesec — jedva vidljiv obruč
     el.style.background = "transparent";
-    el.style.boxShadow = "inset 0 0 0 1px rgba(255, 233, 168, .28)";
+    el.style.boxShadow = "inset 0 0 0 2px rgba(240, 246, 255, .35)";
     return;
   }
   var k = (1 - Math.cos(2 * Math.PI * f)) / 2;         // osvetljeni deo, 0..1
-  if (k > 0.93) {                                      // pun mesec — zlatni disk
-    el.style.background = "radial-gradient(circle at 38% 34%, #ffe9a8, #d4af37 72%)";
-    el.style.boxShadow = "0 0 10px rgba(255, 222, 130, .5)";
+  if (k > 0.93) {                                      // pun mesec — beli disk
+    el.style.background = "radial-gradient(circle at 38% 34%, #ffffff, #dfe6f4 72%)";
+    el.style.boxShadow = "0 0 14px rgba(235, 242, 255, .55)";
     return;
   }
   var smer = (f < 0.5) ? 1 : -1;                       // rastući → svetlo desno, opadajući → levo
-  var d = 20;                                          // prečnik diska u kutijici
+  var d = 32;                                          // prečnik diska u kutijici
   el.style.background = "transparent";
-  el.style.boxShadow = "inset " + (smer * (k * d * 0.9 + 0.8)).toFixed(1) + "px 0 0 0 #ffe9a8";
+  el.style.boxShadow = "inset " + (smer * (k * d * 0.9 + 0.8)).toFixed(1) + "px 0 0 0 #f4f7ff";
 }
 
 // Scena u kvadratu oko lava — cela pozornica se menja sa vremenom
@@ -1038,6 +1071,10 @@ function obradi(tekst) {
     document.getElementById("mood").textContent = "Sumrak lije zlato preko brkova 🌇";
     postaviLava("sumrak");
   }
+  // Doba dana: svaki vremenski lav ima svog noćnog, zoru i sumrak
+  if (jeNoc(tekst) && LAVOVI[moodKlasa + "Noc"]) postaviLava(moodKlasa + "Noc");
+  if (jeJutro(tekst) && LAVOVI[moodKlasa + "Jutro"]) postaviLava(moodKlasa + "Jutro");
+  if (jeSumrak(tekst) && LAVOVI[moodKlasa + "Sumrak"]) postaviLava(moodKlasa + "Sumrak");
   postaviEfekte(moodKlasa);
   postaviScenu(moodKlasa);
   var stare = document.body.className.match(/mood-\S+/g) || [];
@@ -1060,6 +1097,9 @@ function obradi(tekst) {
   var lavVrsta = moodKlasa === "noc" ? (jePunMesec() ? "nocPun" : "noc") : info[1];
   if (jeJutroS) lavVrsta = "jutro";
   if (jeSumrakS) lavVrsta = "sumrak";
+  if (jeNoc(tekst) && LAVOVI[moodKlasa + "Noc"]) lavVrsta = moodKlasa + "Noc";
+  if (jeJutro(tekst) && LAVOVI[moodKlasa + "Jutro"]) lavVrsta = moodKlasa + "Jutro";
+  if (jeSumrak(tekst) && LAVOVI[moodKlasa + "Sumrak"]) lavVrsta = moodKlasa + "Sumrak";
   document.getElementById("lav-top").src = LAVOVI[lavVrsta];
   document.getElementById("msg").style.display = "none";
 
