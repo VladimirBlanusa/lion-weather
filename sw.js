@@ -1,7 +1,7 @@
 // ——— Service worker: prvi pogled i bez neta ———
 // Keš "lav-vreme-v1" nosi okvir appa; slike i ostalo se keširaju kako se koriste.
 // API pozivi (open-meteo) se ne diraju — kad nema mreze, podatke drzi localStorage kes u index.html.
-var KES = "lav-vreme-v20"; // v3.68: Grupa 5 + radar gore-levo + Grupa 6 (offline bedž + retry) + Grupa 7 (minutna kiša — bar chart 15-min + rezime "Suvo"/"Kiša pada sad"/"Kiša za X min")
+var KES = "lav-vreme-v21"; // v3.69: Grupa 8 fix (imeMeseca konzistentno sa podesiMesec) + Grupa 10 (kvalitet vazduha — EU AQI indeks + polutanti stubići)
 var OKVIR = ["index.html", "manifest.json", "apple-touch-icon.png", "og-lav.jpg"];
 
 self.addEventListener("install", function(e) {
