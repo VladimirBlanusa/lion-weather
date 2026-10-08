@@ -873,6 +873,38 @@
     margin-top: 10px;
     display: none;
   }
+  /* ——— v3.67 Grupa 6: Offline bedž + Retry dugme ——— */
+  .offline-bedz {
+    display: none;
+    margin-top: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .3px;
+    color: #0c131e;
+    background: var(--gold-light);
+    padding: 2px 8px;
+    border-radius: 8px;
+    white-space: nowrap;
+    width: fit-content;
+    box-shadow: 0 2px 8px rgba(0,0,0,.3);
+  }
+  .offline-bedz.prikazi { display: block; }
+  .retry-btn {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--gold-light);
+    background: rgba(212, 175, 55, .14);
+    border: 1px solid rgba(212, 175, 55, .45);
+    border-radius: 8px;
+    cursor: pointer;
+    vertical-align: middle;
+    transition: background .2s ease, transform .15s ease;
+  }
+  .retry-btn:hover { background: rgba(212, 175, 55, .26); }
+  .retry-btn:active { transform: scale(.96); }
   .loading { color: var(--gold-light); font-size: 14px; margin-top: 10px; }
   /* ——— v3.66: Loader — indeterminate zlatna traka umesto "Lav se budi…" teksta ——— */
   #loader {
@@ -926,6 +958,7 @@
     <div>
       <div id="sat">--:--</div>
       <div id="datum">-/-/-</div>
+      <div id="offline-bedz" class="offline-bedz">Bez mreže · keš</div>
     </div>
     <div class="top-desno">
       <img id="lav-top" class="lav-top" src="https://oss-macaron-ai.macaron.im/image/text_to_image/6ac3d08be1c9684dbf1fdfbf.webp" alt="Vremenski lav">
@@ -1892,9 +1925,11 @@ function uporediModel(model, prefix) {
 function greska(poruka) {
   var el = document.getElementById("err");
   el.style.display = "block";
-  el.textContent = "Greška: " + poruka + " — osveži stranicu.";
+  el.innerHTML = "Greška: " + poruka + ". <button type='button' class='retry-btn' id='retry-btn'>Pokušaj ponovo</button>";
   document.getElementById("msg").style.display = "none";
   document.getElementById("loader").style.display = "none";
+  var rb = document.getElementById("retry-btn");
+  if (rb) rb.onclick = ucitajPrognozu;
 }
 
 // Registracija service workera — omogućava "Instaliraj aplikaciju"
@@ -1915,7 +1950,10 @@ function prikaziKes(razlog) {
     var d = new Date(kes.vreme), h = d.getHours(), m = d.getMinutes();
     var el = document.getElementById("msg");
     el.style.display = "block";
-    el.textContent = "Lav pamti prognozu · osveženo u " + (h<10?"0":"") + h + ":" + (m<10?"0":"") + m;
+    el.innerHTML = "Lav pamti prognozu · osveženo u " + (h<10?"0":"") + h + ":" + (m<10?"0":"") + m + " <button type='button' class='retry-btn' id='retry-btn'>Pokušaj ponovo</button>";
+    document.getElementById("offline-bedz").classList.add("prikazi");
+    var rb = document.getElementById("retry-btn");
+    if (rb) rb.onclick = ucitajPrognozu;
   } else {
     greska(razlog);
   }
@@ -1925,6 +1963,7 @@ function prikaziKes(razlog) {
 function ucitajPrognozu() {
   document.getElementById("err").style.display = "none";
   document.getElementById("msg").style.display = "block";
+  document.getElementById("offline-bedz").classList.remove("prikazi");
   document.getElementById("msg").textContent = "Učitavam prognozu…";
   document.getElementById("loader").style.display = "block";
 
