@@ -936,7 +936,7 @@
 
   <img class="vb-avatar" src="https://oss-macaron-ai.macaron.im/image/chat_image/6f900e9a-de6f-46ff-af62-7c7818206580.webp" alt="VB — Vladimir Blanuša">
 
-  <div class="foot">Lion Weather · <span id="grad-foot">Stara Pazova</span> · Open-Meteo</div>
+  <div class="foot">Lion Weather · Open-Meteo</div>
   <div class="foot foot-crveni">
     <div class="foot-glava">IZVORI</div>
     <span>Vremenski modeli: ECMWF · GFS · ICON</span>
@@ -958,7 +958,6 @@ try {
 
 function postaviGradUI(ime) {
   document.getElementById("grad").textContent = ime;
-  document.getElementById("grad-foot").textContent = ime;
   document.title = "Lion Weather";
 }
 postaviGradUI(LOK.ime);
@@ -1188,8 +1187,9 @@ function postaviEfekte(vrsta) {
 
 // ——— Probni režim: ?faza=jutro|sumrak|noc forsira doba dana, ?efekt= vreme ———
 var PROBA = new URLSearchParams(window.location.search);
-var PROBA_FAZA = (PROBA.get("faza") || "").toLowerCase();
-var PROBA_EFEKT = (PROBA.get("efekt") || "").toLowerCase();
+var PROBA_UKLJUCEN = PROBA.get("proba") === "1"; // zaštitni param — bez ?proba=1 faza/efekt se ignorisu u produkciji
+var PROBA_FAZA = PROBA_UKLJUCEN ? (PROBA.get("faza") || "").toLowerCase() : "";
+var PROBA_EFEKT = PROBA_UKLJUCEN ? (PROBA.get("efekt") || "").toLowerCase() : "";
 
 // Da li je noć (posle zalaska / pre izlaska sunca)
 function jeNoc(tekst) {
