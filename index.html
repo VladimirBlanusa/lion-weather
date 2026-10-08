@@ -1020,6 +1020,7 @@
       <span class="meta-prelom"></span>
       <span> izlazak: <b id="izlazak">–</b></span>
       <span> zalazak: <b id="zalazak">–</b></span>
+      <span> mesec: <svg class="moon" width="18" height="18" viewBox="-50 -50 100 100" style="vertical-align:-3px" aria-hidden="true"><circle cx="0" cy="0" r="44" fill="#2a2a3e" stroke="#3a3a5e" stroke-width="2"/><path id="moon-lit" d="" fill="#f5ecd0"/></svg> <b id="mesec">–</b></span>
     </div>
     <div class="meta meta-detalji">
       <span> osećaj: <b id="osecaj">–</b>°</span>
@@ -1373,6 +1374,28 @@ function jeSumrak(tekst) {
   if (!tekst.daily || !tekst.daily.sunset) return false;
   var t = minuDana(tekst.current.time), z = minuDana(tekst.daily.sunset[0]);
   return (t >= z - 120) && (t < z);
+}
+
+// Faza meseca: sinodicki ciklus 29.53059 dana, ref. mladi mesec 2000-01-06 18:14 UTC
+function fazaMeseca(datum) {
+  var ref = Date.UTC(2000, 0, 6, 18, 14), ciklus = 29.530588853;
+  var dani = (new Date(datum).getTime() - ref) / 86400000;
+  var p = (dani % ciklus) / ciklus;
+  if (p < 0) p += 1;
+  return p;
+}
+function imeMeseca(p) {
+  var IMENA = ["Mlad mesec","Mladi srp","Prva četvrt","Rastući ogrbljeni","Pun mesec","Opadajući ogrbljeni","Poslednja četvrt","Stari srp"];
+  return IMENA[Math.round(p * 8) % 8];
+}
+function moonPath(R, p) {
+  var ugao = 2 * Math.PI * p, cosU = Math.cos(ugao);
+  var rx = Math.max(0.01, R * Math.abs(cosU));
+  var waxing = p < 0.5, crescent = cosU > 0;
+  var outerSweep = waxing ? 1 : 0;
+  var termSweep = waxing ? (crescent ? 1 : 0) : (crescent ? 0 : 1);
+  return "M 0," + (-R) + " A " + R + "," + R + " 0 0 " + outerSweep + " 0," + R +
+         " A " + rx + "," + R + " 0 0 " + termSweep + " 0," + (-R) + " Z";
 }
 
 // Faza za dati sat kartice: jutro/sumrak/noc po izlasku i zalasku — sat traka pravi priču kao glavna scena
@@ -1997,6 +2020,12 @@ function obradi(tekst) {
     document.getElementById("izlazak").textContent = e.sunrise[0].slice(11, 16);
     document.getElementById("zalazak").textContent = e.sunset[0].slice(11, 16);
   }
+  // Faza meseca -- crtanje osvetljenog dela + ime
+  var mp = fazaMeseca(tekst.current ? tekst.current.time : new Date().toISOString());
+  var moonLit = document.getElementById("moon-lit");
+  if (moonLit) moonLit.setAttribute("d", moonPath(44, mp));
+  var mesecEl = document.getElementById("mesec");
+  if (mesecEl) mesecEl.textContent = imeMeseca(mp);
   postaviTraku();
   renderDana(tekst.daily);
   // ?mkisa= test param — ubaci fake kišu u minutni panel (samo sa ?proba=1)
