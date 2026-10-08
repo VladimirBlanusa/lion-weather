@@ -1812,7 +1812,7 @@ document.getElementById("lok-unos").addEventListener("keydown", function(e){
 });
 
 // v3.55: tap na mesec otvara krupan prikaz sa kraterima
-(function(){
+window.addEventListener("DOMContentLoaded", function(){
   var mz = document.getElementById("mesec-zum");
   var ms = document.getElementById("mesec-zum-sadrzaj");
   var zatvori = document.getElementById("mesec-zatvori");
@@ -1829,7 +1829,7 @@ document.getElementById("lok-unos").addEventListener("keydown", function(e){
   if (ugaoEl) ugaoEl.addEventListener("click", otvori);
   zatvori.addEventListener("click", zatvoriZum);
   mz.addEventListener("click", function(e){ if (e.target === mz) zatvoriZum(); });
-})();
+});
 </script>
 <div class="mesec-zum" id="mesec-zum" role="dialog" aria-label="Krupan prikaz Meseca">
   <span class="mesec-zatvori" id="mesec-zatvori">&times;</span>
