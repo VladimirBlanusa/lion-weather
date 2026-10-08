@@ -287,7 +287,7 @@
     background: radial-gradient(circle at 50% 42%, rgba(240, 228, 200, .15), rgba(186, 200, 240, .06) 70%, rgba(255, 255, 255, .04));
   }
   .nebo-mesec {
-    width: 32px; height: 32px; border-radius: 50%;
+    width: 44px; height: 44px; border-radius: 50%;
     transform: rotate(-5deg);
     animation: ef-disi 6s ease-in-out infinite;
   }
@@ -1137,26 +1137,46 @@ function jePunMesec() {
   return Math.abs(f - 0.5) < 0.05;
 }
 
-// Kutijica u uglu: srp prati pravi Mesec na nebu
+// Kutijica u uglu: tekstura punog Meseca + tamni deo prati pravu fazu
 function podesiMesec() {
   var el = document.querySelector(".nebo-mesec");
   if (!el) return;
   var f = mesecFaza();
-  var mt = parseFloat(new URLSearchParams(location.search).get("mfaza"));  // probni rezim: ?mfaza=0..1
+  var mt = parseFloat(new URLSearchParams(location.search).get("mfaza"));
   if (!isNaN(mt) && mt >= 0 && mt <= 1) f = mt;
-  var k = Math.round(f * 8) % 8;                       // osam pravih mena — tacni terminatori
-  var DEFS = '<defs><radialGradient id="mg" cx="38%" cy="34%" r="80%"><stop offset="0" stop-color="#fdf8ea"/><stop offset="1" stop-color="#eee1c2"/></radialGradient></defs>';
-  var MENE = [
-    '<circle cx="20" cy="20" r="15" fill="none" stroke="rgba(247,239,218,.45)" stroke-width="1.6"/>',
-    '<path d="M20,5 A15,15 0 0 1 20,35 A10.6,15 0 0 0 20,5 Z" fill="#fbf4e2"/>',
-    '<path d="M20,5 A15,15 0 0 1 20,35 Z" fill="#fbf4e2"/>',
-    '<path d="M20,5 A15,15 0 0 1 20,35 A10.6,15 0 1 0 20,5 Z" fill="#fbf4e2"/>',
-    DEFS + '<circle cx="20" cy="20" r="15" fill="url(#mg)"/>',
-    '<path d="M20,5 A15,15 0 0 0 20,35 A10.6,15 0 1 1 20,5 Z" fill="#fbf4e2"/>',
-    '<path d="M20,5 A15,15 0 0 0 20,35 Z" fill="#fbf4e2"/>',
-    '<path d="M20,5 A15,15 0 0 0 20,35 A10.6,15 0 0 1 20,5 Z" fill="#fbf4e2"/>'
-  ];
-  el.innerHTML = '<svg viewBox="0 0 40 40">' + MENE[k] + '</svg>';
+  var IMENA_FAZA = ["Nov mesec","Mladi srp","Prva cetvrt","Rastuci srp","Pun mesec","Opadajuci srp","Zadnja cetvrt","Stari srp"];
+  var idxFaze = Math.round(f * 8) % 8;
+  el.setAttribute("data-faza", IMENA_FAZA[idxFaze]);
+  el.title = IMENA_FAZA[idxFaze];
+  var TXT = "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac7b2a7b13ed015324caf02.webp";
+  var R = 17, cx = 20, cy = 20;
+  var rx = Math.cos(2 * Math.PI * f) * R;
+  var tamniPut = "";
+  if (Math.abs(f - 0.5) < 0.02) {
+    // pun mesec - nema tamnog dela
+  } else if (Math.abs(rx) > R - 0.4) {
+    // nov mesec - sve tamno
+    tamniPut = '<circle cx="' + cx + '" cy="' + cy + '" r="' + R + '" fill="rgba(10,15,26,.9)"/>';
+  } else {
+    var vosak = f < 0.5;
+    var mali = f < 0.25 || f > 0.75;
+    var p = "M " + cx + "," + (cy - R);
+    if (vosak) {
+      p += " A " + R + "," + R + " 0 0 0 " + cx + "," + (cy + R);
+      p += " A " + Math.abs(rx).toFixed(1) + "," + R + " 0 0 " + (mali ? 1 : 0) + " " + cx + "," + (cy - R);
+    } else {
+      p += " A " + R + "," + R + " 0 0 1 " + cx + "," + (cy + R);
+      p += " A " + Math.abs(rx).toFixed(1) + "," + R + " 0 0 " + (mali ? 0 : 1) + " " + cx + "," + (cy - R);
+    }
+    p += " Z";
+    tamniPut = '<path d="' + p + '" fill="rgba(10,15,26,.9)"/>';
+  }
+  el.innerHTML = '<svg viewBox="0 0 40 40">' +
+    '<defs><clipPath id="mesec-clip"><circle cx="' + cx + '" cy="' + cy + '" r="' + R + '"/></clipPath></defs>' +
+    '<image href="' + TXT + '" x="' + (cx - R) + '" y="' + (cy - R) + '" width="' + (2 * R) + '" height="' + (2 * R) + '" preserveAspectRatio="xMidYMid slice" clip-path="url(#mesec-clip)"/>' +
+    tamniPut +
+    '<circle cx="' + cx + '" cy="' + cy + '" r="' + R + '" fill="none" stroke="rgba(247,239,218,.45)" stroke-width="1.4"/>' +
+    '</svg>';
 }
 
 // Scena u kvadratu oko lava — cela pozornica se menja sa vremenom
