@@ -730,6 +730,38 @@
     filter: brightness(1.18);
   }
   .sat-item b { color: var(--text); font-size: 14px; }
+  /* ——— v3.68 Grupa 7: Minutna kiša — bar chart + pametni rezime ——— */
+  .kisa-minutno-panel { }
+  .kisa-rezime {
+    font-size: 13px;
+    color: rgba(245, 241, 230, .82);
+    margin-top: 6px;
+    line-height: 1.4;
+  }
+  .kisa-minutno-traka {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    height: 52px;
+    margin-top: 10px;
+  }
+  .kisa-bar {
+    flex: 1;
+    min-width: 0;
+    background: linear-gradient(180deg, rgba(120, 185, 240, .9), rgba(60, 130, 205, .55));
+    border-radius: 3px 3px 0 0;
+    min-height: 3px;
+    transition: height .35s ease;
+  }
+  .kisa-bar.nula { background: rgba(255, 255, 255, .07); min-height: 2px; }
+  .kisa-minutno-vremena {
+    display: flex;
+    gap: 4px;
+    margin-top: 4px;
+    font-size: 10px;
+    color: rgba(245, 241, 230, .5);
+  }
+  .kisa-minutno-vreme { flex: 1; text-align: center; }
   .dan-red {
     display: flex;
     align-items: center;
@@ -1007,6 +1039,13 @@
   <div class="panel sati">
     <h3 id="sati-naslov">Po satima</h3>
     <div id="sati-traka" class="sati-traka"></div>
+  </div>
+
+  <div class="panel kisa-minutno" id="kisa-minutno-panel">
+    <h3>Sledeća 2 sata — kiša</h3>
+    <div id="kisa-minutno-rezime" class="kisa-rezime"></div>
+    <div id="kisa-minutno-traka" class="kisa-minutno-traka"></div>
+    <div id="kisa-minutno-vremena" class="kisa-minutno-vremena"></div>
   </div>
 
   <div class="panel dani">
@@ -1796,6 +1835,50 @@ function proveriKisu(tekst) {
   }
 }
 
+// ——— v3.68 Grupa 7: Minutna kiša — 15-minutni bar chart + pametni rezime ———
+function renderKisaMinutno(m) {
+  var panel = document.getElementById("kisa-minutno-panel");
+  if (!m || !m.time || !m.precipitation) { panel.style.display = "none"; return; }
+  panel.style.display = "";
+  var p = m.precipitation, times = m.time;
+  var maxP = 0;
+  for (var i = 0; i < p.length; i++) if (p[i] > maxP) maxP = p[i];
+  var maxScale = Math.max(maxP, 0.5);
+  var rezime = document.getElementById("kisa-minutno-rezime");
+  if (maxP < 0.05) {
+    rezime.textContent = "Suvo naredna 2 sata \u2600\uFE0F";
+    rezime.style.color = "rgba(245, 241, 230, .82)";
+  } else {
+    var prvi = -1, poslednji = -1;
+    for (var a = 0; a < p.length; a++) { if (p[a] >= 0.05) { prvi = a; break; } }
+    for (var b = p.length - 1; b >= 0; b--) { if (p[b] >= 0.05) { poslednji = b; break; } }
+    var pocetakMin = prvi * 15;
+    var kraj = new Date(times[poslednji]);
+    var krajH = kraj.getHours(), krajM = kraj.getMinutes();
+    var intenzitet = maxP < 0.5 ? "slaba" : (maxP < 2 ? "umerena" : "jaka");
+    var pocetak = prvi === 0 ? "Ki\u0161a pada sad" : "Ki\u0161a za " + pocetakMin + " min";
+    rezime.innerHTML = pocetak + " \u00b7 " + intenzitet + " \u00b7 do " + (krajH<10?"0":"") + krajH + ":" + (krajM<10?"0":"") + krajM;
+    rezime.style.color = "rgba(165, 195, 235, .95)";
+  }
+  var traka = document.getElementById("kisa-minutno-traka");
+  traka.innerHTML = "";
+  for (var k = 0; k < p.length; k++) {
+    var bar = document.createElement("div");
+    bar.className = "kisa-bar" + (p[k] < 0.05 ? " nula" : "");
+    bar.style.height = Math.max((p[k] / maxScale) * 100, 3) + "%";
+    bar.title = times[k].slice(11, 16) + " \u00b7 " + p[k].toFixed(2) + " mm";
+    traka.appendChild(bar);
+  }
+  var vremena = document.getElementById("kisa-minutno-vremena");
+  vremena.innerHTML = "";
+  for (var v = 0; v < p.length; v++) {
+    var span = document.createElement("span");
+    span.className = "kisa-minutno-vreme";
+    span.textContent = (v % 4 === 0 || v === p.length - 1) ? times[v].slice(11, 16) : "";
+    vremena.appendChild(span);
+  }
+}
+
 function obradi(tekst) {
   POSLEDNJI_TEKST = tekst;
   var t = Math.round(tekst.current.temperature_2m);
@@ -1909,6 +1992,7 @@ function obradi(tekst) {
   }
   postaviTraku();
   renderDana(tekst.daily);
+  renderKisaMinutno(tekst.minutely_15);
 }
 
 function uporediModel(model, prefix) {
@@ -1971,6 +2055,7 @@ function ucitajPrognozu() {
     "https://api.open-meteo.com/v1/forecast?latitude=" + LOK.lat + "&longitude=" + LOK.lon +
     "&current=temperature_2m,weather_code,wind_speed_10m,precipitation,apparent_temperature,relative_humidity_2m,surface_pressure,uv_index,wind_direction_10m" +
     "&hourly=temperature_2m,weather_code,precipitation_probability" +
+    "&minutely_15=precipitation&forecast_minutely_15=8" +
     "&daily=temperature_2m_max,temperature_2m_min,weather_code,sunrise,sunset,precipitation_probability_max,wind_speed_10m_max" +
     "&forecast_days=7&timezone=auto"
   )
