@@ -696,6 +696,9 @@
     overflow-x: auto;
     padding-bottom: 4px;
     scrollbar-width: none;
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: 4px;
+    -webkit-overflow-scrolling: touch;
   }
   .sati-traka::-webkit-scrollbar { display: none; }
   /* Na računaru: vitka zlatna traka za listanje sati (telefon ostaje bez nje) */
@@ -714,6 +717,9 @@
     gap: 4px;
     font-size: 12px;
     color: rgba(245, 241, 230, .82);
+    scroll-snap-align: start;
+    padding: 4px 2px;
+    border-radius: 12px;
   }
   .sat-item img {
     width: 40px;
@@ -868,6 +874,51 @@
     display: none;
   }
   .loading { color: var(--gold-light); font-size: 14px; margin-top: 10px; }
+  /* ——— v3.66: Loader — indeterminate zlatna traka umesto "Lav se budi…" teksta ——— */
+  #loader {
+    margin: 12px auto 0;
+    width: 140px;
+    height: 3px;
+    background: rgba(212, 175, 55, .14);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+  }
+  #loader::after {
+    content: "";
+    position: absolute;
+    top: 0; left: -35%;
+    width: 35%; height: 100%;
+    background: linear-gradient(90deg, transparent, var(--gold-light) 50%, transparent);
+    border-radius: 2px;
+    animation: loader-klizaj 1.4s ease-in-out infinite;
+  }
+  @keyframes loader-klizaj { 0% { left: -35%; } 100% { left: 100%; } }
+  @media (prefers-reduced-motion: reduce) { #loader::after { animation: none; } }
+  /* ——— v3.66: "Sada" marker na satnoj traci — zlatni pečat na trenutnom satu ——— */
+  .sat-sada {
+    position: relative;
+    border-radius: 12px;
+    background: rgba(212, 175, 55, .14);
+    box-shadow: inset 0 0 0 1px rgba(212, 175, 55, .38);
+  }
+  .sat-sada img { border-color: rgba(212, 175, 55, .5); }
+  .sat-sada-oznaka {
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .5px;
+    color: #0c131e;
+    background: var(--gold-light);
+    padding: 1px 5px;
+    border-radius: 6px;
+    white-space: nowrap;
+    z-index: 2;
+    text-transform: uppercase;
+  }
 </style>
 </head>
 <body class="mood-oblacno">
@@ -893,7 +944,8 @@
       <span class="temp-unit">°C</span>
     </div>
     <div id="desc">Provera vremena…</div>
-    <div id="mood">Lav se budi…</div>
+    <div id="mood"></div>
+    <div id="loader" aria-hidden="true"></div>
     <div id="kisa-paznja"></div>
     <div class="meta">
       <span id="grad">Stara Pazova</span>
@@ -1596,14 +1648,19 @@ function pokreniGrmljavinu() {
   setTimeout(function() { grmCiklus(gen); }, 700 + Math.random() * 1800);
 }
 
-// Traka po satima — 24 sata od trenutnog sata
-function renderSate(h, trenutno, sunrise0, sunset0) {
+// Traka po satima — 24 sata od trenutnog sata; sadaSat označava "Sada" pečat
+function renderSate(h, trenutno, sunrise0, sunset0, sadaSat) {
   var traka = document.getElementById("sati-traka");
   traka.innerHTML = "";
   if (!h || !h.time) return;
   var idx = h.time.indexOf(trenutno.slice(0, 13) + ":00");
   if (idx < 0) idx = 0;
   var kraj = Math.min(idx + 24, h.time.length);
+  var sadaIdx = -1;
+  if (sadaSat) {
+    sadaIdx = h.time.indexOf(sadaSat.slice(0, 13) + ":00");
+    if (sadaIdx < 0) sadaIdx = -1;
+  }
   for (var i = idx; i < kraj; i++) {
     var info = WCODE[h.weather_code[i]] || ["", "oblacno", ""];
     // Vlad: sat kartice prate fazu dana — lav i oblak menjaju svetlost kao glavna scena
@@ -1611,9 +1668,11 @@ function renderSate(h, trenutno, sunrise0, sunset0) {
     var lavKey = info[1];
     if (f === "Jutro" || f === "Sumrak") { if (LAVOVI[info[1] + f]) lavKey = info[1] + f; }
     else if (f === "Noc") { lavKey = LAVOVI[info[1] + "Noc"] ? info[1] + "Noc" : "noc"; }
+    var jeSada = (i === sadaIdx);
     var d = document.createElement("div");
-    d.className = "sat-item" + (f ? " faza-" + f.toLowerCase() : "");
-    d.innerHTML = "<span>" + h.time[i].slice(11, 13) + "h</span>" +
+    d.className = "sat-item" + (f ? " faza-" + f.toLowerCase() : "") + (jeSada ? " sat-sada" : "");
+    d.innerHTML = (jeSada ? "<span class=\"sat-sada-oznaka\">Sada</span>" : "") +
+                  "<span>" + h.time[i].slice(11, 13) + "h</span>" +
                   "<img src=\"" + LAVOVI[lavKey] + "\" alt=\"\">" +
                   "<span class=\"sat-emoji\">" + (IKONE[info[3]] || info[3] || "") + "</span>" +
                   "<b>" + Math.round(h.temperature_2m[i]) + "°</b>" +
@@ -1800,6 +1859,7 @@ function obradi(tekst) {
   if (jeSumrak(tekst) && LAVOVI[moodKlasa + "Sumrak"]) lavVrsta = moodKlasa + "Sumrak";
   document.getElementById("lav-top").src = GAL_URL(lavDana());
   document.getElementById("msg").style.display = "none";
+  document.getElementById("loader").style.display = "none";
 
   var e = tekst.daily ? tekst.daily : null;
   if (e) {
@@ -1834,6 +1894,7 @@ function greska(poruka) {
   el.style.display = "block";
   el.textContent = "Greška: " + poruka + " — osveži stranicu.";
   document.getElementById("msg").style.display = "none";
+  document.getElementById("loader").style.display = "none";
 }
 
 // Registracija service workera — omogućava "Instaliraj aplikaciju"
@@ -1865,6 +1926,7 @@ function ucitajPrognozu() {
   document.getElementById("err").style.display = "none";
   document.getElementById("msg").style.display = "block";
   document.getElementById("msg").textContent = "Učitavam prognozu…";
+  document.getElementById("loader").style.display = "block";
 
   fetch(
     "https://api.open-meteo.com/v1/forecast?latitude=" + LOK.lat + "&longitude=" + LOK.lon +
