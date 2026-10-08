@@ -1781,6 +1781,7 @@ document.getElementById("lok-unos").addEventListener("keydown", function(e){
   function otvori(){
     var el = document.querySelector(".nebo-mesec");
     var svg = el ? el.innerHTML : "";
+    svg = svg.replace(/mesec-clip/g, "mesec-clip-zum"); // v3.56: unikatni id za zum da ne konfliktuje sa malim
     var faza = el ? (el.getAttribute("data-faza") || "Mesec") : "Mesec";
     var f = mesecFaza();
     var provera = Math.round(f * 100);
