@@ -2003,20 +2003,25 @@ function obradi(tekst) {
   var mkData = tekst.minutely_15;
   if (PROBA_MKISA) {
     alert("DEBUG mkisa=" + PROBA_MKISA + " | minutely_15=" + (tekst.minutely_15 ? "ima" : "nema"));
-    var bt = (tekst.minutely_15 && tekst.minutely_15.time) ? tekst.minutely_15.time.slice() : [];
-    if (bt.length === 0) {
-      var sd = new Date();
-      for (var mi = 0; mi < 8; mi++) { bt.push(new Date(sd.getTime() + mi * 15 * 60000).toISOString().slice(0, 16)); }
+    try {
+      var bt = (tekst.minutely_15 && tekst.minutely_15.time) ? tekst.minutely_15.time.slice() : [];
+      if (bt.length === 0) {
+        var sd = new Date();
+        for (var mi = 0; mi < 8; mi++) { bt.push(new Date(sd.getTime() + mi * 15 * 60000).toISOString().slice(0, 16)); }
+      }
+      var fake = {
+        kisa:  [0, 0, 0.2, 0.6, 1.1, 0.8, 0.3, 0.1],
+        jaka:  [0, 0, 1.5, 2.8, 3.2, 2.1, 0.5, 0],
+        pada:  [0.4, 0.8, 1.2, 0.9, 0.5, 0.2, 0, 0],
+        suvo:  [0, 0, 0, 0, 0, 0, 0, 0]
+      };
+      alert("DEBUG3 PM=[" + PROBA_MKISA + "] len=" + PROBA_MKISA.length + " | fake[PM]=" + JSON.stringify(fake[PROBA_MKISA]) + " | keys=" + Object.keys(fake).join(","));
+      if (fake[PROBA_MKISA]) mkData = { time: bt, precipitation: fake[PROBA_MKISA] };
+      alert("DEBUG2: mkData.precipitation=" + JSON.stringify(mkData && mkData.precipitation));
+    } catch(err) {
+      alert("CATCH GREŠKA: " + err.message);
     }
-    var fake = {
-      kisa:  [0, 0, 0.2, 0.6, 1.1, 0.8, 0.3, 0.1],
-      jaka:  [0, 0, 1.5, 2.8, 3.2, 2.1, 0.5, 0],
-      pada:  [0.4, 0.8, 1.2, 0.9, 0.5, 0.2, 0, 0],
-      suvo:  [0, 0, 0, 0, 0, 0, 0, 0]
-    };
-    if (fake[PROBA_MKISA]) mkData = { time: bt, precipitation: fake[PROBA_MKISA] };
   }
-  alert("DEBUG2 pre render | mkData.precipitation=" + JSON.stringify(mkData && mkData.precipitation));
   renderKisaMinutno(mkData);
 }
 
