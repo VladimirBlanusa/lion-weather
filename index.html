@@ -423,6 +423,7 @@
   .meta-prelom { flex-basis: 100%; height: 0; }
   #grad { font-weight: 600; color: var(--text); }
   .meta span b { color: var(--text); font-weight: 600; }
+  .meta-detalji { margin-top: 8px; font-size: 12px; color: rgba(245, 241, 230, .75); }
   .panel {
     width: 100%;
     max-width: 420px;
@@ -894,12 +895,18 @@
     <div id="kisa-paznja"></div>
     <div class="meta">
       <span id="grad">Stara Pazova</span>
-      <span> vetar: <b id="wind">–</b> km/h</span>
+      <span> vetar: <b id="wind">–</b> km/h <b id="wind-dir"></b></span>
       <span> kiša: <b id="rain">–</b> mm</span>
       <span id="sansa-red" style="display:none"> šansa: <b id="sansa">–</b>%</span>
       <span class="meta-prelom"></span>
       <span> izlazak: <b id="izlazak">–</b></span>
       <span> zalazak: <b id="zalazak">–</b></span>
+    </div>
+    <div class="meta meta-detalji">
+      <span> osećaj: <b id="osecaj">–</b>°</span>
+      <span> vlažnost: <b id="vlaznost">–</b>%</span>
+      <span> pritisak: <b id="pritisak">–</b> hPa</span>
+      <span> UV: <b id="uv">–</b></span>
     </div>
     <div id="msg" class="loading">Učitavam prognozu…</div>
     <div id="err" class="err"></div>
@@ -1251,6 +1258,13 @@ function mesecFaza() {
 function jePunMesec() {
   var f = mesecFaza();
   return Math.abs(f - 0.5) < 0.05;
+}
+
+// Smer vetra: stepeni → skraćenica (16-wind rose, srpski)
+function pravacVetra(deg) {
+  if (deg == null || isNaN(deg)) return "";
+  var P = ["S", "SSI", "SI", "ISI", "I", "IJI", "JI", "JJI", "J", "JJZ", "JZ", "ZJZ", "Z", "ZSZ", "SZ", "SSZ"];
+  return P[Math.round(deg / 22.5) % 16];
 }
 
 // Kutijica u uglu: tekstura punog Meseca + tamni deo prati pravu fazu
@@ -1697,6 +1711,12 @@ function obradi(tekst) {
   document.getElementById("mood").textContent = poruka;
   document.getElementById("wind").textContent = v;
   document.getElementById("rain").textContent = k;
+  // v3.64: Dodatni meteorološki podaci — osećaj, vlažnost, pritisak, UV, smer vetra
+  document.getElementById("wind-dir").textContent = pravacVetra(tekst.current.wind_direction_10m);
+  document.getElementById("osecaj").textContent = Math.round(tekst.current.apparent_temperature);
+  document.getElementById("vlaznost").textContent = tekst.current.relative_humidity_2m;
+  document.getElementById("pritisak").textContent = Math.round(tekst.current.surface_pressure);
+  document.getElementById("uv").textContent = (tekst.current.uv_index || 0).toFixed(1);
   var sansa = null;
   if (tekst.hourly && tekst.hourly.precipitation_probability && tekst.hourly.time) {
     var si = tekst.hourly.time.indexOf(tekst.current.time.slice(0, 13) + ":00");
@@ -1826,7 +1846,7 @@ function ucitajPrognozu() {
 
   fetch(
     "https://api.open-meteo.com/v1/forecast?latitude=" + LOK.lat + "&longitude=" + LOK.lon +
-    "&current=temperature_2m,weather_code,wind_speed_10m,precipitation" +
+    "&current=temperature_2m,weather_code,wind_speed_10m,precipitation,apparent_temperature,relative_humidity_2m,surface_pressure,uv_index,wind_direction_10m" +
     "&hourly=temperature_2m,weather_code,precipitation_probability" +
     "&daily=temperature_2m_max,temperature_2m_min,weather_code,sunrise,sunset,precipitation_probability_max" +
     "&forecast_days=7&timezone=auto"
