@@ -290,9 +290,21 @@
     width: 44px; height: 44px; border-radius: 50%;
     transform: rotate(-5deg);
     animation: ef-disi 6s ease-in-out infinite;
+    cursor: pointer; outline: none; -webkit-tap-highlight-color: transparent;
   }
   .nebo-mesec svg { display: block; width: 100%; height: 100%;
     filter: drop-shadow(0 0 5px rgba(245, 232, 200, .45)); }
+  /* ——— Krupan Mesec: tap na mesec otvara zum ——— */
+  .mesec-zum { position: fixed; inset: 0; z-index: 55; display: flex; align-items: center; justify-content: center;
+    background: radial-gradient(circle at 50% 38%, rgba(10,15,26,.92), rgba(5,8,14,.97) 78%);
+    opacity: 0; visibility: hidden; transition: opacity .32s ease, visibility .32s; }
+  .mesec-zum.otvoren { opacity: 1; visibility: visible; }
+  .mesec-zum-unutra { text-align: center; padding: 30px 20px; transform: scale(.94); transition: transform .32s ease; }
+  .mesec-zum.otvoren .mesec-zum-unutra { transform: scale(1); }
+  .mesec-zum svg { width: min(280px, 70vw); height: min(280px, 70vw); filter: drop-shadow(0 0 24px rgba(245,232,200,.35)); }
+  .mesec-zum h3 { margin: 18px 0 6px; font-size: 15px; color: var(--gold); letter-spacing: .3em; text-transform: uppercase; font-weight: 600; }
+  .mesec-zum p { margin: 0; font-size: 13px; color: rgba(245,241,230,.7); }
+  .mesec-zum .mesec-zatvori { position: fixed; top: 16px; right: 18px; font-size: 28px; color: rgba(245,241,230,.6); cursor: pointer; line-height: 1; }
   /* ——— Galerija lavova: muzej svih lavova — klik na ikonicu gore desno (Vlad 3.9) ——— */
   .lav-top { cursor: pointer; transition: transform .25s ease, box-shadow .25s ease; }
   .lav-top:hover { transform: scale(1.06); }
@@ -1759,7 +1771,35 @@ document.getElementById("lok-gps").onclick = gpsLokacija;
 document.getElementById("lok-unos").addEventListener("keydown", function(e){
   if (e.key === "Enter") traziGrad();
 });
+
+// v3.55: tap na mesec otvara krupan prikaz sa kraterima
+(function(){
+  var mz = document.getElementById("mesec-zum");
+  var ms = document.getElementById("mesec-zum-sadrzaj");
+  var zatvori = document.getElementById("mesec-zatvori");
+  if (!mz || !zatvori) return;
+  function otvori(){
+    var el = document.querySelector(".nebo-mesec");
+    var svg = el ? el.innerHTML : "";
+    var faza = el ? (el.getAttribute("data-faza") || "Mesec") : "Mesec";
+    var f = mesecFaza();
+    var provera = Math.round(f * 100);
+    ms.innerHTML = svg + "<h3>" + faza + "</h3><p>" + provera + "% osvetljeno</p>";
+    mz.classList.add("otvoren");
+  }
+  function zatvoriZum(){ mz.classList.remove("otvoren"); }
+  var mesecEl = document.querySelector(".nebo-mesec");
+  if (mesecEl) mesecEl.addEventListener("click", otvori);
+  zatvori.addEventListener("click", zatvoriZum);
+  mz.addEventListener("click", function(e){ if (e.target === mz) zatvoriZum(); });
+})();
 </script>
+<div class="mesec-zum" id="mesec-zum" role="dialog" aria-label="Krupan prikaz Meseca">
+  <span class="mesec-zatvori" id="mesec-zatvori">&times;</span>
+  <div class="mesec-zum-unutra">
+    <div id="mesec-zum-sadrzaj"></div>
+  </div>
+</div>
 <div class="galerija" id="galerija" role="dialog" aria-label="Galerija lavova">
   <button class="galerija-zatvori" id="galerija-zatvori" type="button" aria-label="Zatvori galeriju">&times;</button>
   <div class="galerija-unutra">
