@@ -15,6 +15,9 @@
 <meta property="og:image" content="https://macaron-sandbox-workspace.oss-accelerate.aliyuncs.com/prod/01a05aef-9b6e-7737-bec4-ae31a3069526/workspace/lav-vreme/og-lav.jpg">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
+<!-- v3.61: Radar — Leaflet + RainViewer, centrirano na LOK -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
 <style>
   :root {
     --bg-mid: #111826;
@@ -306,6 +309,43 @@
   .mesec-zum h3 { margin: 18px 0 6px; font-size: 15px; color: var(--gold); letter-spacing: .3em; text-transform: uppercase; font-weight: 600; }
   .mesec-zum p { margin: 0; font-size: 13px; color: rgba(245,241,230,.7); }
   .mesec-zum .mesec-zatvori { position: fixed; top: 16px; right: 18px; font-size: 28px; color: rgba(245,241,230,.6); cursor: pointer; line-height: 1; }
+  /* ——— Radar: Leaflet + RainViewer (Vlad 8.10, v3.61) — centrirano na LOK ——— */
+  .radar-zum { position: fixed; inset: 0; z-index: 60; display: flex; flex-direction: column;
+    background: radial-gradient(circle at 50% 30%, rgba(20,28,44,.96), rgba(5,8,16,.98) 80%);
+    opacity: 0; visibility: hidden; transition: opacity .32s ease, visibility .32s; }
+  .radar-zum.otvoren { opacity: 1; visibility: visible; }
+  .radar-glava { display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 18px; flex-shrink: 0; }
+  .radar-glava h3 { margin: 0; font-size: 14px; color: var(--gold); letter-spacing: .25em;
+    text-transform: uppercase; font-weight: 600; }
+  .radar-glava h3 b { color: var(--text); font-weight: 500; letter-spacing: .04em; text-transform: none; }
+  .radar-zatvori { font-size: 28px; color: rgba(245,241,230,.6); cursor: pointer; line-height: 1;
+    background: none; border: none; padding: 0 4px; }
+  .radar-zatvori:hover { color: var(--gold); }
+  #radar-mapa { flex: 1; min-height: 0; width: 100%; background: #0a0f1a; }
+  .radar-dno { display: flex; align-items: center; gap: 14px; padding: 12px 18px; flex-shrink: 0;
+    background: rgba(10,15,26,.92); border-top: 1px solid rgba(212,175,55,.18); }
+  #radar-play { width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0; cursor: pointer;
+    background: rgba(212,175,55,.18); border: 1px solid rgba(212,175,55,.55);
+    color: var(--gold-light); font-size: 18px; display: flex; align-items: center; justify-content: center; }
+  #radar-play:active { transform: scale(.94); }
+  #radar-traka { flex: 1; height: 6px; background: rgba(245,241,230,.12); border-radius: 3px;
+    position: relative; cursor: pointer; }
+  #radar-traka .pun { position: absolute; left: 0; top: 0; height: 100%; background: var(--gold);
+    border-radius: 3px; width: 0; transition: width .15s linear; }
+  #radar-traka .kvoci { position: absolute; top: 50%; transform: translate(-50%, -50%);
+    width: 14px; height: 14px; border-radius: 50%; background: var(--gold-light);
+    border: 2px solid #0a0f1a; left: 0; transition: left .15s linear; }
+  #radar-vreme { font-size: 12px; color: rgba(245,241,230,.75); min-width: 88px; text-align: right;
+    font-variant-numeric: tabular-nums; }
+  .radar-greska { padding: 40px 24px; text-align: center; color: rgba(245,241,230,.7); font-size: 14px; }
+  /* Leaflet kontrole u zlatnom tonu */
+  .leaflet-container { background: #0a0f1a !important; font-family: inherit; }
+  .leaflet-control-zoom a { background: rgba(18,24,38,.9) !important; color: var(--gold-light) !important;
+    border-color: rgba(212,175,55,.35) !important; }
+  .leaflet-control-zoom a:hover { background: rgba(212,175,55,.18) !important; }
+  .leaflet-control-attribution { background: rgba(10,15,26,.7) !important; color: rgba(245,241,230,.5) !important; }
+  .leaflet-control-attribution a { color: rgba(212,175,55,.7) !important; }
   /* ——— Galerija lavova: muzej svih lavova — klik na ikonicu gore desno (Vlad 3.9) ——— */
   .lav-top { cursor: pointer; transition: transform .25s ease, box-shadow .25s ease; }
   .lav-top:hover { transform: scale(1.06); }
@@ -426,7 +466,7 @@
     pointer-events: none;
     z-index: 0;
   }
-  .card > *:not(#scena):not(.ugao-nebo) { position: relative; z-index: 1; }
+  .card > *:not(#scena):not(.ugao-nebo):not(#lok-radar) { position: relative; z-index: 1; }
   /* Sunce diše na celoj kartici — zlatno svetlo od lava preko kvadrata */
   .mood-sunce #scena::before {
     content: ""; position: absolute; inset: 0;
@@ -728,6 +768,59 @@
     cursor: pointer;
   }
   #lok-gps { font-size: 16px; padding: 10px 12px; display: inline-flex; align-items: center; justify-content: center; }
+  /* ——— Radar dugme: plovak na glavnoj karti, pozicija 1 (dole-levo) — Vlad 8.10, v3.61 ——— */
+  #lok-radar {
+    position: absolute;
+    left: 14px;
+    bottom: 14px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 50%, #0c131e 0%, #050810 100%);
+    border: 1.5px solid rgba(212,175,55,.85);
+    cursor: pointer;
+    z-index: 5;
+    overflow: hidden;
+    padding: 0;
+    box-shadow: 0 4px 16px rgba(0,0,0,.45), inset 0 0 12px rgba(0,0,0,.6);
+    transition: transform .25s ease, box-shadow .25s ease;
+  }
+  #lok-radar:hover { transform: scale(1.08); box-shadow: 0 0 18px rgba(212,175,55,.45), inset 0 0 12px rgba(0,0,0,.6); }
+  #lok-radar:active { transform: scale(.94); }
+  /* Koncentrični krugovi — radar scope */
+  #lok-radar::before, #lok-radar::after {
+    content: ""; position: absolute; border-radius: 50%;
+    border: 1px solid rgba(212,175,55,.22); pointer-events: none;
+  }
+  #lok-radar::before { width: 64%; height: 64%; top: 18%; left: 18%; }
+  #lok-radar::after { width: 32%; height: 32%; top: 34%; left: 34%; }
+  /* Rotirajući snop — konični gradijent koji ostavlja trag */
+  #lok-radar .radar-snop {
+    position: absolute; inset: 0; border-radius: 50%;
+    background: conic-gradient(from 0deg,
+      rgba(120, 220, 130, 0) 0deg,
+      rgba(120, 220, 130, 0) 250deg,
+      rgba(120, 220, 130, .15) 305deg,
+      rgba(120, 220, 130, .55) 350deg,
+      rgba(120, 220, 130, .95) 360deg);
+    animation: radar-snop 3s linear infinite;
+  }
+  @keyframes radar-snop { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  /* Krst u sredini */
+  #lok-radar .radar-krst { position: absolute; inset: 0; pointer-events: none; }
+  #lok-radar .radar-krst::before, #lok-radar .radar-krst::after {
+    content: ""; position: absolute; background: rgba(212,175,55,.22);
+  }
+  #lok-radar .radar-krst::before { left: 50%; top: 6px; bottom: 6px; width: 1px; transform: translateX(-50%); }
+  #lok-radar .radar-krst::after { top: 50%; left: 6px; right: 6px; height: 1px; transform: translateY(-50%); }
+  /* Središnja tačka */
+  #lok-radar .radar-tacka {
+    position: absolute; top: 50%; left: 50%; width: 4px; height: 4px; border-radius: 50%;
+    background: var(--gold-light); transform: translate(-50%, -50%);
+    box-shadow: 0 0 4px rgba(240,212,124,.7);
+  }
+  @media (max-width: 360px) { #lok-radar { width: 42px; height: 42px; } }
+  @media (prefers-reduced-motion: reduce) { #lok-radar .radar-snop { animation: none; } }
   #lok-rez { margin-top: 8px; display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: rgba(245, 241, 230, .82); }
   .lok-rez-btn {
     text-align: left;
@@ -805,6 +898,11 @@
     </div>
     <div id="msg" class="loading">Učitavam prognozu…</div>
     <div id="err" class="err"></div>
+    <button id="lok-radar" type="button" title="Radar — kretanje oblaka" aria-label="Radar — kretanje oblaka">
+      <span class="radar-snop"></span>
+      <span class="radar-krst"></span>
+      <span class="radar-tacka"></span>
+    </button>
   </div>
 
   <div class="panel sati">
@@ -1830,11 +1928,168 @@ window.addEventListener("DOMContentLoaded", function(){
   zatvori.addEventListener("click", zatvoriZum);
   mz.addEventListener("click", function(e){ if (e.target === mz) zatvoriZum(); });
 });
+
+// v3.61: Radar — Leaflet + RainViewer, kretanje oblaka i padavina (Vlad 8.10)
+window.addEventListener("DOMContentLoaded", function(){
+  var rz = document.getElementById("radar-zum");
+  var rZatvori = document.getElementById("radar-zatvori");
+  var rGrad = document.getElementById("radar-grad");
+  var rMapa = document.getElementById("radar-mapa");
+  var rPlay = document.getElementById("radar-play");
+  var rTraka = document.getElementById("radar-traka");
+  var rPun = rTraka.querySelector(".pun");
+  var rKvoci = rTraka.querySelector(".kvoci");
+  var rVreme = document.getElementById("radar-vreme");
+  if (!rz || !rZatvori) return;
+
+  var mapa = null;
+  var okviri = [];        // RainViewer prošli frejmovi
+  var host = "";
+  var pozicija = 0;
+  var sloj = null;        // trenutni radarski tileLayer
+  var tajmer = null;
+  var playing = false;
+  var TILE = window.devicePixelRatio >= 2 ? 512 : 256;
+
+  function fmtVreme(ts){
+    var d = new Date(ts * 1000);
+    var h = d.getHours().toString().padStart(2,"0");
+    var m = d.getMinutes().toString().padStart(2,"0");
+    return h + ":" + m;
+  }
+
+  function prikaziOkvir(i){
+    if (!mapa || !okviri.length) return;
+    if (i < 0) i = 0;
+    if (i >= okviri.length) i = okviri.length - 1;
+    pozicija = i;
+    var fr = okviri[i];
+    if (sloj) mapa.removeLayer(sloj);
+    sloj = L.tileLayer(host + fr.path + "/" + TILE + "/{z}/{x}/{y}/2/1_1.png", {
+      tileSize: 256,
+      opacity: 0.78,
+      maxNativeZoom: 7,
+      maxZoom: 12,
+      zIndex: 250
+    });
+    sloj.addTo(mapa);
+    var p = okviri.length > 1 ? i / (okviri.length - 1) : 0;
+    rPun.style.width = (p * 100) + "%";
+    rKvoci.style.left = (p * 100) + "%";
+    rVreme.textContent = fmtVreme(fr.time);
+  }
+
+  function play(){
+    if (playing || okviri.length < 2) return;
+    playing = true;
+    rPlay.textContent = "⏸";
+    tajmer = setInterval(function(){
+      prikaziOkvir((pozicija + 1) % okviri.length);
+    }, 650);
+  }
+  function pauziraj(){
+    playing = false;
+    rPlay.textContent = "▶";
+    if (tajmer){ clearInterval(tajmer); tajmer = null; }
+  }
+
+  function trakaKlik(e){
+    if (!okviri.length) return;
+    var rect = rTraka.getBoundingClientRect();
+    var x = (e.clientX - rect.left) / rect.width;
+    if (x < 0) x = 0; if (x > 1) x = 1;
+    var idx = Math.round(x * (okviri.length - 1));
+    pauziraj();
+    prikaziOkvir(idx);
+  }
+
+  function init(){
+    if (mapa) return;
+    if (typeof L === "undefined"){
+      rMapa.innerHTML = '<div class="radar-greska">Mapa nije dostupna — proveri konekciju.</div>';
+      return;
+    }
+    mapa = L.map("radar-mapa", {
+      center: [LOK.lat, LOK.lon],
+      zoom: 7,
+      zoomControl: true,
+      attributionControl: true
+    });
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+      attribution: '&copy; OpenStreetMap &copy; CARTO &copy; RainViewer',
+      subdomains: "abcd",
+      maxZoom: 12,
+      zIndex: 100
+    }).addTo(mapa);
+    L.circleMarker([LOK.lat, LOK.lon], {
+      radius: 5,
+      color: "#d4af37",
+      weight: 2,
+      fillColor: "#d4af37",
+      fillOpacity: 0.45
+    }).addTo(mapa);
+  }
+
+  function ucitajRadar(){
+    rGrad.textContent = LOK.ime;
+    rVreme.textContent = "Učitavam…";
+    init();
+    if (!mapa) return;
+    if (sloj){ mapa.removeLayer(sloj); sloj = null; }
+    okviri = [];
+    rPun.style.width = "0%";
+    rKvoci.style.left = "0%";
+    pauziraj();
+    setTimeout(function(){ mapa.invalidateSize(); }, 60);
+    fetch("https://api.rainviewer.com/public/weather-maps.json")
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        host = d.host;
+        okviri = (d.radar && d.radar.past) ? d.radar.past : [];
+        if (!okviri.length){
+          rVreme.textContent = "—";
+          rMapa.innerHTML = '<div class="radar-greska">Trenutno nema radarskih podataka. Pokušaj kasnije.</div>';
+          return;
+        }
+        prikaziOkvir(okviri.length - 1); // najnoviji frejm
+        play(); // automatski pokreni animaciju
+      })
+      .catch(function(){
+        rVreme.textContent = "—";
+        rMapa.innerHTML = '<div class="radar-greska">Ne mogu da dohvatim radar — proveri internet.</div>';
+      });
+  }
+
+  function otvori(){ rz.classList.add("otvoren"); ucitajRadar(); }
+  function zatvori(){ pauziraj(); rz.classList.remove("otvoren"); }
+
+  var dugme = document.getElementById("lok-radar");
+  if (dugme) dugme.addEventListener("click", otvori);
+  rZatvori.addEventListener("click", zatvori);
+  rz.addEventListener("click", function(e){ if (e.target === rz) zatvori(); });
+  rPlay.addEventListener("click", function(){ if (playing) pauziraj(); else play(); });
+  rTraka.addEventListener("click", trakaKlik);
+});
 </script>
 <div class="mesec-zum" id="mesec-zum" role="dialog" aria-label="Krupan prikaz Meseca">
   <span class="mesec-zatvori" id="mesec-zatvori">&times;</span>
   <div class="mesec-zum-unutra">
     <div id="mesec-zum-sadrzaj"></div>
+  </div>
+</div>
+<div class="radar-zum" id="radar-zum" role="dialog" aria-label="Radar — kretanje oblaka i padavina">
+  <div class="radar-glava">
+    <h3>RADAR <b id="radar-grad">—</b></h3>
+    <button class="radar-zatvori" id="radar-zatvori" type="button" aria-label="Zatvori radar">&times;</button>
+  </div>
+  <div id="radar-mapa"></div>
+  <div class="radar-dno">
+    <button id="radar-play" type="button" aria-label="Pokreni ili pauziraj animaciju">▶</button>
+    <div id="radar-traka" role="slider" aria-label="Vremenska traka radara">
+      <div class="pun"></div>
+      <div class="kvoci"></div>
+    </div>
+    <span id="radar-vreme">—</span>
   </div>
 </div>
 <div class="galerija" id="galerija" role="dialog" aria-label="Galerija lavova">
