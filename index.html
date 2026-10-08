@@ -1843,24 +1843,31 @@ function renderKisaMinutno(m) {
   var p = m.precipitation, times = m.time;
   var maxP = 0;
   for (var i = 0; i < p.length; i++) if (p[i] > maxP) maxP = p[i];
-  var maxScale = Math.max(maxP, 0.5);
+  var traka = document.getElementById("kisa-minutno-traka");
+  var vremena = document.getElementById("kisa-minutno-vremena");
   var rezime = document.getElementById("kisa-minutno-rezime");
   if (maxP < 0.05) {
+    // Suvo — samo rezime, sakrij bar chart i vremena
     rezime.textContent = "Suvo naredna 2 sata \u2600\uFE0F";
     rezime.style.color = "rgba(245, 241, 230, .82)";
-  } else {
-    var prvi = -1, poslednji = -1;
-    for (var a = 0; a < p.length; a++) { if (p[a] >= 0.05) { prvi = a; break; } }
-    for (var b = p.length - 1; b >= 0; b--) { if (p[b] >= 0.05) { poslednji = b; break; } }
-    var pocetakMin = prvi * 15;
-    var kraj = new Date(times[poslednji]);
-    var krajH = kraj.getHours(), krajM = kraj.getMinutes();
-    var intenzitet = maxP < 0.5 ? "slaba" : (maxP < 2 ? "umerena" : "jaka");
-    var pocetak = prvi === 0 ? "Ki\u0161a pada sad" : "Ki\u0161a za " + pocetakMin + " min";
-    rezime.innerHTML = pocetak + " \u00b7 " + intenzitet + " \u00b7 do " + (krajH<10?"0":"") + krajH + ":" + (krajM<10?"0":"") + krajM;
-    rezime.style.color = "rgba(165, 195, 235, .95)";
+    traka.style.display = "none";
+    vremena.style.display = "none";
+    return;
   }
-  var traka = document.getElementById("kisa-minutno-traka");
+  // Ima kiše — prikaži bar chart i vremena
+  traka.style.display = "";
+  vremena.style.display = "";
+  var maxScale = Math.max(maxP, 0.5);
+  var prvi = -1, poslednji = -1;
+  for (var a = 0; a < p.length; a++) { if (p[a] >= 0.05) { prvi = a; break; } }
+  for (var b = p.length - 1; b >= 0; b--) { if (p[b] >= 0.05) { poslednji = b; break; } }
+  var pocetakMin = prvi * 15;
+  var kraj = new Date(times[poslednji]);
+  var krajH = kraj.getHours(), krajM = kraj.getMinutes();
+  var intenzitet = maxP < 0.5 ? "slaba" : (maxP < 2 ? "umerena" : "jaka");
+  var pocetak = prvi === 0 ? "Ki\u0161a pada sad" : "Ki\u0161a za " + pocetakMin + " min";
+  rezime.innerHTML = pocetak + " \u00b7 " + intenzitet + " \u00b7 do " + (krajH<10?"0":"") + krajH + ":" + (krajM<10?"0":"") + krajM;
+  rezime.style.color = "rgba(165, 195, 235, .95)";
   traka.innerHTML = "";
   for (var k = 0; k < p.length; k++) {
     var bar = document.createElement("div");
@@ -1869,7 +1876,6 @@ function renderKisaMinutno(m) {
     bar.title = times[k].slice(11, 16) + " \u00b7 " + p[k].toFixed(2) + " mm";
     traka.appendChild(bar);
   }
-  var vremena = document.getElementById("kisa-minutno-vremena");
   vremena.innerHTML = "";
   for (var v = 0; v < p.length; v++) {
     var span = document.createElement("span");
