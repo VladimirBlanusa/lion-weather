@@ -1984,7 +1984,11 @@ function obradiUpozorenja(tekst) {
       talas: { nivo: "cisto", ikona: "🌡️", tekst: "Toplotni talas — test, pijte vodu" },
       kisa: { nivo: "umereno", ikona: "🌧️", tekst: "Jaka kiša danas — ponesi kišobran" },
       mraz: { nivo: "blago", ikona: "❄️", tekst: "Mraz — čuvaj biljke" },
-      magla: { nivo: "blago", ikona: "🌫️", tekst: "Magla — vozite pažljivo" }
+      magla: { nivo: "blago", ikona: "🌫️", tekst: "Magla — vozite pažljivo" },
+      led: { nivo: "cisto", ikona: "🧊", tekst: "Led i ledena kiša — test, ceste klizave" },
+      sneg: { nivo: "umereno", ikona: "❄️", tekst: "Jak sneg — test, čistite sneg" },
+      mecava: { nivo: "cisto", ikona: "🌨️", tekst: "Mećava — test, sneg i vetar" },
+      hladnoca: { nivo: "umereno", ikona: "🥶", tekst: "Ekstremna hladnoća — test, toplo se obucite" }
     };
     var t = TEST[PROBA_UPOZ];
     if (t) {
@@ -2006,13 +2010,22 @@ function obradiUpozorenja(tekst) {
   var curKod = tekst.current ? tekst.current.weather_code : 0;
 
   // Sortirano po ozbiljnosti — opasno (crveno) prvo
+  var danJeSneg = (danKod >= 71 && danKod <= 77) || (danKod >= 85 && danKod <= 86) || (curKod >= 71 && curKod <= 77) || (curKod >= 85 && curKod <= 86);
   var upoz = null;
   if ((danKod >= 95 && danKod <= 99) || (curKod >= 95 && curKod <= 99)) {
     upoz = { nivo: "cisto", ikona: "⛈️", tekst: "Oluja danas — grom i grad, sedi gde si" };
-  } else if (danVetarMax >= 50) {
-    upoz = { nivo: "umereno", ikona: "💨", tekst: "Jak vetar — do " + Math.round(danVetarMax) + " km/h, čuvaj stvari" };
+  } else if (danJeSneg && danVetarMax >= 50) {
+    upoz = { nivo: "cisto", ikona: "🌨️", tekst: "Mećava danas — sneg i jak vetar, ostanite unutra" };
+  } else if ((danKod >= 56 && danKod <= 57) || (danKod >= 66 && danKod <= 67) || (curKod >= 56 && curKod <= 57) || (curKod >= 66 && curKod <= 67)) {
+    upoz = { nivo: "cisto", ikona: "🧊", tekst: "Led i ledena kiša — ceste klizave, vozite pažljivo" };
   } else if (danTmax >= 33) {
     upoz = { nivo: "cisto", ikona: "🌡️", tekst: "Toplotni talas — do " + Math.round(danTmax) + "°, pijte vodu" };
+  } else if (danKod === 75 || danKod === 86 || curKod === 75 || curKod === 86) {
+    upoz = { nivo: "umereno", ikona: "❄️", tekst: "Jak sneg danas — očekujte nanose" };
+  } else if (danTmin <= -10) {
+    upoz = { nivo: "umereno", ikona: "🥶", tekst: "Ekstremna hladnoća — do " + Math.round(danTmin) + "°, toplo se obucite" };
+  } else if (danVetarMax >= 50) {
+    upoz = { nivo: "umereno", ikona: "💨", tekst: "Jak vetar — do " + Math.round(danVetarMax) + " km/h, čuvaj stvari" };
   } else if (danKisaSansa >= 85) {
     upoz = { nivo: "umereno", ikona: "🌧️", tekst: "Jaka kiša danas — ponesi kišobran" };
   } else if (danTmin < 1) {
