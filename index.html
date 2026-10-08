@@ -2016,6 +2016,7 @@ function obradi(tekst) {
     };
     if (fake[PROBA_MKISA]) mkData = { time: bt, precipitation: fake[PROBA_MKISA] };
   }
+  alert("DEBUG2 pre render | mkData.precipitation=" + JSON.stringify(mkData && mkData.precipitation));
   renderKisaMinutno(mkData);
 }
 
