@@ -1191,6 +1191,44 @@ function podesiMesec() {
     '</svg>';
 }
 
+// v3.56: Krupan Mesec za zum — svež SVG, veci radius, unikatni id-jevi (bez kopiranja iz malog)
+function mesecKrupniSVG() {
+  var f = mesecFaza();
+  var mt = parseFloat(new URLSearchParams(location.search).get("mfaza"));
+  if (!isNaN(mt) && mt >= 0 && mt <= 1) f = mt;
+  var IMENA_FAZA = ["Nov mesec","Mladi srp","Prva cetvrt","Rastuci srp","Pun mesec","Opadajuci srp","Zadnja cetvrt","Stari srp"];
+  var idxFaze = Math.round(f * 8) % 8;
+  var TXT = "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac7b2a7b13ed015324caf02.webp";
+  var R = 85, cx = 100, cy = 100;
+  var rx = Math.cos(2 * Math.PI * f) * R;
+  var tamniPut = "";
+  if (Math.abs(f - 0.5) < 0.02) {
+    // pun mesec - nema tamnog dela
+  } else if (Math.abs(rx) > R - 2) {
+    tamniPut = '<circle cx="' + cx + '" cy="' + cy + '" r="' + R + '" fill="rgba(10,15,26,.9)"/>';
+  } else {
+    var vosak = f < 0.5;
+    var mali = f < 0.25 || f > 0.75;
+    var p = "M " + cx + "," + (cy - R);
+    if (vosak) {
+      p += " A " + R + "," + R + " 0 0 0 " + cx + "," + (cy + R);
+      p += " A " + Math.abs(rx).toFixed(1) + "," + R + " 0 0 " + (mali ? 1 : 0) + " " + cx + "," + (cy - R);
+    } else {
+      p += " A " + R + "," + R + " 0 0 1 " + cx + "," + (cy + R);
+      p += " A " + Math.abs(rx).toFixed(1) + "," + R + " 0 0 " + (mali ? 0 : 1) + " " + cx + "," + (cy - R);
+    }
+    p += " Z";
+    tamniPut = '<path d="' + p + '" fill="rgba(10,15,26,.9)"/>';
+  }
+  var svg = '<svg viewBox="0 0 200 200">' +
+    '<defs><clipPath id="mesec-zum-clip"><circle cx="' + cx + '" cy="' + cy + '" r="' + R + '"/></clipPath></defs>' +
+    '<image href="' + TXT + '" x="' + (cx - R) + '" y="' + (cy - R) + '" width="' + (2 * R) + '" height="' + (2 * R) + '" preserveAspectRatio="xMidYMid slice" clip-path="url(#mesec-zum-clip)"/>' +
+    tamniPut +
+    '<circle cx="' + cx + '" cy="' + cy + '" r="' + R + '" fill="none" stroke="rgba(247,239,218,.45)" stroke-width="1.4"/>' +
+    '</svg>';
+  return { svg: svg, ime: IMENA_FAZA[idxFaze], procenat: Math.round(f * 100) };
+}
+
 // Scena u kvadratu oko lava — cela pozornica se menja sa vremenom
 // Vlad 3.0: organska oblak-silueta — pufnaste mase, talasasta donja ivica (referenca: Vladovi meki kumulusi)
 var OB_SED = [3, 7, 11, 17, 23, 29, 41]; // v3.53: random seed-ovi za raznolike siluete
@@ -1779,13 +1817,8 @@ document.getElementById("lok-unos").addEventListener("keydown", function(e){
   var zatvori = document.getElementById("mesec-zatvori");
   if (!mz || !zatvori) return;
   function otvori(){
-    var el = document.querySelector(".nebo-mesec");
-    var svg = el ? el.innerHTML : "";
-    svg = svg.replace(/mesec-clip/g, "mesec-clip-zum"); // v3.56: unikatni id za zum da ne konfliktuje sa malim
-    var faza = el ? (el.getAttribute("data-faza") || "Mesec") : "Mesec";
-    var f = mesecFaza();
-    var provera = Math.round(f * 100);
-    ms.innerHTML = svg + "<h3>" + faza + "</h3><p>" + provera + "% osvetljeno</p>";
+    var m = mesecKrupniSVG();
+    ms.innerHTML = m.svg + "<h3>" + m.ime + "</h3><p>" + m.procenat + "% osvetljeno</p>";
     mz.classList.add("otvoren");
   }
   function zatvoriZum(){ mz.classList.remove("otvoren"); }
