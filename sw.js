@@ -1,7 +1,7 @@
 // ——— Service worker: prvi pogled i bez neta ———
 // Keš "lav-vreme-v1" nosi okvir appa; slike i ostalo se keširaju kako se koriste.
 // API pozivi (open-meteo) se ne diraju — kad nema mreze, podatke drzi localStorage kes u index.html.
-var KES = "lav-vreme-v16"; // v3.64: dubina podataka — osećaj, vlažnost, pritisak, UV, smer vetra
+var KES = "lav-vreme-v17"; // v3.65: radar dugme dignuto + Modeli 3x3 grid (Temp/Kiša/Vetar × ECMWF/GFS/ICON)
 var OKVIR = ["index.html", "manifest.json", "apple-touch-icon.png", "og-lav.jpg"];
 
 self.addEventListener("install", function(e) {
