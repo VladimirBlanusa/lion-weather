@@ -2002,7 +2002,6 @@ function obradi(tekst) {
   // ?mkisa= test param — ubaci fake kišu u minutni panel (samo sa ?proba=1)
   var mkData = tekst.minutely_15;
   if (PROBA_MKISA) {
-    alert("DEBUG mkisa=" + PROBA_MKISA + " | minutely_15=" + (tekst.minutely_15 ? "ima" : "nema"));
     try {
       var bt = (tekst.minutely_15 && tekst.minutely_15.time) ? tekst.minutely_15.time.slice() : [];
       if (bt.length === 0) {
@@ -2015,9 +2014,7 @@ function obradi(tekst) {
         pada:  [0.4, 0.8, 1.2, 0.9, 0.5, 0.2, 0, 0],
         suvo:  [0, 0, 0, 0, 0, 0, 0, 0]
       };
-      alert("DEBUG3 PM=[" + PROBA_MKISA + "] len=" + PROBA_MKISA.length + " | fake[PM]=" + JSON.stringify(fake[PROBA_MKISA]) + " | keys=" + Object.keys(fake).join(","));
       if (fake[PROBA_MKISA]) mkData = { time: bt, precipitation: fake[PROBA_MKISA] };
-      alert("DEBUG2: mkData.precipitation=" + JSON.stringify(mkData && mkData.precipitation));
     } catch(err) {
       alert("CATCH GREŠKA: " + err.message);
     }
@@ -2375,3 +2372,4 @@ window.addEventListener("DOMContentLoaded", function(){
 </div>
 </body>
 </html>
+                                                                                                                                                                                                                                                                         
