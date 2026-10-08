@@ -1697,7 +1697,7 @@ function renderSateZaDan(tekst, danIdx) {
       if (h.precipitation_probability) novi.precipitation_probability.push(h.precipitation_probability[j]);
     }
   }
-  renderSate(novi, novi.time[0] ? novi.time[0] : "", d.sunrise && d.sunrise[danIdx], d.sunset && d.sunset[danIdx]);
+  renderSate(novi, novi.time[0] ? novi.time[0] : "", d.sunrise && d.sunrise[danIdx], d.sunset && d.sunset[danIdx], tekst.current && tekst.current.time);
 }
 
 function postaviTraku() {
@@ -1709,7 +1709,7 @@ function postaviTraku() {
     var dt = new Date(d.time[IZBRANI_DAN] + "T12:00:00");
     naslov.textContent = "Po satima — " + DANI_SR[dt.getDay()].toLowerCase();
   } else {
-    renderSate(POSLEDNJI_TEKST.hourly, POSLEDNJI_TEKST.current.time, d && d.sunrise && d.sunrise[0], d && d.sunset && d.sunset[0]);
+    renderSate(POSLEDNJI_TEKST.hourly, POSLEDNJI_TEKST.current.time, d && d.sunrise && d.sunrise[0], d && d.sunset && d.sunset[0], POSLEDNJI_TEKST.current.time);
     naslov.textContent = "Po satima";
   }
 }
