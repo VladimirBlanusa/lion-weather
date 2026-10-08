@@ -291,6 +291,7 @@
     transform: rotate(-5deg);
     animation: ef-disi 6s ease-in-out infinite;
     cursor: pointer; outline: none; -webkit-tap-highlight-color: transparent;
+    pointer-events: auto; position: relative; z-index: 10;
   }
   .nebo-mesec svg { display: block; width: 100%; height: 100%;
     filter: drop-shadow(0 0 5px rgba(245, 232, 200, .45)); }
@@ -1824,6 +1825,8 @@ document.getElementById("lok-unos").addEventListener("keydown", function(e){
   function zatvoriZum(){ mz.classList.remove("otvoren"); }
   var mesecEl = document.querySelector(".nebo-mesec");
   if (mesecEl) mesecEl.addEventListener("click", otvori);
+  var ugaoEl = document.querySelector(".ugao-nebo");
+  if (ugaoEl) ugaoEl.addEventListener("click", otvori);
   zatvori.addEventListener("click", zatvoriZum);
   mz.addEventListener("click", function(e){ if (e.target === mz) zatvoriZum(); });
 })();
