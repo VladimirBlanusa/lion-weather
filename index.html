@@ -1341,6 +1341,7 @@ var PROBA = new URLSearchParams(window.location.search);
 var PROBA_UKLJUCEN = PROBA.get("proba") === "1"; // zaštitni param — bez ?proba=1 faza/efekt se ignorisu u produkciji
 var PROBA_FAZA = PROBA_UKLJUCEN ? (PROBA.get("faza") || "").toLowerCase() : "";
 var PROBA_EFEKT = PROBA_UKLJUCEN ? (PROBA.get("efekt") || "").toLowerCase() : "";
+var PROBA_MKISA = PROBA_UKLJUCEN ? (PROBA.get("mkisa") || "").toLowerCase() : "";
 
 // Da li je noć (posle zalaska / pre izlaska sunca)
 function jeNoc(tekst) {
@@ -1998,7 +1999,24 @@ function obradi(tekst) {
   }
   postaviTraku();
   renderDana(tekst.daily);
-  renderKisaMinutno(tekst.minutely_15);
+  // ?mkisa= test param — ubaci fake kišu u minutni panel (samo sa ?proba=1)
+  var mkData = tekst.minutely_15;
+  if (PROBA_MKISA) {
+    alert("DEBUG mkisa=" + PROBA_MKISA + " | minutely_15=" + (tekst.minutely_15 ? "ima" : "nema"));
+    var bt = (tekst.minutely_15 && tekst.minutely_15.time) ? tekst.minutely_15.time.slice() : [];
+    if (bt.length === 0) {
+      var sd = new Date();
+      for (var mi = 0; mi < 8; mi++) { bt.push(new Date(sd.getTime() + mi * 15 * 60000).toISOString().slice(0, 16)); }
+    }
+    var fake = {
+      kisa:  [0, 0, 0.2, 0.6, 1.1, 0.8, 0.3, 0.1],
+      jaka:  [0, 0, 1.5, 2.8, 3.2, 2.1, 0.5, 0],
+      pada:  [0.4, 0.8, 1.2, 0.9, 0.5, 0.2, 0, 0],
+      suvo:  [0, 0, 0, 0, 0, 0, 0, 0]
+    };
+    if (fake[PROBA_MKISA]) mkData = { time: bt, precipitation: fake[PROBA_MKISA] };
+  }
+  renderKisaMinutno(mkData);
 }
 
 function uporediModel(model, prefix) {
