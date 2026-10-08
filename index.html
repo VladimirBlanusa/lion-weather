@@ -2015,11 +2015,17 @@ window.addEventListener("DOMContentLoaded", function(){
       zoomControl: true,
       attributionControl: true
     });
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-      attribution: '&copy; OpenStreetMap &copy; CARTO &copy; RainViewer',
-      subdomains: "abcd",
+    // Esri Dark Gray Canvas (besplatan, bez API ključa — CARTO od 2025. zahteva ključ)
+    L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
+      attribution: 'Tiles &copy; Esri · &copy; OpenStreetMap · &copy; RainViewer',
       maxZoom: 12,
       zIndex: 100
+    }).addTo(mapa);
+    // Esri Dark Gray Reference — gradski labeli na transparentnoj pozadini
+    L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}", {
+      maxZoom: 12,
+      zIndex: 110,
+      opacity: 0.9
     }).addTo(mapa);
     L.circleMarker([LOK.lat, LOK.lon], {
       radius: 5,
