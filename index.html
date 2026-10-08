@@ -86,17 +86,21 @@
     margin-top: 4px;
     text-shadow: 0 1px 6px rgba(0, 0, 0, .6), 0 0 12px rgba(212, 175, 55, .3);
   }
-  .vb-avatar {
+  .vb-pecat {
     position: fixed;
     right: 14px;
     bottom: calc(14px + env(safe-area-inset-bottom));
-    width: 58px;
-    height: 58px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 1px solid rgba(212, 175, 55, .45);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, .5);
     z-index: 5;
+    padding: 6px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .5px;
+    color: #d4af37;
+    background: rgba(19, 27, 42, .72);
+    border: 1px solid rgba(212, 175, 55, .45);
+    border-radius: 999px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, .5);
+    backdrop-filter: blur(6px);
   }
   .card {
     width: 100%;
@@ -1146,7 +1150,7 @@
     <div id="lok-rez"></div>
   </div>
 
-  <img class="vb-avatar" src="https://oss-macaron-ai.macaron.im/image/chat_image/6f900e9a-de6f-46ff-af62-7c7818206580.webp" alt="VB — Vladimir Blanuša">
+  <div class="vb-pecat">V.B. &amp; Macaron</div>
 
   <div class="foot">Lion Weather · Open-Meteo</div>
   <div class="foot foot-crveni">
