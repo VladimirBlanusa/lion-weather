@@ -769,15 +769,16 @@
     width: 58px; height: 58px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
     font-size: 26px; font-weight: 700; color: #fff;
-    background: #5a6275; transition: background .4s ease;
+    background: linear-gradient(180deg, #5a6275, #3a3d4a); transition: background .4s ease;
     flex-shrink: 0; font-variant-numeric: tabular-nums;
+    box-shadow: 0 0 0 2px rgba(212, 175, 55, .22), 0 4px 14px rgba(0, 0, 0, .35);
   }
   .vazduh-opis { flex: 1; min-width: 0; }
   .vazduh-ime { font-size: 16px; font-weight: 600; color: var(--text); }
   .vazduh-savet { font-size: 12px; color: rgba(245, 241, 230, .65); margin-top: 2px; line-height: 1.35; }
-  .vazduh-stubici { display: flex; align-items: flex-end; gap: 6px; height: 50px; margin-top: 12px; }
+  .vazduh-stubici { display: flex; align-items: flex-end; gap: 6px; height: 70px; margin-top: 12px; }
   .vazduh-stub { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; }
-  .vazduh-stub .bar { width: 100%; border-radius: 3px 3px 0 0; min-height: 4px; transition: height .35s ease; }
+  .vazduh-stub .bar { width: 100%; border-radius: 3px 3px 0 0; min-height: 4px; transition: height .35s ease; box-shadow: 0 2px 6px rgba(0,0,0,.25); }
   .vazduh-stub .val { font-size: 11px; color: var(--text); font-weight: 600; margin-top: 3px; font-variant-numeric: tabular-nums; }
   .vazduh-stub .ime { font-size: 9px; color: rgba(245, 241, 230, .5); text-transform: uppercase; letter-spacing: .04em; }
 
@@ -1950,14 +1951,14 @@ function obradiVazduh(j) {
   if (aqi == null) { p.style.display = "none"; return; }
 
   var KAT = [
-    [20, "Dobar", "#4caf50", "Vazduh je čist — slobodno napolje"],
-    [40, "Umeren", "#f1c40f", "Kvalitet je prihvatljiv"],
-    [60, "Loš za osetljive", "#e67e22", "Osetljive grupe neka paze"],
-    [80, "Loš", "#e74c3c", "Smanjite napore napolju"],
-    [100, "Veoma loš", "#8e44ad", "Bolje ostati unutra"],
-    [Infinity, "Ekstremno loš", "#6e1a2e", "Izbegavajte boravak napolju"]
+    [20, "Dobar", "linear-gradient(180deg, #8fbf8a, #4a7a52)", "Vazduh je čist — slobodno napolje"],
+    [40, "Umeren", "linear-gradient(180deg, #e8c873, #b8893a)", "Kvalitet je prihvatljiv"],
+    [60, "Loš za osetljive", "linear-gradient(180deg, #e8a35a, #b56a30)", "Osetljive grupe neka paze"],
+    [80, "Loš", "linear-gradient(180deg, #c8634a, #8a3528)", "Smanjite napore napolju"],
+    [100, "Veoma loš", "linear-gradient(180deg, #8a4a6e, #4a2840)", "Bolje ostati unutra"],
+    [Infinity, "Ekstremno loš", "linear-gradient(180deg, #5a2832, #2e1418)", "Izbegavajte boravak napolju"]
   ];
-  var ime = "–", boja = "#5a6275", savet = "";
+  var ime = "–", boja = "linear-gradient(180deg, #5a6275, #3a3d4a)", savet = "";
   for (var i = 0; i < KAT.length; i++) {
     if (aqi <= KAT[i][0]) { ime = KAT[i][1]; boja = KAT[i][2]; savet = KAT[i][3]; break; }
   }
@@ -1978,13 +1979,13 @@ function obradiVazduh(j) {
   for (var k = 0; k < POL.length; k++) {
     var n = POL[k];
     var subAqi = n[2];
-    var subBoja = "#5a6275";
+    var subBoja = "linear-gradient(180deg, #5a6275, #3a3d4a)";
     if (subAqi != null) {
       for (var m = 0; m < KAT.length; m++) {
         if (subAqi <= KAT[m][0]) { subBoja = KAT[m][2]; break; }
       }
     }
-    var visina = subAqi != null ? Math.max(6, Math.min(50, subAqi / 100 * 50)) : 6;
+    var visina = subAqi != null ? Math.max(10, Math.min(70, subAqi / 100 * 70)) : 10;
     var valTxt = n[1] != null ? Math.round(n[1]) : "–";
     html += '<div class="vazduh-stub">' +
       '<div class="bar" style="height:' + visina + 'px;background:' + subBoja + '"></div>' +
