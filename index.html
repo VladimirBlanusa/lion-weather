@@ -588,6 +588,24 @@
     filter: brightness(1.03) saturate(1.02) drop-shadow(0 10px 12px var(--ob-s));
     opacity: .96;
   }
+  /* v3.54: OBLACNI BANK - jedna velika siroka masa preko gornjeg dela scene */
+  .ef-bank {
+    position: absolute; top: -20px; left: -10%; width: 120%;
+    height: auto; aspect-ratio: 460 / 200;
+    --ob-g: #f6efdd; --ob-z: #e3d7bd; --ob-h: #fdf8ec; --ob-s: rgba(7, 23, 16, .16);
+  }
+  .ef-bank svg { display: block; width: 100%; height: 100%; filter: drop-shadow(0 12px 16px var(--ob-s)); }
+  .ef-bank-siv   { --ob-g: #c9d4e1; --ob-z: #7a8aa3; --ob-h: #e0e8f1; --ob-s: rgba(7, 23, 16, .24); }
+  .ef-bank-sneg  { --ob-g: #eaf2fb; --ob-z: #a5c0e2; --ob-h: #ffffff; --ob-s: rgba(7, 23, 16, .16); }
+  .ef-bank-taman { --ob-g: #4e5872; --ob-z: #2e364c; --ob-h: #8a96b0; --ob-s: rgba(7, 23, 16, .32); opacity: .94; }
+  .obl-bank-pozadina {
+    animation: ef-oblak-pluta 22s ease-in-out infinite;
+  }
+.obl-paralaks-prednji {
+    animation: ef-oblak-pluta 9s ease-in-out infinite;
+    filter: brightness(1.03) saturate(1.02) drop-shadow(0 10px 12px var(--ob-s));
+    opacity: .96;
+  }
   .je-noc .ef-oblak svg, .je-noc .sc-kulisa svg { filter: brightness(.75) saturate(.8) drop-shadow(0 10px 12px var(--ob-s)); }
   /* Vlad: oblaci u sumraku prate toplu svetlost — ne hladno dnevno */
   .je-sumrak .ef-oblak svg, .je-sumrak .sc-kulisa svg { filter: sepia(.3) saturate(.85) contrast(1.04) brightness(.95) drop-shadow(0 10px 12px var(--ob-s)); }
@@ -1186,6 +1204,39 @@ function oblakSVG(seed){
     '<path fill="url(#'+u+'l)" d="M40,70C38,52 60,42 78,48C66,54 54,62 48,76C46,75 42,72 40,70Z" opacity=".7"/>' +
     '</g></svg>';
 }
+// v3.54: OBLACNI BANK - jedna velika siroka masa koja prekriva gornji deo scene (referenca: meki volumni sumrak oblaci)
+// Jedna silueta od 4-5 preklopljenih pufnova, duboko sencenje, unutrasnji radialni proboji svetlosti
+var BANK_UID = 0;
+function bankSVG(seed){
+  BANK_UID++; var u="bk"+BANK_UID; var sd = (seed===undefined) ? 5 : seed;
+  return '<svg viewBox="0 0 460 200" preserveAspectRatio="none"><defs>' +
+    '<linearGradient id="'+u+'g" x1="0" y1="0" x2="0" y2="1">' +
+    '<stop offset="0%" style="stop-color:var(--ob-z)"/>' +
+    '<stop offset="25%" style="stop-color:var(--ob-z)"/>' +
+    '<stop offset="55%" style="stop-color:var(--ob-g)"/>' +
+    '<stop offset="88%" style="stop-color:var(--ob-h)"/>' +
+    '<stop offset="100%" style="stop-color:var(--ob-h)"/></linearGradient>' +
+    '<radialGradient id="'+u+'p1" cx="28%" cy="35%" r="22%">' +
+    '<stop offset="0%" style="stop-color:var(--ob-h);stop-opacity:.42"/>' +
+    '<stop offset="100%" style="stop-color:var(--ob-h);stop-opacity:0"/></radialGradient>' +
+    '<radialGradient id="'+u+'p2" cx="62%" cy="28%" r="18%">' +
+    '<stop offset="0%" style="stop-color:var(--ob-h);stop-opacity:.36"/>' +
+    '<stop offset="100%" style="stop-color:var(--ob-h);stop-opacity:0"/></radialGradient>' +
+    '<radialGradient id="'+u+'p3" cx="48%" cy="50%" r="25%">' +
+    '<stop offset="0%" style="stop-color:var(--ob-h);stop-opacity:.22"/>' +
+    '<stop offset="100%" style="stop-color:var(--ob-h);stop-opacity:0"/></radialGradient>' +
+    '<filter id="'+u+'f" x="-8%" y="-10%" width="116%" height="120%">' +
+    '<feTurbulence type="fractalNoise" baseFrequency="0.008 0.014" numOctaves="4" seed="'+sd+'" result="noise"/>' +
+    '<feDisplacementMap in="SourceGraphic" in2="noise" scale="9" xChannelSelector="R" yChannelSelector="G" result="shape"/>' +
+    '<feGaussianBlur stdDeviation="0.7"/></filter></defs>' +
+    '<g filter="url(#'+u+'f)">' +
+    '<path fill="url(#'+u+'g)" d="M0,140C8,128 22,126 36,132C30,110 44,92 64,96C66,70 92,58 110,50C112,28 142,18 158,30C168,12 198,10 210,26C224,8 256,8 270,24C284,10 316,12 326,30C340,16 374,18 382,38C404,40 418,62 410,82C428,86 438,108 426,124C440,130 446,146 432,152C416,160 398,150 382,154C364,164 346,154 330,156C312,166 294,156 278,158C260,168 242,158 226,160C208,170 190,160 174,162C156,172 138,162 122,164C104,174 86,164 70,166C52,176 34,166 18,168C10,170 4,148 0,140Z"/>' +
+    '<path fill="url(#'+u+'g)" d="M120,180C108,180 100,168 106,154C100,140 114,126 132,130C136,112 162,106 174,120C184,108 210,114 208,134C224,138 228,160 212,168C222,176 212,186 198,182C182,190 172,180 156,182C140,190 126,180 120,180Z" opacity=".7"/>' +
+    '<path fill="url(#'+u+'p1)" d="M40,80C38,62 60,52 78,58C66,64 54,72 48,86C46,85 42,82 40,80Z"/>' +
+    '<path fill="url(#'+u+'p2)" d="M280,60C278,44 298,36 314,42C304,48 294,54 288,66C286,65 282,62 280,60Z"/>' +
+    '<path fill="url(#'+u+'p3)" d="M210,90C208,74 230,66 246,72C234,78 222,86 216,98C214,97 210,94 210,90Z"/>' +
+    '</g></svg>';
+}
 var KAP_SVG = '<svg viewBox="0 0 8 16" preserveAspectRatio="none"><path d="M4,0.5 C4,3 7,8 7,12 A3.5,3.5 0 1,1 1,12 C1,8 4,3 4,0.5 Z" fill="rgba(205,226,248,.92)"/></svg>';
 function postaviScenu(vrsta) {
   var sc = document.getElementById("scena");
@@ -1194,30 +1245,23 @@ function postaviScenu(vrsta) {
   GRM_GEN++; // nova scena → stara grmljavina se gasi
   var i, s;
   if (vrsta === "kisa" || vrsta === "oluja") {
-    // v3.53: dvoslojni parallax — pozadina (veći, zamućeni, tamni, spori) + prednji (manji, oštri, svetli, brži)
-    var OBL_DN = vrsta === "kisa" ? "ef-oblak ef-oblak-siv" : "ef-oblak ef-oblak-taman";
-    // sloj 1: pozadina — 3 velika oblaka, blur 2-3px, tamnija, animacija 18s (sporo plovi)
-    var OBL_BG = [[-6, 6, 150, 0], [38, 8, 175, 2.5], [-10, 40, 140, 5]];
-    for (i = 0; i < OBL_BG.length; i++) {
+    // v3.54: OBLACNI BANK - jedna velika masa prekriva gornji deo + 2 manja plutaju preko
+    var BK_DN = vrsta === "kisa" ? "ef-bank ef-bank-siv" : "ef-bank ef-bank-taman";
+    // BANK: jedna siroka silueta preko celog gornjeg dela scene
+    var bk = document.createElement("div");
+    bk.className = BK_DN + " obl-bank-pozadina";
+    bk.innerHTML = bankSVG(5);
+    sc.appendChild(bk);
+    // 2 manja oblaka koja plutaju preko bank-a za parallax dubinu
+    var BK_FR = [[15, 30, 84, 1.5], [58, 24, 96, 4.2]];
+    for (i = 0; i < BK_FR.length; i++) {
       s = document.createElement("span");
-      s.className = OBL_DN + " obl-paralaks-pozadina";
-      s.innerHTML = oblakSVG(OBL_BG[i][3]);
-      s.style.left = OBL_BG[i][0] + "%";
-      s.style.top = OBL_BG[i][1] + "%";
-      s.style.width = OBL_BG[i][2] + "px";
-      s.style.animationDelay = OBL_BG[i][3].toFixed(1) + "s";
-      sc.appendChild(s);
-    }
-    // sloj 2: prednji — 3 manja oblaka, oštrija, svetlija, animacija 9s (brže plovi)
-    var OBL_FR = [[20, 22, 92, 1.2], [62, 18, 110, 3.7], [8, 58, 84, 6]];
-    for (i = 0; i < OBL_FR.length; i++) {
-      s = document.createElement("span");
-      s.className = OBL_DN + " obl-paralaks-prednji";
-      s.innerHTML = oblakSVG(OBL_FR[i][3] + 13);
-      s.style.left = OBL_FR[i][0] + "%";
-      s.style.top = OBL_FR[i][1] + "%";
-      s.style.width = OBL_FR[i][2] + "px";
-      s.style.animationDelay = OBL_FR[i][3].toFixed(1) + "s";
+      s.className = BK_DN + " obl-paralaks-prednji";
+      s.innerHTML = oblakSVG(BK_FR[i][3]);
+      s.style.left = BK_FR[i][0] + "%";
+      s.style.top = BK_FR[i][1] + "%";
+      s.style.width = BK_FR[i][2] + "px";
+      s.style.animationDelay = BK_FR[i][3].toFixed(1) + "s";
       sc.appendChild(s);
     }
     var broj = vrsta === "kisa" ? 26 : 30;
@@ -1265,27 +1309,20 @@ function postaviScenu(vrsta) {
       s.style.animationDelay = (Math.random() * 4.5).toFixed(2) + "s";
       sc.appendChild(s);
     }
-    // v3.53: dvoslojni parallax za sneg
-    var SNC_BG = [[-6, 6, 150, 0], [38, 8, 175, 2.5], [-10, 40, 140, 5]];
-    for (i = 0; i < SNC_BG.length; i++) {
+    // v3.54: OBLACNI BANK za sneg
+    var SBK = document.createElement("div");
+    SBK.className = "ef-bank ef-bank-sneg obl-bank-pozadina";
+    SBK.innerHTML = bankSVG(11);
+    sc.appendChild(SBK);
+    var SBK_FR = [[15, 30, 84, 1.5], [58, 24, 96, 4.2]];
+    for (i = 0; i < SBK_FR.length; i++) {
       s = document.createElement("span");
-      s.className = "ef-oblak ef-oblak-sneg obl-paralaks-pozadina";
-      s.innerHTML = oblakSVG(SNC_BG[i][3]);
-      s.style.left = SNC_BG[i][0] + "%";
-      s.style.top = SNC_BG[i][1] + "%";
-      s.style.width = SNC_BG[i][2] + "px";
-      s.style.animationDelay = SNC_BG[i][3].toFixed(1) + "s";
-      sc.appendChild(s);
-    }
-    var SNC_FR = [[20, 22, 92, 1.2], [62, 18, 110, 3.7], [8, 58, 84, 6]];
-    for (i = 0; i < SNC_FR.length; i++) {
-      s = document.createElement("span");
-      s.className = "ef-oblak ef-oblak-sneg obl-paralaks-prednji";
-      s.innerHTML = oblakSVG(SNC_FR[i][3] + 13);
-      s.style.left = SNC_FR[i][0] + "%";
-      s.style.top = SNC_FR[i][1] + "%";
-      s.style.width = SNC_FR[i][2] + "px";
-      s.style.animationDelay = SNC_FR[i][3].toFixed(1) + "s";
+      s.className = "ef-bank ef-bank-sneg obl-paralaks-prednji";
+      s.innerHTML = oblakSVG(SBK_FR[i][3]);
+      s.style.left = SBK_FR[i][0] + "%";
+      s.style.top = SBK_FR[i][1] + "%";
+      s.style.width = SBK_FR[i][2] + "px";
+      s.style.animationDelay = SBK_FR[i][3].toFixed(1) + "s";
       sc.appendChild(s);
     }
   } else if (vrsta === "magla") {
@@ -1299,36 +1336,20 @@ function postaviScenu(vrsta) {
       sc.appendChild(s);
     }
   } else if (vrsta === "oblacno") {
-    // v3.53: dvoslojni parallax za oblacno
-    var OBC_BG = [[-6, 6, 150, 0], [38, 8, 175, 2.5], [-10, 40, 140, 5]];
-    for (i = 0; i < OBC_BG.length; i++) {
+    // v3.54: OBLACNI BANK za oblacno
+    var OBK = document.createElement("div");
+    OBK.className = "ef-bank obl-bank-pozadina";
+    OBK.innerHTML = bankSVG(17);
+    sc.appendChild(OBK);
+    var OBK_FR = [[15, 30, 84, 1.5], [58, 24, 96, 4.2]];
+    for (i = 0; i < OBK_FR.length; i++) {
       s = document.createElement("span");
-      s.className = "ef-oblak obl-paralaks-pozadina";
-      s.innerHTML = oblakSVG(OBC_BG[i][3]);
-      s.style.left = OBC_BG[i][0] + "%";
-      s.style.top = OBC_BG[i][1] + "%";
-      s.style.width = OBC_BG[i][2] + "px";
-      s.style.animationDelay = OBC_BG[i][3].toFixed(1) + "s";
-      sc.appendChild(s);
-    }
-    var OBC_FR = [[20, 22, 92, 1.2], [62, 18, 110, 3.7], [8, 58, 84, 6]];
-    for (i = 0; i < OBC_FR.length; i++) {
-      s = document.createElement("span");
-      s.className = "ef-oblak obl-paralaks-prednji";
-      s.innerHTML = oblakSVG(OBC_FR[i][3] + 13);
-      s.style.left = OBC_FR[i][0] + "%";
-      s.style.top = OBC_FR[i][1] + "%";
-      s.style.width = OBC_FR[i][2] + "px";
-      s.style.animationDelay = OBC_FR[i][3].toFixed(1) + "s";
-      sc.appendChild(s);
-    }
-  } else if (vrsta === "noc") {
-    for (i = 0; i < 28; i++) {
-      s = document.createElement("span");
-      s.className = "sc-zvezda";
-      s.style.left = Math.floor(Math.random() * 100) + "%";
-      s.style.top = Math.floor(Math.random() * 60) + "%";
-      s.style.animationDelay = (Math.random() * 3).toFixed(2) + "s";
+      s.className = "ef-bank obl-paralaks-prednji";
+      s.innerHTML = oblakSVG(OBK_FR[i][3]);
+      s.style.left = OBK_FR[i][0] + "%";
+      s.style.top = OBK_FR[i][1] + "%";
+      s.style.width = OBK_FR[i][2] + "px";
+      s.style.animationDelay = OBK_FR[i][3].toFixed(1) + "s";
       sc.appendChild(s);
     }
   }
