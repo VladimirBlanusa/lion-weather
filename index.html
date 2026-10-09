@@ -1158,7 +1158,7 @@
     <div id="kisa-minutno-vremena" class="kisa-minutno-vremena"></div>
   </div>
 
-  <div class="panel vazduh" id="vazduh-panel" style="display:none">
+  <div class="panel vazduh" id="vazduh-panel">
     <h3>Kvalitet vazduha — EU indeks</h3>
     <div class="vazduh-glavni">
       <div class="vazduh-broj" id="vazduh-broj">–</div>
@@ -2723,10 +2723,10 @@ function obradiUpozorenja(tekst) {
 function obradiVazduh(j) {
   var p = document.getElementById("vazduh-panel");
   if (!p) return;
-  if (!j || !j.current) { p.style.display = "none"; return; }
+  if (!j || !j.current) { var vi0 = document.getElementById("vazduh-ime"); if (vi0) vi0.textContent = "Nedostupno"; return; }
   var c = j.current;
   var aqi = c.european_aqi;
-  if (aqi == null) { p.style.display = "none"; return; }
+  if (aqi == null) { var vi1 = document.getElementById("vazduh-ime"); if (vi1) vi1.textContent = "Nedostupno"; return; }
 
   var KAT = [
     [20, "Dobar", "linear-gradient(180deg, #8fbf8a, #4a7a52)", "Vazduh je čist — slobodno napolje"],
@@ -2772,7 +2772,6 @@ function obradiVazduh(j) {
       '</div>';
   }
   document.getElementById("vazduh-stubici").innerHTML = html;
-  p.style.display = "block";
 }
 
 function obradi(tekst) {
@@ -3010,7 +3009,7 @@ function ucitajPrognozu() {
   )
     .then(function(r){ return r.json(); })
     .then(function(j){ obradiVazduh(j); })
-    .catch(function(){ var vp = document.getElementById("vazduh-panel"); if (vp) vp.style.display = "none"; });
+    .catch(function(){ var vi2 = document.getElementById("vazduh-ime"); if (vi2) vi2.textContent = "Nedostupno"; });
 }
 ucitajPrognozu();
 
