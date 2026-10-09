@@ -1,7 +1,7 @@
 // ——— Service worker: prvi pogled i bez neta ———
 // Keš "lav-vreme-v1" nosi okvir appa; slike i ostalo se keširaju kako se koriste.
 // API pozivi (open-meteo) se ne diraju — kad nema mreze, podatke drzi localStorage kes u index.html.
-var KES = "lav-vreme-v53"; // v4.03: Sunce — 18 krakova sa oreolom (mekši zrak svetla), deblji topliji, pulsiranje dužine, topliji sjaj
+var KES = "lav-vreme-v54"; // v4.04: Sunce — shadowBlur na krakovima (pravi zrak svetla sa bloom), širok bled oreol + sjajna jezgra
 var OKVIR = ["index.html", "manifest.json", "apple-touch-icon.png", "og-lav.jpg"];
 
 self.addEventListener("install", function(e) {
