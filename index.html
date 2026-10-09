@@ -750,6 +750,12 @@
     pointer-events: none;
     z-index: 2;
   }
+  #zvezde-canvas {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
   @keyframes ef-zrak-vrti {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
@@ -2139,6 +2145,79 @@ function snegCanvas(vrsta, fazaDana) {
   });
 }
 
+// ——— Canvas zvezde engine — treperenje, parallax dubina, sjaj za vece zvezde ———
+var ZVEZDE_GEN = 0;
+function zvezdeCanvas(vrsta, fazaDana) {
+  ZVEZDE_GEN++;
+  var gen = ZVEZDE_GEN;
+  var sc = document.getElementById("scena");
+  if (!sc) return;
+  var stari = sc.querySelector("#zvezde-canvas");
+  if (stari) stari.remove();
+  var cv = document.createElement("canvas");
+  cv.id = "zvezde-canvas";
+  sc.appendChild(cv);
+  var ctx = cv.getContext("2d");
+  var W = 0, H = 0, DPR = 1;
+  function resize() {
+    var r = sc.getBoundingClientRect();
+    W = r.width; H = r.height;
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    cv.width = Math.max(1, Math.floor(W * DPR));
+    cv.height = Math.max(1, Math.floor(H * DPR));
+    cv.style.width = W + "px";
+    cv.style.height = H + "px";
+  }
+  resize();
+  // 60 zvezda — parallax dubina, gornji deo neba
+  var zvezde = [];
+  for (var i = 0; i < 60; i++) {
+    var dubina = Math.random();
+    zvezde.push({
+      x: Math.random() * W,
+      y: Math.random() * H * 0.78,           // gornji deo neba
+      r: 0.6 + dubina * 2.4,                   // 0.6–3px
+      alfaBaza: 0.35 + dubina * 0.65,
+      phase: Math.random() * Math.PI * 2,
+      brzTreptanja: 0.4 + Math.random() * 1.6, // razlicit tempo treperenja
+      sjaj: dubina > 0.7                       // vece zvezde imaju sjaj
+    });
+  }
+  function loop() {
+    if (gen !== ZVEZDE_GEN) return;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    ctx.scale(DPR, DPR);
+    var t = performance.now() * 0.001;
+    for (var i = 0; i < zvezde.length; i++) {
+      var z = zvezde[i];
+      // treperenje — sinusoida po fazi
+      var treptaj = 0.5 + 0.5 * Math.sin(t * z.brzTreptanja + z.phase);
+      var alfa = z.alfaBaza * (0.35 + 0.65 * treptaj);
+      // sjaj (vece zvezde) — siri krug sa manjom alfa
+      if (z.sjaj) {
+        ctx.fillStyle = "rgba(255,212,130," + (alfa * 0.28).toFixed(3) + ")";
+        ctx.beginPath();
+        ctx.arc(z.x, z.y, z.r * 3.2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      // jezgro zvezde
+      ctx.fillStyle = "rgba(255,233,168," + Math.min(1, alfa).toFixed(3) + ")";
+      ctx.beginPath();
+      ctx.arc(z.x, z.y, Math.max(0.4, z.r), 0, Math.PI * 2);
+      ctx.fill();
+    }
+    requestAnimationFrame(loop);
+  }
+  loop();
+  var toR4 = null;
+  window.addEventListener("resize", function() {
+    if (gen !== ZVEZDE_GEN) return;
+    clearTimeout(toR4);
+    toR4 = setTimeout(resize, 200);
+  });
+}
+
 function postaviScenu(vrsta) {
   var sc = document.getElementById("scena");
   if (!sc) return;
@@ -2180,15 +2259,7 @@ function postaviScenu(vrsta) {
       kisaCanvas("maglovita", document.body.classList.contains("je-noc") ? "noc" : "dan");
     }
   } else if (vrsta === "noc") {
-    // noć bez oblaka — zvezde (oblaciCanvas se već vratio rano)
-    for (i = 0; i < 28; i++) {
-      s = document.createElement("span");
-      s.className = "sc-zvezda";
-      s.style.left = Math.floor(Math.random() * 100) + "%";
-      s.style.top = Math.floor(Math.random() * 60) + "%";
-      s.style.animationDelay = (Math.random() * 3).toFixed(2) + "s";
-      sc.appendChild(s);
-    }
+    zvezdeCanvas(vrsta, faza);
   }
 }
 
@@ -2544,7 +2615,7 @@ function obradi(tekst) {
   var t = Math.round(tekst.current.temperature_2m);
   var kod = tekst.current.weather_code;
   // Probni režim: ?efekt= obara i prikaz, lava i rečenicu na forsirano vreme
-  var PROBA_KOD = ({ sunce: 0, oblacno: 3, kisa: 63, sneg: 73, oluja: 95, magla: 45 })[PROBA_EFEKT];
+  var PROBA_KOD = ({ sunce: 0, oblacno: 3, kisa: 63, sneg: 73, oluja: 95, magla: 45, noc: 0 })[PROBA_EFEKT];
   if (PROBA_KOD !== undefined) kod = PROBA_KOD;
   var v = Math.round(tekst.current.wind_speed_10m);
   var k = (tekst.current.precipitation || 0);
@@ -2584,7 +2655,7 @@ function obradi(tekst) {
   postaviLava(info[1]);
   var moodKlasa = (kod === 45 || kod === 48) ? "magla" : info[1];
   // Probni režim: ?efekt= forsira raspoloženje (sunce, oblacno, kisa, sneg, oluja, magla)
-  if (["sunce", "oblacno", "kisa", "sneg", "oluja", "magla"].indexOf(PROBA_EFEKT) >= 0) moodKlasa = PROBA_EFEKT;
+  if (["sunce", "oblacno", "kisa", "sneg", "oluja", "magla", "noc"].indexOf(PROBA_EFEKT) >= 0) moodKlasa = PROBA_EFEKT;
   // Noć: vedro/pretežno vedro noću → mesečina umesto sunca
   if (jeNoc(tekst) && moodKlasa === "sunce") moodKlasa = "noc";
   // Doba dana: i kiša, sneg, oblačno, oluja i magla imaju svoje noćne, zorne i sumračne rečenice
