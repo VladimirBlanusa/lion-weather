@@ -1,7 +1,7 @@
 // ——— Service worker: prvi pogled i bez neta ———
 // Keš "lav-vreme-v1" nosi okvir appa; slike i ostalo se keširaju kako se koriste.
 // API pozivi (open-meteo) se ne diraju — kad nema mreze, podatke drzi localStorage kes u index.html.
-var KES = "lav-vreme-v65"; // v4.15: IntersectionObserver threshold 0.25 — canvas pauzira ranije (i na kompjuteru dok skrol vazduh)
+var KES = "lav-vreme-v66"; // v4.16: uklonjen backdrop-filter sa .vb-pecat (scroll-lag krivac) + body bg fixed
 var OKVIR = ["index.html", "manifest.json", "apple-touch-icon.png", "og-lav.jpg"];
 
 self.addEventListener("install", function(e) {
