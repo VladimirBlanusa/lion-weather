@@ -717,6 +717,12 @@
     pointer-events: none;
     z-index: 2;
   }
+  #magla-canvas {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 1;
+  }
   @keyframes ef-zrak-vrti {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
@@ -1929,6 +1935,80 @@ function kisaCanvas(vrsta, fazaDana) {
   });
 }
 
+// ——— Canvas magla engine — gusta prizemna magla, 3 talasasta sloja sa blur ———
+var MAGLA_GEN = 0;
+function maglaCanvas(vrsta, fazaDana) {
+  MAGLA_GEN++;
+  var gen = MAGLA_GEN;
+  var sc = document.getElementById("scena");
+  if (!sc) return;
+  var stari = sc.querySelector("#magla-canvas");
+  if (stari) stari.remove();
+  var cv = document.createElement("canvas");
+  cv.id = "magla-canvas";
+  sc.appendChild(cv);
+  var ctx = cv.getContext("2d");
+  var W = 0, H = 0, DPR = 1;
+  function resize() {
+    var r = sc.getBoundingClientRect();
+    W = r.width; H = r.height;
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    cv.width = Math.max(1, Math.floor(W * DPR));
+    cv.height = Math.max(1, Math.floor(H * DPR));
+    cv.style.width = W + "px";
+    cv.style.height = H + "px";
+  }
+  resize();
+  // boja magle po fazi dana
+  var boja = "210,215,222"; // dan — hladno bela
+  if (fazaDana === "noc") boja = "75,80,92";
+  else if (fazaDana === "sumrak") boja = "180,168,156";
+  else if (fazaDana === "jutro") boja = "228,214,198";
+  // 3 sloja maglenih talasa pri dnu — svaki gušci i nizi
+  var slojevi = [
+    { brzina: 0.0009, yBase: 0.42, amplituda: 22, alfa: 0.30, phase: 0.0, period: 0.011 },
+    { brzina: 0.0014, yBase: 0.58, amplituda: 18, alfa: 0.42, phase: 1.7, period: 0.014 },
+    { brzina: 0.0020, yBase: 0.74, amplituda: 16, alfa: 0.55, phase: 3.3, period: 0.017 }
+  ];
+  function loop() {
+    if (gen !== MAGLA_GEN) return;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    ctx.scale(DPR, DPR);
+    var t = performance.now();
+    ctx.filter = "blur(10px)";
+    for (var i = 0; i < slojevi.length; i++) {
+      var s = slojevi[i];
+      ctx.beginPath();
+      ctx.moveTo(0, H);
+      for (var x = 0; x <= W; x += 8) {
+        var y = s.yBase * H
+              + Math.sin((x + t * s.brzina) * s.period + s.phase) * s.amplituda
+              + Math.sin((x + t * s.brzina * 1.7) * s.period * 2.1 + s.phase) * s.amplituda * 0.4;
+        ctx.lineTo(x, y);
+      }
+      ctx.lineTo(W, H);
+      ctx.closePath();
+      var gornja = Math.max(0, (s.yBase - 0.12) * H);
+      var grd = ctx.createLinearGradient(0, gornja, 0, H);
+      grd.addColorStop(0, "rgba(" + boja + ",0)");
+      grd.addColorStop(0.25, "rgba(" + boja + "," + (s.alfa * 0.4).toFixed(2) + ")");
+      grd.addColorStop(1, "rgba(" + boja + "," + s.alfa.toFixed(2) + ")");
+      ctx.fillStyle = grd;
+      ctx.fill();
+    }
+    ctx.filter = "none";
+    requestAnimationFrame(loop);
+  }
+  loop();
+  var toR2 = null;
+  window.addEventListener("resize", function() {
+    if (gen !== MAGLA_GEN) return;
+    clearTimeout(toR2);
+    toR2 = setTimeout(resize, 200);
+  });
+}
+
 function postaviScenu(vrsta) {
   var sc = document.getElementById("scena");
   if (!sc) return;
@@ -1971,16 +2051,7 @@ function postaviScenu(vrsta) {
       sc.appendChild(s);
     }
   } else if (vrsta === "magla") {
-    // Canvas oblaci se već crtaju za maglu — dodajemo sc-oblak spanove kao dodatnu zamućenost
-    for (i = 0; i < 5; i++) {
-      s = document.createElement("span");
-      s.className = "sc-oblak";
-      s.style.width = (120 + Math.floor(Math.random() * 90)) + "px";
-      s.style.left = (-6 + i * 21 + Math.floor(Math.random() * 9)) + "%";
-      s.style.top = (6 + i * 17 + Math.floor(Math.random() * 7)) + "%";
-      s.style.animationDelay = (i * 1.1).toFixed(2) + "s";
-      sc.appendChild(s);
-    }
+    maglaCanvas(vrsta, faza);
   } else if (vrsta === "noc") {
     // noć bez oblaka — zvezde (oblaciCanvas se već vratio rano)
     for (i = 0; i < 28; i++) {
