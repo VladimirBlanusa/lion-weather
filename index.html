@@ -2394,7 +2394,7 @@ var SCENA_VIDANA = true;
   if (card && "IntersectionObserver" in window) {
     new IntersectionObserver(function(entries) {
       for (var i = 0; i < entries.length; i++) SCENA_VIDANA = entries[i].isIntersecting;
-    }, { threshold: 0.01 }).observe(card);
+    }, { threshold: 0.25 }).observe(card);
   }
 })();
 
