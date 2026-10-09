@@ -1860,6 +1860,80 @@ function oblaciCanvas(vrsta, fazaDana) {
   });
 }
 
+
+// ——— Canvas kiša engine — tanke kapi pod uglom, parallax dubina ———
+var KISA_GEN = 0, KISA_RAF = null;
+function kisaCanvas(vrsta, fazaDana) {
+  KISA_GEN++;
+  var gen = KISA_GEN;
+  var sc = document.getElementById("scena");
+  if (!sc) return;
+  var stari = sc.querySelector("#kisa-canvas");
+  if (stari) stari.remove();
+  var cv = document.createElement("canvas");
+  cv.id = "kisa-canvas";
+  sc.appendChild(cv);
+  var ctx = cv.getContext("2d");
+  var W = 0, H = 0, DPR = 1;
+  function resize() {
+    var r = sc.getBoundingClientRect();
+    W = r.width; H = r.height;
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    cv.width = Math.max(1, Math.floor(W * DPR));
+    cv.height = Math.max(1, Math.floor(H * DPR));
+    cv.style.width = W + "px";
+    cv.style.height = H + "px";
+  }
+  resize();
+  // vetar — ugao kapi (oluja jači vetar)
+  var vetarUgao = vrsta === "oluja" ? 0.35 : 0.18;
+  var brzinaBaza = vrsta === "oluja" ? 14 : 9;
+  var brojKapi = vrsta === "oluja" ? 180 : 120;
+  // boja kapi — hladno plavkasto
+  var boja = vrsta === "oluja" ? "180,205,245" : "195,220,250";
+  // kap: x, y, duzina, brzina, alfa, debljina
+  var kapi = [];
+  for (var i = 0; i < brojKapi; i++) {
+    var dubina = Math.random();
+    kapi.push({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      duz: 8 + dubina * 14,
+      brz: brzinaBaza * (0.6 + dubina * 0.8),
+      alfa: 0.3 + dubina * 0.5,
+      deb: 0.8 + dubina * 1.2
+    });
+  }
+  function loop() {
+    if (gen !== KISA_GEN) return;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    ctx.scale(DPR, DPR);
+    var dx = Math.sin(vetarUgao), dy = Math.cos(vetarUgao);
+    for (var i = 0; i < kapi.length; i++) {
+      var k = kapi[i];
+      k.x += dx * k.brz;
+      k.y += dy * k.brz;
+      if (k.y > H + 20) { k.y = -20; k.x = Math.random() * W; }
+      if (k.x > W + 20) k.x = -20;
+      ctx.strokeStyle = "rgba(" + boja + "," + k.alfa + ")";
+      ctx.lineWidth = k.deb;
+      ctx.beginPath();
+      ctx.moveTo(k.x, k.y);
+      ctx.lineTo(k.x + dx * k.duz, k.y + dy * k.duz);
+      ctx.stroke();
+    }
+    KISA_RAF = requestAnimationFrame(loop);
+  }
+  loop();
+  var toR = null;
+  window.addEventListener("resize", function() {
+    if (gen !== KISA_GEN) return;
+    clearTimeout(toR);
+    toR = setTimeout(resize, 200);
+  });
+}
+
 function postaviScenu(vrsta) {
   var sc = document.getElementById("scena");
   if (!sc) return;
@@ -1877,19 +1951,8 @@ function postaviScenu(vrsta) {
   oblaciCanvas(vrsta, faza);
 
   if (vrsta === "kisa" || vrsta === "oluja") {
-    // kišne kapi padaju preko oblaka
-    var broj = vrsta === "kisa" ? 26 : 30;
-    for (i = 0; i < broj; i++) {
-      s = document.createElement("span");
-      s.className = "sc-kapa";
-      s.innerHTML = KAP_SVG;
-      s.style.left = Math.floor(Math.random() * 100) + "%";
-      s.style.height = (20 + Math.floor(Math.random() * 10)) + "px";
-      s.style.animationDelay = (Math.random() * 1.2).toFixed(2) + "s";
-      s.style.animationDuration = (2.4 + Math.random() * 0.9).toFixed(2) + "s";
-      if (vrsta === "oluja") s.style.animationDuration = "1.7s";
-      sc.appendChild(s);
-    }
+    // Canvas kiša — tanke kapi pod uglom, parallax dubina
+    kisaCanvas(vrsta, document.body.classList.contains("je-noc") ? "noc" : "dan");
     var kapice = vrsta === "kisa" ? 9 : 12;
     for (i = 0; i < kapice; i++) {
       s = document.createElement("span");
