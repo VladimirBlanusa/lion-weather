@@ -599,11 +599,13 @@
     position: absolute; inset: 0;
     background: rgba(255,204,96,.22);
     opacity: 0;
+    z-index: 3;
   }
   /* Munja-kosa: razgranata munja koju grmljavina() crta za svaki udar */
   .sc-munja {
     position: absolute; top: 3%; width: 140px; height: 220px;
     opacity: 0; pointer-events: none;
+    z-index: 3;
   }
   .sc-munja svg { width: 100%; height: 100%; overflow: visible; }
   /* Živo nebo: oblaci tiho pulsiraju zlatno između udara */
@@ -611,6 +613,7 @@
     position: absolute; inset: 0; pointer-events: none;
     background: radial-gradient(ellipse at 50% 0%, rgba(255,190,60,.14), rgba(255,190,60,0) 65%);
     animation: sc-nebo-dise 5.6s ease-in-out infinite;
+    z-index: 1;
   }
   @keyframes sc-nebo-dise {
     0%, 100% { opacity: .3; }
@@ -1944,18 +1947,7 @@ function postaviScenu(vrsta) {
 
   if (vrsta === "kisa" || vrsta === "oluja") {
     kisaCanvas(vrsta, document.body.classList.contains("je-noc") ? "noc" : "dan");
-    var kapice = vrsta === "kisa" ? 9 : 12;
-    for (i = 0; i < kapice; i++) {
-      s = document.createElement("span");
-      s.className = "sc-kap" + (Math.random() < .5 ? "" : " levo");
-      s.style.left = (3 + Math.floor(Math.random() * 93)) + "%";
-      s.style.top = (1 + Math.floor(Math.random() * 26)) + "%";
-      s.style.width = (8 + Math.floor(Math.random() * 5)) + "px";
-      s.style.height = (11 + Math.floor(Math.random() * 5)) + "px";
-      s.style.animationDuration = (vrsta === "kisa" ? 7 + Math.random() * 4 : 4 + Math.random() * 2.5).toFixed(2) + "s";
-      s.style.animationDelay = (-Math.random() * 8).toFixed(2) + "s";
-      sc.appendChild(s);
-    }
+    // sc-kap (stare CSS kapi) uklonjeno — kisaCanvas crta pravu kišu
     if (vrsta === "oluja") {
       var b = document.createElement("div");
       b.className = "sc-blesak";
