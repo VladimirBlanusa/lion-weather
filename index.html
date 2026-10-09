@@ -529,23 +529,23 @@
   body.mood-sunce.je-jutro .card  { background: linear-gradient(180deg, rgba(128, 158, 204, .55), rgba(26, 50, 92, .8)); }
   body.mood-sunce.je-sumrak .card { background: linear-gradient(180deg, rgba(166, 104, 80, .6), rgba(48, 34, 62, .84)); }
   /* ——— Zlatna slova za svetle pozadine (magla, oblačno) — bele/sive se gube, zlatno se ističe ——— */
-  .mood-magla #temp, .mood-oblacno #temp,
-  .mood-magla #grad, .mood-oblacno #grad,
-  .mood-magla .meta span b, .mood-oblacno .meta span b {
+  .mood-magla #temp, .mood-oblacno #temp, .mood-sunce #temp,
+  .mood-magla #grad, .mood-oblacno #grad, .mood-sunce #grad,
+  .mood-magla .meta span b, .mood-oblacno .meta span b, .mood-sunce .meta span b {
     color: var(--gold);
     text-shadow: 0 2px 14px rgba(0,0,0,.62);
   }
-  .mood-magla #mood, .mood-oblacno #mood {
+  .mood-magla #mood, .mood-oblacno #mood, .mood-sunce #mood {
     color: var(--gold);
     text-shadow: 0 2px 14px rgba(0,0,0,.7);
   }
-  .mood-magla #kisa-paznja, .mood-oblacno #kisa-paznja {
+  .mood-magla #kisa-paznja, .mood-oblacno #kisa-paznja, .mood-sunce #kisa-paznja {
     color: var(--gold);
     text-shadow: 0 2px 12px rgba(0,0,0,.55);
   }
-  .mood-magla #desc, .mood-oblacno #desc,
-  .mood-magla .meta, .mood-oblacno .meta,
-  .mood-magla .meta-detalji, .mood-oblacno .meta-detalji {
+  .mood-magla #desc, .mood-oblacno #desc, .mood-sunce #desc,
+  .mood-magla .meta, .mood-oblacno #meta, .mood-sunce .meta,
+  .mood-magla .meta-detalji, .mood-oblacno .meta-detalji, .mood-sunce .meta-detalji {
     color: var(--gold);
     text-shadow: 0 2px 12px rgba(0,0,0,.55);
   }
@@ -2306,19 +2306,19 @@ function sunceCanvas(vrsta, fazaDana) {
     ctx.fillStyle = grd;
     ctx.fillRect(0, 0, W, H);
     // zraci — 12 zrakova, sporo rotacija
-    var ugao = t * 0.04;
+    var ugao = t * 0.018;
     ctx.save();
     ctx.translate(suncex, suncey);
     ctx.rotate(ugao);
-    ctx.strokeStyle = "rgba(" + bojaZrak + "," + (0.45 * puls).toFixed(3) + ")";
-    ctx.lineWidth = 2;
+    ctx.strokeStyle = "rgba(" + bojaZrak + "," + (0.6 * puls).toFixed(3) + ")";
+    ctx.lineWidth = 2.5;
     ctx.lineCap = "round";
     var brojZraka = 12;
     for (var i = 0; i < brojZraka; i++) {
       ctx.rotate((Math.PI * 2) / brojZraka);
       ctx.beginPath();
-      ctx.moveTo(R * 1.25, 0);
-      ctx.lineTo(R * 2.6, 0);
+      ctx.moveTo(R * 1.2, 0);
+      ctx.lineTo(R * 3.8, 0);
       ctx.stroke();
     }
     ctx.restore();
