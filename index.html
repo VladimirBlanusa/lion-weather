@@ -528,24 +528,24 @@
   /* Zora i sumrak: kartica topla na ivici dana */
   body.mood-sunce.je-jutro .card  { background: linear-gradient(180deg, rgba(128, 158, 204, .55), rgba(26, 50, 92, .8)); }
   body.mood-sunce.je-sumrak .card { background: linear-gradient(180deg, rgba(166, 104, 80, .6), rgba(48, 34, 62, .84)); }
-  /* ——— Zlatna slova za svetle pozadine (magla, oblačno) — bele/sive se gube, zlatno se ističe ——— */
-  .mood-magla #temp, .mood-oblacno #temp, .mood-sunce #temp,
-  .mood-magla #grad, .mood-oblacno #grad, .mood-sunce #grad,
-  .mood-magla .meta span b, .mood-oblacno .meta span b, .mood-sunce .meta span b {
+    /* ——— Zlatna slova za SVE vremenske uslove — konzistentan premium izgled ——— */
+  .mood-magla #temp, .mood-oblacno #temp, .mood-sunce #temp, .mood-kisa #temp, .mood-sneg #temp, .mood-oluja #temp, .mood-noc #temp,
+  .mood-magla #grad, .mood-oblacno #grad, .mood-sunce #grad, .mood-kisa #grad, .mood-sneg #grad, .mood-oluja #grad, .mood-noc #grad,
+  .mood-magla .meta span b, .mood-oblacno .meta span b, .mood-sunce .meta span b, .mood-kisa .meta span b, .mood-sneg .meta span b, .mood-oluja .meta span b, .mood-noc .meta span b {
     color: var(--gold);
     text-shadow: 0 2px 14px rgba(0,0,0,.62);
   }
-  .mood-magla #mood, .mood-oblacno #mood, .mood-sunce #mood {
+  .mood-magla #mood, .mood-oblacno #mood, .mood-sunce #mood, .mood-kisa #mood, .mood-sneg #mood, .mood-oluja #mood, .mood-noc #mood {
     color: var(--gold);
     text-shadow: 0 2px 14px rgba(0,0,0,.7);
   }
-  .mood-magla #kisa-paznja, .mood-oblacno #kisa-paznja, .mood-sunce #kisa-paznja {
+  .mood-magla #kisa-paznja, .mood-oblacno #kisa-paznja, .mood-sunce #kisa-paznja, .mood-kisa #kisa-paznja, .mood-sneg #kisa-paznja, .mood-oluja #kisa-paznja, .mood-noc #kisa-paznja {
     color: var(--gold);
     text-shadow: 0 2px 12px rgba(0,0,0,.55);
   }
-  .mood-magla #desc, .mood-oblacno #desc, .mood-sunce #desc,
-  .mood-magla .meta, .mood-oblacno #meta, .mood-sunce .meta,
-  .mood-magla .meta-detalji, .mood-oblacno .meta-detalji, .mood-sunce .meta-detalji {
+  .mood-magla #desc, .mood-oblacno #desc, .mood-sunce #desc, .mood-kisa #desc, .mood-sneg #desc, .mood-oluja #desc, .mood-noc #desc,
+  .mood-magla .meta, .mood-oblacno .meta, .mood-sunce .meta, .mood-kisa .meta, .mood-sneg .meta, .mood-oluja .meta, .mood-noc .meta,
+  .mood-magla .meta-detalji, .mood-oblacno .meta-detalji, .mood-sunce .meta-detalji, .mood-kisa .meta-detalji, .mood-sneg .meta-detalji, .mood-oluja .meta-detalji, .mood-noc .meta-detalji {
     color: var(--gold);
     text-shadow: 0 2px 12px rgba(0,0,0,.55);
   }
