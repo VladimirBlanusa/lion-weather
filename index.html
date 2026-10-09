@@ -1911,10 +1911,10 @@ function kisaCanvas(vrsta, fazaDana) {
     cv.style.height = H + "px";
   }
   resize();
-  var vetarUgao = vrsta === "oluja" ? 0.35 : 0.18;
-  var brzinaBaza = vrsta === "oluja" ? 14 : 9;
-  var brojKapi = vrsta === "oluja" ? 180 : 120;
-  var boja = vrsta === "oluja" ? "180,205,245" : "195,220,250";
+  var vetarUgao = vrsta === "oluja" ? 0.35 : (vrsta === "maglovita" ? 0.12 : 0.18);
+  var brzinaBaza = vrsta === "oluja" ? 14 : (vrsta === "maglovita" ? 7 : 9);
+  var brojKapi = vrsta === "oluja" ? 180 : (vrsta === "maglovita" ? 160 : 120);
+  var boja = vrsta === "oluja" ? "180,205,245" : (vrsta === "maglovita" ? "230,245,255" : "195,220,250");
   var kapi = [];
   for (var i = 0; i < brojKapi; i++) {
     var dubina = Math.random();
@@ -1922,8 +1922,8 @@ function kisaCanvas(vrsta, fazaDana) {
       x: Math.random() * W, y: Math.random() * H,
       duz: 8 + dubina * 14,
       brz: brzinaBaza * (0.6 + dubina * 0.8),
-      alfa: 0.3 + dubina * 0.5,
-      deb: 0.8 + dubina * 1.2
+      alfa: vrsta === "maglovita" ? (0.5 + dubina * 0.5) : (0.3 + dubina * 0.5),
+      deb: vrsta === "maglovita" ? (1.3 + dubina * 1.3) : (0.8 + dubina * 1.2)
     });
   }
   function loop() {
@@ -2075,7 +2075,7 @@ function postaviScenu(vrsta) {
     maglaCanvas(vrsta, faza);
     // Kombinacija: magla + kiša (maglovita kiša) — test ?proba=1&efekt=magla&kisa=1
     if (typeof PROBA !== "undefined" && PROBA.get("kisa") === "1") {
-      kisaCanvas("kisa", document.body.classList.contains("je-noc") ? "noc" : "dan");
+      kisaCanvas("maglovita", document.body.classList.contains("je-noc") ? "noc" : "dan");
     }
   } else if (vrsta === "noc") {
     // noć bez oblaka — zvezde (oblaciCanvas se već vratio rano)
