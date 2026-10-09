@@ -190,7 +190,7 @@
     62% { opacity: .06; } 100% { opacity: 0; }
   }
   .ef-blesak-zlatni.udar, .sc-blesak.udar, .sc-munja.udar {
-    animation: bljesak-udar .5s linear;
+    animation: bljesak-udar .75s linear;
   }
   @keyframes ef-pluta {
     0%, 100% { transform: translateX(-4px); opacity: .7; }
@@ -1741,28 +1741,28 @@ function oblaciCanvas(vrsta, fazaDana) {
     slojevi = [];
     // pozadina: veliki, zamućeni, tamni, sporo
     slojevi.push(napraviSloj({
-      n: 4, brzina: .003, skala: 1.8, alfa: .55, blur: 8,
+      n: 4, brzina: .0018, skala: 1.8, alfa: .55, blur: 8,
       yBase: .15, yRazmak: .12, rMin: .22, rRazmak: .14
     }));
     // sredina: umerena veličina, umerena brzina
     slojevi.push(napraviSloj({
-      n: 5, brzina: .006, skala: 1.3, alfa: .72, blur: 4,
+      n: 5, brzina: .0036, skala: 1.3, alfa: .72, blur: 4,
       yBase: .28, yRazmak: .15, rMin: .16, rRazmak: .12
     }));
     // prednji: manji, oštriji, brži
     slojevi.push(napraviSloj({
-      n: 6, brzina: .01, skala: .9, alfa: .88, blur: 1,
+      n: 6, brzina: .006, skala: .9, alfa: .88, blur: 1,
       yBase: .45, yRazmak: .18, rMin: .12, rRazmak: .1
     }));
     // magla ima samo dva široka sloja
     if (vrsta === "magla") {
       slojevi = [];
       slojevi.push(napraviSloj({
-        n: 3, brzina: .002, skala: 2.5, alfa: .5, blur: 12,
+        n: 3, brzina: .0012, skala: 2.5, alfa: .5, blur: 12,
         yBase: .3, yRazmak: .2, rMin: .3, rRazmak: .15
       }));
       slojevi.push(napraviSloj({
-        n: 4, brzina: .004, skala: 1.8, alfa: .6, blur: 8,
+        n: 4, brzina: .0024, skala: 1.8, alfa: .6, blur: 8,
         yBase: .55, yRazmak: .15, rMin: .2, rRazmak: .12
       }));
     }
@@ -2039,7 +2039,7 @@ function grmCiklus(gen) {
   [blesk, munja, ef].forEach(function(el) {
     if (el) { el.classList.remove("udar"); void el.offsetWidth; el.classList.add("udar"); }
   });
-  setTimeout(function() { grmCiklus(gen); }, 3800 + Math.random() * 5200);
+  setTimeout(function() { grmCiklus(gen); }, 6000 + Math.random() * 8000);
 }
 
 function pokreniGrmljavinu() {

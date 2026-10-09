@@ -1,7 +1,7 @@
 // ——— Service worker: prvi pogled i bez neta ———
 // Keš "lav-vreme-v1" nosi okvir appa; slike i ostalo se keširaju kako se koriste.
 // API pozivi (open-meteo) se ne diraju — kad nema mreze, podatke drzi localStorage kes u index.html.
-var KES = "lav-vreme-v36"; // v3.86: Canvas oluja — uklonjen sc-kap duplikat, z-index popravka da munje/blesak budu iznad canvas kiše
+var KES = "lav-vreme-v37"; // v3.87: usporeni oblaci ~40%, munje ređe (6-14s) i duži bljesak (.75s)
 var OKVIR = ["index.html", "manifest.json", "apple-touch-icon.png", "og-lav.jpg"];
 
 self.addEventListener("install", function(e) {
