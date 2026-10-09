@@ -744,6 +744,12 @@
     pointer-events: none;
     z-index: 1;
   }
+  #sneg-canvas {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 2;
+  }
   @keyframes ef-zrak-vrti {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
@@ -2030,6 +2036,109 @@ function maglaCanvas(vrsta, fazaDana) {
   });
 }
 
+// ——— Canvas sneg engine — prave razgranate pahulje (6 krakova), parallax, vrtlozenje, rotacija ———
+var SNEG_GEN = 0;
+function snegCanvas(vrsta, fazaDana) {
+  SNEG_GEN++;
+  var gen = SNEG_GEN;
+  var sc = document.getElementById("scena");
+  if (!sc) return;
+  var stari = sc.querySelector("#sneg-canvas");
+  if (stari) stari.remove();
+  var cv = document.createElement("canvas");
+  cv.id = "sneg-canvas";
+  sc.appendChild(cv);
+  var ctx = cv.getContext("2d");
+  var W = 0, H = 0, DPR = 1;
+  function resize() {
+    var r = sc.getBoundingClientRect();
+    W = r.width; H = r.height;
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    cv.width = Math.max(1, Math.floor(W * DPR));
+    cv.height = Math.max(1, Math.floor(H * DPR));
+    cv.style.width = W + "px";
+    cv.style.height = H + "px";
+  }
+  resize();
+  // boja pahulja po fazi
+  var boja = fazaDana === "noc" ? "205,222,255" : "255,255,255";
+  // 80 pahulja — parallax dubina, veca = brza i svetlija
+  var pahulje = [];
+  for (var i = 0; i < 80; i++) {
+    var dubina = Math.random();
+    pahulje.push({
+      x: Math.random() * W, y: Math.random() * H,
+      r: 1 + dubina * 5.5,            // 1–6.5px
+      brz: 0.5 + dubina * 1.6,        // padanje
+      drift: (Math.random() - .5) * .4, // horizontalno talasanje
+      alfa: 0.4 + dubina * 0.6,
+      rot: Math.random() * Math.PI * 2,
+      rotBrz: (Math.random() - .5) * 0.015,
+      phase: Math.random() * Math.PI * 2,
+      razgranata: dubina > 0.55       // vece pahulje su razgranate
+    });
+  }
+  function nacrtajPahulju(px, py, p) {
+    ctx.save();
+    ctx.translate(px, py);
+    ctx.rotate(p.rot);
+    if (p.razgranata) {
+      // razgranata pahulja — 6 krakova sa granama
+      ctx.strokeStyle = "rgba(" + boja + "," + p.alfa + ")";
+      ctx.lineWidth = Math.max(0.6, p.r * 0.16);
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      for (var k = 0; k < 6; k++) {
+        ctx.rotate(Math.PI / 3);
+        ctx.moveTo(0, 0);
+        ctx.lineTo(0, p.r);
+        // grane na sredini i pri vrhu
+        ctx.moveTo(0, p.r * 0.5);
+        ctx.lineTo(p.r * 0.32, p.r * 0.7);
+        ctx.moveTo(0, p.r * 0.5);
+        ctx.lineTo(-p.r * 0.32, p.r * 0.7);
+        ctx.moveTo(0, p.r * 0.78);
+        ctx.lineTo(p.r * 0.2, p.r * 0.9);
+        ctx.moveTo(0, p.r * 0.78);
+        ctx.lineTo(-p.r * 0.2, p.r * 0.9);
+      }
+      ctx.stroke();
+    } else {
+      // jednostavna tacka sa sjajem
+      ctx.fillStyle = "rgba(" + boja + "," + p.alfa + ")";
+      ctx.beginPath();
+      ctx.arc(0, 0, Math.max(0.5, p.r), 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+  function loop() {
+    if (gen !== SNEG_GEN) return;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    ctx.scale(DPR, DPR);
+    var t = performance.now() * 0.001;
+    for (var i = 0; i < pahulje.length; i++) {
+      var p = pahulje[i];
+      p.y += p.brz;
+      p.x += p.drift + Math.sin(t + p.phase) * 0.35; // lagano talasanje
+      p.rot += p.rotBrz;
+      if (p.y > H + 12) { p.y = -12; p.x = Math.random() * W; }
+      if (p.x > W + 12) p.x = -12;
+      if (p.x < -12) p.x = W + 12;
+      nacrtajPahulju(p.x, p.y, p);
+    }
+    requestAnimationFrame(loop);
+  }
+  loop();
+  var toR3 = null;
+  window.addEventListener("resize", function() {
+    if (gen !== SNEG_GEN) return;
+    clearTimeout(toR3);
+    toR3 = setTimeout(resize, 200);
+  });
+}
+
 function postaviScenu(vrsta) {
   var sc = document.getElementById("scena");
   if (!sc) return;
@@ -2063,14 +2172,7 @@ function postaviScenu(vrsta) {
       pokreniGrmljavinu();
     }
   } else if (vrsta === "sneg") {
-    // pahulje padaju preko oblaka
-    for (i = 0; i < 28; i++) {
-      s = document.createElement("span");
-      s.className = "sc-pahulja";
-      s.style.left = Math.floor(Math.random() * 100) + "%";
-      s.style.animationDelay = (Math.random() * 4.5).toFixed(2) + "s";
-      sc.appendChild(s);
-    }
+    snegCanvas(vrsta, faza);
   } else if (vrsta === "magla") {
     maglaCanvas(vrsta, faza);
     // Kombinacija: magla + kiša (maglovita kiša) — test ?proba=1&efekt=magla&kisa=1
