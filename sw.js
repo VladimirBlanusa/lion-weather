@@ -1,7 +1,7 @@
 // ——— Service worker: prvi pogled i bez neta ———
 // Keš "lav-vreme-v1" nosi okvir appa; slike i ostalo se keširaju kako se koriste.
 // API pozivi (open-meteo) se ne diraju — kad nema mreze, podatke drzi localStorage kes u index.html.
-var KES = "lav-vreme-v58"; // v4.08: Bug fix — postaviScenu se zvao PRE postavljanja je-sumrak/noc/jutro klasa, sad POSLE (faze konačno rade)
+var KES = "lav-vreme-v59"; // v4.09: Kiša sumrak boja — topla amber/breskva (230,180,140) umesto roze, prirodnije za sumrak sunce
 var OKVIR = ["index.html", "manifest.json", "apple-touch-icon.png", "og-lav.jpg"];
 
 self.addEventListener("install", function(e) {
