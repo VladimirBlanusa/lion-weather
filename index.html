@@ -708,6 +708,12 @@
     pointer-events: none;
     z-index: 0;
   }
+  #kisa-canvas {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 2;
+  }
   @keyframes ef-zrak-vrti {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
@@ -1732,7 +1738,7 @@ function oblaciCanvas(vrsta, fazaDana) {
     slojevi = [];
     // pozadina: veliki, zamućeni, tamni, sporo
     slojevi.push(napraviSloj({
-      n: 4, brzina: .006, skala: 1.8, alfa: .38, blur: 10,
+      n: 4, brzina: .003, skala: 1.8, alfa: .55, blur: 8,
       yBase: .15, yRazmak: .12, rMin: .22, rRazmak: .14
     }));
     // sredina: umerena veličina, umerena brzina
@@ -1742,14 +1748,14 @@ function oblaciCanvas(vrsta, fazaDana) {
     }));
     // prednji: manji, oštriji, brži
     slojevi.push(napraviSloj({
-      n: 6, brzina: .005, skala: .9, alfa: .95, blur: 0,
+      n: 6, brzina: .01, skala: .9, alfa: .88, blur: 1,
       yBase: .45, yRazmak: .18, rMin: .12, rRazmak: .1
     }));
     // magla ima samo dva široka sloja
     if (vrsta === "magla") {
       slojevi = [];
       slojevi.push(napraviSloj({
-        n: 3, brzina: .003, skala: 2.5, alfa: .35, blur: 14,
+        n: 3, brzina: .002, skala: 2.5, alfa: .5, blur: 12,
         yBase: .3, yRazmak: .2, rMin: .3, rRazmak: .15
       }));
       slojevi.push(napraviSloj({
@@ -1771,7 +1777,7 @@ function oblaciCanvas(vrsta, fazaDana) {
 
     // nacrtaj nekoliko preklopljenih "blobova" sa fbm perturbacijom
     // svaki blob ima gradijent: vrh (tamno) → donja ivica (svetlo)
-    var blobovi = 7;
+    var blobovi = 5;
     for (var b = 0; b < blobovi; b++) {
       var bx = (b - 1) * r * .45;
       var by = (b - 1) * r * .15 * (b % 2 ? -1 : 1);
@@ -1801,15 +1807,6 @@ function oblaciCanvas(vrsta, fazaDana) {
       g.addColorStop(1,    "rgba(" + cSvet[0] + "," + cSvet[1] + "," + cSvet[2] + "," + (alfa * .95) + ")");
       ctx2.fillStyle = g;
       ctx2.fill();
-      // tamna donja senka — osećaj težine i volumena
-      ctx2.save();
-      ctx2.globalCompositeOperation = "multiply";
-      var sg = ctx2.createLinearGradient(0, br * .3, 0, br * .62);
-      sg.addColorStop(0, "rgba(0,0,0,0)");
-      sg.addColorStop(1, "rgba(0,0,0,.18)");
-      ctx2.fillStyle = sg;
-      ctx2.fill();
-      ctx2.restore();
     }
     ctx2.restore();
   }
@@ -1860,9 +1857,8 @@ function oblaciCanvas(vrsta, fazaDana) {
   });
 }
 
-
 // ——— Canvas kiša engine — tanke kapi pod uglom, parallax dubina ———
-var KISA_GEN = 0, KISA_RAF = null;
+var KISA_GEN = 0;
 function kisaCanvas(vrsta, fazaDana) {
   KISA_GEN++;
   var gen = KISA_GEN;
@@ -1885,19 +1881,15 @@ function kisaCanvas(vrsta, fazaDana) {
     cv.style.height = H + "px";
   }
   resize();
-  // vetar — ugao kapi (oluja jači vetar)
   var vetarUgao = vrsta === "oluja" ? 0.35 : 0.18;
   var brzinaBaza = vrsta === "oluja" ? 14 : 9;
   var brojKapi = vrsta === "oluja" ? 180 : 120;
-  // boja kapi — hladno plavkasto
   var boja = vrsta === "oluja" ? "180,205,245" : "195,220,250";
-  // kap: x, y, duzina, brzina, alfa, debljina
   var kapi = [];
   for (var i = 0; i < brojKapi; i++) {
     var dubina = Math.random();
     kapi.push({
-      x: Math.random() * W,
-      y: Math.random() * H,
+      x: Math.random() * W, y: Math.random() * H,
       duz: 8 + dubina * 14,
       brz: brzinaBaza * (0.6 + dubina * 0.8),
       alfa: 0.3 + dubina * 0.5,
@@ -1923,7 +1915,7 @@ function kisaCanvas(vrsta, fazaDana) {
       ctx.lineTo(k.x + dx * k.duz, k.y + dy * k.duz);
       ctx.stroke();
     }
-    KISA_RAF = requestAnimationFrame(loop);
+    requestAnimationFrame(loop);
   }
   loop();
   var toR = null;
@@ -1951,7 +1943,6 @@ function postaviScenu(vrsta) {
   oblaciCanvas(vrsta, faza);
 
   if (vrsta === "kisa" || vrsta === "oluja") {
-    // Canvas kiša — tanke kapi pod uglom, parallax dubina
     kisaCanvas(vrsta, document.body.classList.contains("je-noc") ? "noc" : "dan");
     var kapice = vrsta === "kisa" ? 9 : 12;
     for (i = 0; i < kapice; i++) {
