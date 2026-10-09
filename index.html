@@ -1933,6 +1933,10 @@ function kisaCanvas(vrsta, fazaDana) {
   var brzinaBaza = vrsta === "oluja" ? 14 : (vrsta === "maglovita" ? 7 : 9);
   var brojKapi = vrsta === "oluja" ? 180 : (vrsta === "maglovita" ? 160 : 120);
   var boja = vrsta === "oluja" ? "180,205,245" : (vrsta === "maglovita" ? "230,245,255" : "195,220,250");
+  // faze dana menjaju nijansu kiše
+  if (fazaDana === "noc") boja = "120,140,175";
+  else if (fazaDana === "sumrak") boja = "195,180,185";
+  else if (fazaDana === "jutro") boja = "220,205,200";
   var kapi = [];
   for (var i = 0; i < brojKapi; i++) {
     var dubina = Math.random();
@@ -2073,7 +2077,11 @@ function snegCanvas(vrsta, fazaDana) {
   }
   resize();
   // boja pahulja po fazi
-  var boja = fazaDana === "noc" ? "205,222,255" : "255,255,255";
+  var boja;
+  if (fazaDana === "noc") boja = "205,222,255";
+  else if (fazaDana === "sumrak") boja = "255,235,230";
+  else if (fazaDana === "jutro") boja = "255,248,235";
+  else boja = "255,255,255";
   // 80 pahulja — parallax dubina, veca = brza i svetlija
   var pahulje = [];
   for (var i = 0; i < 80; i++) {
@@ -2390,7 +2398,7 @@ function postaviScenu(vrsta) {
   oblaciCanvas(vrsta, faza);
 
   if (vrsta === "kisa" || vrsta === "oluja") {
-    kisaCanvas(vrsta, document.body.classList.contains("je-noc") ? "noc" : "dan");
+    kisaCanvas(vrsta, faza);
     // sc-kap (stare CSS kapi) uklonjeno — kisaCanvas crta pravu kišu
     if (vrsta === "oluja") {
       var b = document.createElement("div");
@@ -2411,7 +2419,7 @@ function postaviScenu(vrsta) {
     maglaCanvas(vrsta, faza);
     // Kombinacija: magla + kiša (maglovita kiša) — test ?proba=1&efekt=magla&kisa=1
     if (typeof PROBA !== "undefined" && PROBA.get("kisa") === "1") {
-      kisaCanvas("maglovita", document.body.classList.contains("je-noc") ? "noc" : "dan");
+      kisaCanvas("maglovita", faza);
     }
   } else if (vrsta === "sunce") {
     sunceCanvas(vrsta, faza);
