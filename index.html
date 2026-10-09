@@ -2194,18 +2194,52 @@ function zvezdeCanvas(vrsta, fazaDana) {
       // treperenje — sinusoida po fazi
       var treptaj = 0.5 + 0.5 * Math.sin(t * z.brzTreptanja + z.phase);
       var alfa = z.alfaBaza * (0.35 + 0.65 * treptaj);
-      // sjaj (vece zvezde) — siri krug sa manjom alfa
-      if (z.sjaj) {
-        ctx.fillStyle = "rgba(255,212,130," + (alfa * 0.28).toFixed(3) + ")";
-        ctx.beginPath();
-        ctx.arc(z.x, z.y, z.r * 3.2, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      // jezgro zvezde
-      ctx.fillStyle = "rgba(255,233,168," + Math.min(1, alfa).toFixed(3) + ")";
+      // krstasta zvezdica — 4 zraka (romb) + sjajan beli centar
+      ctx.save();
+      ctx.translate(z.x, z.y);
+      // zraci — vertikalni i horizontalni romb
+      ctx.fillStyle = "rgba(255,233,168," + alfa.toFixed(3) + ")";
       ctx.beginPath();
-      ctx.arc(z.x, z.y, Math.max(0.4, z.r), 0, Math.PI * 2);
+      ctx.moveTo(0, -z.r * 2.6);
+      ctx.lineTo(z.r * 0.28, 0);
+      ctx.lineTo(0, z.r * 2.6);
+      ctx.lineTo(-z.r * 0.28, 0);
+      ctx.closePath();
       ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(-z.r * 2.6, 0);
+      ctx.lineTo(0, z.r * 0.28);
+      ctx.lineTo(z.r * 2.6, 0);
+      ctx.lineTo(0, -z.r * 0.28);
+      ctx.closePath();
+      ctx.fill();
+      // dijagonalni zraci (tanji) — samo za vece zvezde
+      if (z.sjaj) {
+        ctx.save();
+        ctx.rotate(Math.PI / 4);
+        ctx.fillStyle = "rgba(255,225,150," + (alfa * 0.7).toFixed(3) + ")";
+        ctx.beginPath();
+        ctx.moveTo(0, -z.r * 1.8);
+        ctx.lineTo(z.r * 0.18, 0);
+        ctx.lineTo(0, z.r * 1.8);
+        ctx.lineTo(-z.r * 0.18, 0);
+        ctx.closePath();
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(-z.r * 1.8, 0);
+        ctx.lineTo(0, z.r * 0.18);
+        ctx.lineTo(z.r * 1.8, 0);
+        ctx.lineTo(0, -z.r * 0.18);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+      // sjajan beli centar
+      ctx.fillStyle = "rgba(255,255,255," + Math.min(1, alfa * 1.4).toFixed(3) + ")";
+      ctx.beginPath();
+      ctx.arc(0, 0, Math.max(0.3, z.r * 0.5), 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
     }
     requestAnimationFrame(loop);
   }
