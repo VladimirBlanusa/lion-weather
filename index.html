@@ -2297,28 +2297,45 @@ function sunceCanvas(vrsta, fazaDana) {
     var suncey = H * 0.22;
     var R = Math.max(6, Math.min(W, H) * 0.07);  // poluprecnik sunca
     var puls = 0.82 + 0.18 * Math.sin(t * 0.7);  // pulsiranje
-    // sjaj oko sunca — radial gradient (mekano zlatno svetlo)
+    // sjaj oko sunca — radial gradient (toplo zlatno-narandžasto svetlo)
     var sjajR = R * 7 * puls;
     var grd = ctx.createRadialGradient(suncex, suncey, 0, suncex, suncey, sjajR);
-    grd.addColorStop(0, "rgba(" + bojaSjaj + "," + (0.32 * puls).toFixed(3) + ")");
-    grd.addColorStop(0.25, "rgba(" + bojaSjaj + "," + (0.14 * puls).toFixed(3) + ")");
+    grd.addColorStop(0, "rgba(" + bojaSjaj + "," + (0.42 * puls).toFixed(3) + ")");
+    grd.addColorStop(0.25, "rgba(" + bojaSjaj + "," + (0.18 * puls).toFixed(3) + ")");
     grd.addColorStop(1, "rgba(" + bojaSjaj + ",0)");
     ctx.fillStyle = grd;
     ctx.fillRect(0, 0, W, H);
-    // zraci — 12 zrakova, sporo rotacija
+    // zraci — 18 zrakova sa oreolom, sporo rotacija
     var ugao = t * 0.018;
+    var brojZraka = 18;
+    var dugPuls = 1 + 0.15 * Math.sin(t * 0.5);  // pulsiranje dužine krakova
+    // oreol krakovi (širi, mekši, manja alfa) — pravi zrak svetla
     ctx.save();
     ctx.translate(suncex, suncey);
     ctx.rotate(ugao);
-    ctx.strokeStyle = "rgba(" + bojaZrak + "," + (0.6 * puls).toFixed(3) + ")";
-    ctx.lineWidth = 2.5;
+    ctx.strokeStyle = "rgba(" + bojaZrak + "," + (0.28 * puls).toFixed(3) + ")";
+    ctx.lineWidth = 9;
     ctx.lineCap = "round";
-    var brojZraka = 12;
+    for (var i = 0; i < brojZraka; i++) {
+      ctx.rotate((Math.PI * 2) / brojZraka);
+      ctx.beginPath();
+      ctx.moveTo(R * 1.15, 0);
+      ctx.lineTo(R * 4.0 * dugPuls, 0);
+      ctx.stroke();
+    }
+    ctx.restore();
+    // sjajni centar krakova (uži, jači, topliji)
+    ctx.save();
+    ctx.translate(suncex, suncey);
+    ctx.rotate(ugao);
+    ctx.strokeStyle = "rgba(" + bojaZrak + "," + (0.65 * puls).toFixed(3) + ")";
+    ctx.lineWidth = 3.5;
+    ctx.lineCap = "round";
     for (var i = 0; i < brojZraka; i++) {
       ctx.rotate((Math.PI * 2) / brojZraka);
       ctx.beginPath();
       ctx.moveTo(R * 1.2, 0);
-      ctx.lineTo(R * 3.8, 0);
+      ctx.lineTo(R * 3.8 * dugPuls, 0);
       ctx.stroke();
     }
     ctx.restore();
