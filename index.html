@@ -2801,4 +2801,479 @@ function obradi(tekst) {
   document.getElementById("wind-dir").textContent = pravacVetra(tekst.current.wind_direction_10m);
   document.getElementById("osecaj").textContent = Math.round(tekst.current.apparent_temperature);
   document.getElementById("vlaznost").textContent = tekst.current.relative_humidity_2m;
-  document.getElementById("pritisak").textContent = Math.round(tekst.current.surface_pre
+  document.getElementById("pritisak").textContent = Math.round(tekst.current.surface_pressure);
+  document.getElementById("uv").textContent = (tekst.current.uv_index || 0).toFixed(1);
+  var sansa = null;
+  if (tekst.hourly && tekst.hourly.precipitation_probability && tekst.hourly.time) {
+    var si = tekst.hourly.time.indexOf(tekst.current.time.slice(0, 13) + ":00");
+    if (si >= 0) sansa = tekst.hourly.precipitation_probability[si];
+  }
+  var sr = document.getElementById("sansa-red");
+  if (sr) {
+    if (sansa !== null && sansa >= 30) {
+      document.getElementById("sansa").textContent = sansa;
+      sr.style.display = "";
+    } else { sr.style.display = "none"; }
+  }
+  proveriKisu(tekst);
+  obradiUpozorenja(tekst);
+  postaviLava(info[1]);
+  var moodKlasa = (kod === 45 || kod === 48) ? "magla" : info[1];
+  // Probni režim: ?efekt= forsira raspoloženje (sunce, oblacno, kisa, sneg, oluja, magla)
+  if (["sunce", "oblacno", "kisa", "sneg", "oluja", "magla", "noc"].indexOf(PROBA_EFEKT) >= 0) moodKlasa = PROBA_EFEKT;
+  // Noć: vedro/pretežno vedro noću → mesečina umesto sunca
+  if (jeNoc(tekst) && moodKlasa === "sunce") moodKlasa = "noc";
+  // Doba dana: i kiša, sneg, oblačno, oluja i magla imaju svoje noćne, zorne i sumračne rečenice
+  var fazaPor = jeNoc(tekst) ? "noc" : (jeJutro(tekst) ? "jutro" : (jeSumrak(tekst) ? "sumrak" : "dan"));
+  if (fazaPor !== "dan" && FAZA_PORUKE[moodKlasa] && FAZA_PORUKE[moodKlasa][fazaPor]) document.getElementById("mood").textContent = FAZA_PORUKE[moodKlasa][fazaPor];
+  if (moodKlasa === "noc") document.getElementById("mood").textContent = "Vreme je za mesečinu 🌙";
+  if (moodKlasa === "noc") postaviLava(jePunMesec() ? "nocPun" : "noc");
+  // Zora i sumrak: vedro jutro/veče nose svoje lava, nebo prati izlazak i zalazak
+  var jeJutroS = jeJutro(tekst) && moodKlasa === "sunce";
+  var jeSumrakS = jeSumrak(tekst) && moodKlasa === "sunce";
+  if (jeJutroS) {
+    document.getElementById("mood").textContent = "Zora lije zlato — Lav se budi 🌅";
+    postaviLava("jutro");
+  }
+  if (jeSumrakS) {
+    document.getElementById("mood").textContent = "Sumrak lije zlato preko brkova 🌇";
+    postaviLava("sumrak");
+  }
+  // Jak vetar: poruka prati vetar — važi iznad doba dana i temperature
+  if (v > 40) document.getElementById("mood").textContent = "Vetar nosi i lavove 💨";
+  // Doba dana: svaki vremenski lav ima svog noćnog, zoru i sumrak
+  if (jeNoc(tekst) && LAVOVI[moodKlasa + "Noc"]) postaviLava(moodKlasa + "Noc");
+  if (jeJutro(tekst) && LAVOVI[moodKlasa + "Jutro"]) postaviLava(moodKlasa + "Jutro");
+  if (jeSumrak(tekst) && LAVOVI[moodKlasa + "Sumrak"]) postaviLava(moodKlasa + "Sumrak");
+  postaviEfekte(moodKlasa);
+  var stare = document.body.className.match(/mood-\S+/g) || [];
+  for (var mi = 0; mi < stare.length; mi++) document.body.classList.remove(stare[mi]);
+  document.body.classList.add("mood-" + moodKlasa);
+  if (jeNoc(tekst)) document.body.classList.add("je-noc");
+  else document.body.classList.remove("je-noc");
+  if (jeJutro(tekst)) document.body.classList.add("je-jutro");
+  else document.body.classList.remove("je-jutro");
+  if (jeSumrak(tekst)) document.body.classList.add("je-sumrak");
+  else document.body.classList.remove("je-sumrak");
+  postaviScenu(moodKlasa);
+  // Traka brauzera prati nebo
+  var TEMA = { sunce: "#103a75", oblacno: "#1f3350", magla: "#2c3543", kisa: "#12335c", sneg: "#224678", oluja: "#31415f", noc: "#0a0e20" };
+  var tema = TEMA[moodKlasa] || "#0a0f1a";
+  if (moodKlasa === "sunce" && jeJutro(tekst)) tema = "#7ba3d6";
+  if (moodKlasa === "sunce" && jeSumrak(tekst)) tema = "#7a4666";
+  var temaMeta = document.querySelector('meta[name="theme-color"]');
+  if (temaMeta) temaMeta.setAttribute("content", tema);
+  podesiMesec();
+  var lavVrsta = moodKlasa === "noc" ? (jePunMesec() ? "nocPun" : "noc") : info[1];
+  if (jeJutroS) lavVrsta = "jutro";
+  if (jeSumrakS) lavVrsta = "sumrak";
+  if (jeNoc(tekst) && LAVOVI[moodKlasa + "Noc"]) lavVrsta = moodKlasa + "Noc";
+  if (jeJutro(tekst) && LAVOVI[moodKlasa + "Jutro"]) lavVrsta = moodKlasa + "Jutro";
+  if (jeSumrak(tekst) && LAVOVI[moodKlasa + "Sumrak"]) lavVrsta = moodKlasa + "Sumrak";
+  document.getElementById("lav-top").src = GAL_URL(lavDana());
+  document.getElementById("msg").style.display = "none";
+  document.getElementById("loader").style.display = "none";
+
+  var e = tekst.daily ? tekst.daily : null;
+  if (e) {
+    if (e.temperature_2m_max) document.getElementById("m-ecmwf-temp").textContent = Math.round(e.temperature_2m_max[0]) + "°";
+    if (e.precipitation_probability_max) {
+      var p = e.precipitation_probability_max[0];
+      document.getElementById("m-ecmwf-kisa").textContent = (p != null ? p + "%" : "–");
+    }
+    if (e.wind_speed_10m_max) document.getElementById("m-ecmwf-vetar").textContent = Math.round(e.wind_speed_10m_max[0]);
+  }
+  if (e && e.sunrise && e.sunset) {
+    document.getElementById("izlazak").textContent = e.sunrise[0].slice(11, 16);
+    document.getElementById("zalazak").textContent = e.sunset[0].slice(11, 16);
+  }
+  // Faza meseca -- crtanje osvetljenog dela + ime
+  var mp = fazaMeseca(tekst.current ? tekst.current.time : new Date().toISOString());
+  var moonLit = document.getElementById("moon-lit");
+  if (moonLit) moonLit.setAttribute("d", moonPath(44, mp));
+  var mesecEl = document.getElementById("mesec");
+  if (mesecEl) mesecEl.textContent = imeMeseca(mp);
+  postaviTraku();
+  renderDana(tekst.daily);
+  // ?mkisa= test param — ubaci fake kišu u minutni panel (samo sa ?proba=1)
+  var mkData = tekst.minutely_15;
+  if (PROBA_MKISA) {
+    try {
+      var bt = (tekst.minutely_15 && tekst.minutely_15.time) ? tekst.minutely_15.time.slice() : [];
+      if (bt.length === 0) {
+        var sd = new Date();
+        for (var mi = 0; mi < 8; mi++) { bt.push(new Date(sd.getTime() + mi * 15 * 60000).toISOString().slice(0, 16)); }
+      }
+      var fake = {
+        kisa:  [0, 0, 0.2, 0.6, 1.1, 0.8, 0.3, 0.1],
+        jaka:  [0, 0, 1.5, 2.8, 3.2, 2.1, 0.5, 0],
+        pada:  [0.4, 0.8, 1.2, 0.9, 0.5, 0.2, 0, 0],
+        suvo:  [0, 0, 0, 0, 0, 0, 0, 0]
+      };
+      if (fake[PROBA_MKISA]) mkData = { time: bt, precipitation: fake[PROBA_MKISA] };
+    } catch(err) {
+      alert("CATCH GREŠKA: " + err.message);
+    }
+  }
+  renderKisaMinutno(mkData);
+}
+
+function uporediModel(model, prefix) {
+  var d = model.daily;
+  if (!d) return;
+  if (d.temperature_2m_max) document.getElementById(prefix + "-temp").textContent = Math.round(d.temperature_2m_max[0]) + "°";
+  if (d.precipitation_probability_max) {
+    var p = d.precipitation_probability_max[0];
+    document.getElementById(prefix + "-kisa").textContent = (p != null ? p + "%" : "–");
+  }
+  if (d.wind_speed_10m_max) document.getElementById(prefix + "-vetar").textContent = Math.round(d.wind_speed_10m_max[0]);
+}
+
+function greska(poruka) {
+  var el = document.getElementById("err");
+  el.style.display = "block";
+  el.innerHTML = "Greška: " + poruka + ". <button type='button' class='retry-btn' id='retry-btn'>Pokušaj ponovo</button>";
+  document.getElementById("msg").style.display = "none";
+  document.getElementById("loader").style.display = "none";
+  var rb = document.getElementById("retry-btn");
+  if (rb) rb.onclick = ucitajPrognozu;
+}
+
+// Registracija service workera — omogućava "Instaliraj aplikaciju"
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js").catch(function(){});
+}
+
+// ——— Keš poslednje prognoze: kad nema neta, lav pamti ———
+var KES_KEY = "lav-vreme-kes";
+function sacuvajKes(j) {
+  try { localStorage.setItem(KES_KEY, JSON.stringify({ vreme: Date.now(), lat: LOK.lat, lon: LOK.lon, podaci: j })); } catch (e) {}
+}
+function prikaziKes(razlog) {
+  var kes = null;
+  try { kes = JSON.parse(localStorage.getItem(KES_KEY)); } catch (e) {}
+  if (kes && kes.podaci && kes.podaci.current && kes.lat === LOK.lat && kes.lon === LOK.lon) {
+    obradi(kes.podaci);
+    var d = new Date(kes.vreme), h = d.getHours(), m = d.getMinutes();
+    var el = document.getElementById("msg");
+    el.style.display = "block";
+    el.innerHTML = "Lav pamti prognozu · osveženo u " + (h<10?"0":"") + h + ":" + (m<10?"0":"") + m + " <button type='button' class='retry-btn' id='retry-btn'>Pokušaj ponovo</button>";
+    document.getElementById("offline-bedz").classList.add("prikazi");
+    var rb = document.getElementById("retry-btn");
+    if (rb) rb.onclick = ucitajPrognozu;
+  } else {
+    greska(razlog);
+  }
+}
+
+// Prognoza za trenutnu lokaciju (LOK)
+function ucitajPrognozu() {
+  document.getElementById("err").style.display = "none";
+  document.getElementById("msg").style.display = "block";
+  document.getElementById("offline-bedz").classList.remove("prikazi");
+  document.getElementById("msg").textContent = "Učitavam prognozu…";
+  document.getElementById("loader").style.display = "block";
+
+  fetch(
+    "https://api.open-meteo.com/v1/forecast?latitude=" + LOK.lat + "&longitude=" + LOK.lon +
+    "&current=temperature_2m,weather_code,wind_speed_10m,precipitation,apparent_temperature,relative_humidity_2m,surface_pressure,uv_index,wind_direction_10m" +
+    "&hourly=temperature_2m,weather_code,precipitation_probability" +
+    "&minutely_15=precipitation&forecast_minutely_15=8" +
+    "&daily=temperature_2m_max,temperature_2m_min,weather_code,sunrise,sunset,precipitation_probability_max,wind_speed_10m_max" +
+    "&forecast_days=7&timezone=auto"
+  )
+    .then(function(r){ return r.json(); })
+    .then(function(j){ sacuvajKes(j); obradi(j); })
+    .catch(function(){ prikaziKes("prognoza nije stigla"); });
+
+  // Uporedni modeli (ECMWF dolazi iz glavnog poziva)
+  fetch(
+    "https://api.open-meteo.com/v1/forecast?latitude=" + LOK.lat + "&longitude=" + LOK.lon +
+    "&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max&forecast_days=1&timezone=auto&models=gfs_seamless"
+  )
+    .then(function(r){ return r.json(); })
+    .then(function(j){ uporediModel(j, "m-gfs"); })
+    .catch(function(){});
+
+  fetch(
+    "https://api.open-meteo.com/v1/forecast?latitude=" + LOK.lat + "&longitude=" + LOK.lon +
+    "&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max&forecast_days=1&timezone=auto&models=icon_seamless"
+  )
+    .then(function(r){ return r.json(); })
+    .then(function(j){ uporediModel(j, "m-icon"); })
+    .catch(function(){});
+
+  // v3.69 Grupa 10: Kvalitet vazduha — Open-Meteo air-quality API (EU AQI)
+  fetch(
+    "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=" + LOK.lat + "&longitude=" + LOK.lon +
+    "&current=european_aqi,european_aqi_pm2_5,european_aqi_pm10,european_aqi_o3,european_aqi_no2,european_aqi_so2,pm2_5,pm10,ozone,nitrogen_dioxide,sulphur_dioxide&timezone=auto"
+  )
+    .then(function(r){ return r.json(); })
+    .then(function(j){ obradiVazduh(j); })
+    .catch(function(){ var vp = document.getElementById("vazduh-panel"); if (vp) vp.style.display = "none"; });
+}
+ucitajPrognozu();
+
+// Auto-osvežavanje — na svakih 30 min i svaki put kad se app otvori
+setInterval(ucitajPrognozu, 30 * 60 * 1000);
+document.addEventListener("visibilitychange", function() {
+  if (!document.hidden) ucitajPrognozu();
+});
+
+// ——— Lokacija: pretraga grada, GPS, pamćenje ———
+function postaviLokaciju(lat, lon, ime) {
+  LOK = { lat: lat, lon: lon, ime: ime };
+  try { localStorage.setItem(LOK_KEY, JSON.stringify(LOK)); } catch (e) {}
+  postaviGradUI(ime);
+  document.getElementById("lok-unos").value = "";
+  document.getElementById("lok-rez").innerHTML = "";
+  document.getElementById("lav").classList.add("fade");
+  ucitajPrognozu();
+}
+
+function traziGrad() {
+  var q = document.getElementById("lok-unos").value.trim();
+  var rez = document.getElementById("lok-rez");
+  if (q.length < 2) { rez.textContent = "Ukucaj bar dva slova."; return; }
+  rez.textContent = "Tražim…";
+  fetch("https://geocoding-api.open-meteo.com/v1/search?name=" + encodeURIComponent(q) + "&count=6&language=sr")
+    .then(function(r){ return r.json(); })
+    .then(function(j){
+      var rezultati = j.results || [];
+      rez.innerHTML = "";
+      if (!rezultati.length) { rez.textContent = "Ništa nije nađeno 🤷"; return; }
+      rezultati.forEach(function(r){
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "lok-rez-btn";
+        var opis = r.name;
+        if (r.admin1 && r.admin1 !== r.name) opis += ", " + r.admin1;
+        if (r.country) opis += " (" + r.country + ")";
+        b.textContent = opis;
+        b.onclick = function(){ postaviLokaciju(r.latitude, r.longitude, r.name); };
+        rez.appendChild(b);
+      });
+    })
+    .catch(function(){ rez.textContent = "Pretraga pukla — proveri net." });
+}
+
+function gpsLokacija() {
+  var rez = document.getElementById("lok-rez");
+  if (!navigator.geolocation) { rez.textContent = "GPS nije dostupan na ovom uređaju."; return; }
+  rez.textContent = "Tražim GPS…";
+  navigator.geolocation.getCurrentPosition(
+    function(p){ postaviLokaciju(p.coords.latitude, p.coords.longitude, "Moja lokacija"); },
+    function(){ rez.textContent = "GPS odbijen ili nedostupan."; },
+    { timeout: 10000 }
+  );
+}
+
+document.getElementById("lok-trazi").onclick = traziGrad;
+document.getElementById("lok-gps").onclick = gpsLokacija;
+document.getElementById("lok-unos").addEventListener("keydown", function(e){
+  if (e.key === "Enter") traziGrad();
+});
+
+// v3.55: tap na mesec otvara krupan prikaz sa kraterima
+window.addEventListener("DOMContentLoaded", function(){
+  var mz = document.getElementById("mesec-zum");
+  var ms = document.getElementById("mesec-zum-sadrzaj");
+  var zatvori = document.getElementById("mesec-zatvori");
+  if (!mz || !zatvori) return;
+  function otvori(){
+    var m = mesecKrupniSVG();
+    ms.innerHTML = m.svg + "<h3>" + m.ime + "</h3><p>" + m.procenat + "% osvetljeno</p>";
+    mz.classList.add("otvoren");
+  }
+  function zatvoriZum(){ mz.classList.remove("otvoren"); }
+  var mesecEl = document.querySelector(".nebo-mesec");
+  if (mesecEl) mesecEl.addEventListener("click", otvori);
+  var ugaoEl = document.querySelector(".ugao-nebo");
+  if (ugaoEl) ugaoEl.addEventListener("click", otvori);
+  zatvori.addEventListener("click", zatvoriZum);
+  mz.addEventListener("click", function(e){ if (e.target === mz) zatvoriZum(); });
+});
+
+// v3.61: Radar — Leaflet + RainViewer, kretanje oblaka i padavina (Vlad 8.10)
+window.addEventListener("DOMContentLoaded", function(){
+  var rz = document.getElementById("radar-zum");
+  var rZatvori = document.getElementById("radar-zatvori");
+  var rGrad = document.getElementById("radar-grad");
+  var rMapa = document.getElementById("radar-mapa");
+  var rPlay = document.getElementById("radar-play");
+  var rTraka = document.getElementById("radar-traka");
+  var rPun = rTraka.querySelector(".pun");
+  var rKvoci = rTraka.querySelector(".kvoci");
+  var rVreme = document.getElementById("radar-vreme");
+  if (!rz || !rZatvori) return;
+
+  var mapa = null;
+  var okviri = [];        // RainViewer prošli frejmovi
+  var host = "";
+  var pozicija = 0;
+  var sloj = null;        // trenutni radarski tileLayer
+  var tajmer = null;
+  var playing = false;
+  var TILE = window.devicePixelRatio >= 2 ? 512 : 256;
+
+  function fmtVreme(ts){
+    var d = new Date(ts * 1000);
+    var h = d.getHours().toString().padStart(2,"0");
+    var m = d.getMinutes().toString().padStart(2,"0");
+    return h + ":" + m;
+  }
+
+  function prikaziOkvir(i){
+    if (!mapa || !okviri.length) return;
+    if (i < 0) i = 0;
+    if (i >= okviri.length) i = okviri.length - 1;
+    pozicija = i;
+    var fr = okviri[i];
+    if (sloj) mapa.removeLayer(sloj);
+    sloj = L.tileLayer(host + fr.path + "/" + TILE + "/{z}/{x}/{y}/2/1_1.png", {
+      tileSize: 256,
+      opacity: 0.78,
+      maxNativeZoom: 7,
+      maxZoom: 12,
+      zIndex: 250
+    });
+    sloj.addTo(mapa);
+    var p = okviri.length > 1 ? i / (okviri.length - 1) : 0;
+    rPun.style.width = (p * 100) + "%";
+    rKvoci.style.left = (p * 100) + "%";
+    rVreme.textContent = fmtVreme(fr.time);
+  }
+
+  function play(){
+    if (playing || okviri.length < 2) return;
+    playing = true;
+    rPlay.textContent = "⏸";
+    tajmer = setInterval(function(){
+      prikaziOkvir((pozicija + 1) % okviri.length);
+    }, 650);
+  }
+  function pauziraj(){
+    playing = false;
+    rPlay.textContent = "▶";
+    if (tajmer){ clearInterval(tajmer); tajmer = null; }
+  }
+
+  function trakaKlik(e){
+    if (!okviri.length) return;
+    var rect = rTraka.getBoundingClientRect();
+    var x = (e.clientX - rect.left) / rect.width;
+    if (x < 0) x = 0; if (x > 1) x = 1;
+    var idx = Math.round(x * (okviri.length - 1));
+    pauziraj();
+    prikaziOkvir(idx);
+  }
+
+  function init(){
+    if (mapa) return;
+    if (typeof L === "undefined"){
+      rMapa.innerHTML = '<div class="radar-greska">Mapa nije dostupna — proveri konekciju.</div>';
+      return;
+    }
+    mapa = L.map("radar-mapa", {
+      center: [LOK.lat, LOK.lon],
+      zoom: 7,
+      zoomControl: true,
+      attributionControl: true
+    });
+    // Esri Dark Gray Canvas (besplatan, bez API ključa — CARTO od 2025. zahteva ključ)
+    L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
+      attribution: 'Tiles &copy; Esri · &copy; OpenStreetMap · &copy; RainViewer',
+      maxZoom: 12,
+      zIndex: 100
+    }).addTo(mapa);
+    // Esri Dark Gray Reference — gradski labeli na transparentnoj pozadini
+    L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}", {
+      maxZoom: 12,
+      zIndex: 110,
+      opacity: 0.9
+    }).addTo(mapa);
+    L.circleMarker([LOK.lat, LOK.lon], {
+      radius: 5,
+      color: "#d4af37",
+      weight: 2,
+      fillColor: "#d4af37",
+      fillOpacity: 0.45
+    }).addTo(mapa);
+  }
+
+  function ucitajRadar(){
+    rGrad.textContent = LOK.ime;
+    rVreme.textContent = "Učitavam…";
+    init();
+    if (!mapa) return;
+    if (sloj){ mapa.removeLayer(sloj); sloj = null; }
+    okviri = [];
+    rPun.style.width = "0%";
+    rKvoci.style.left = "0%";
+    pauziraj();
+    setTimeout(function(){ mapa.invalidateSize(); }, 60);
+    fetch("https://api.rainviewer.com/public/weather-maps.json")
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        host = d.host;
+        okviri = (d.radar && d.radar.past) ? d.radar.past : [];
+        if (!okviri.length){
+          rVreme.textContent = "—";
+          rMapa.innerHTML = '<div class="radar-greska">Trenutno nema radarskih podataka. Pokušaj kasnije.</div>';
+          return;
+        }
+        prikaziOkvir(okviri.length - 1); // najnoviji frejm
+        play(); // automatski pokreni animaciju
+      })
+      .catch(function(){
+        rVreme.textContent = "—";
+        rMapa.innerHTML = '<div class="radar-greska">Ne mogu da dohvatim radar — proveri internet.</div>';
+      });
+  }
+
+  function otvori(){ rz.classList.add("otvoren"); ucitajRadar(); }
+  function zatvori(){ pauziraj(); rz.classList.remove("otvoren"); }
+
+  var dugme = document.getElementById("lok-radar");
+  if (dugme) dugme.addEventListener("click", otvori);
+  rZatvori.addEventListener("click", zatvori);
+  rz.addEventListener("click", function(e){ if (e.target === rz) zatvori(); });
+  rPlay.addEventListener("click", function(){ if (playing) pauziraj(); else play(); });
+  rTraka.addEventListener("click", trakaKlik);
+});
+</script>
+<div class="mesec-zum" id="mesec-zum" role="dialog" aria-label="Krupan prikaz Meseca">
+  <span class="mesec-zatvori" id="mesec-zatvori">&times;</span>
+  <div class="mesec-zum-unutra">
+    <div id="mesec-zum-sadrzaj"></div>
+  </div>
+</div>
+<div class="radar-zum" id="radar-zum" role="dialog" aria-label="Radar — kretanje oblaka i padavina">
+  <div class="radar-glava">
+    <h3>RADAR <b id="radar-grad">—</b></h3>
+    <button class="radar-zatvori" id="radar-zatvori" type="button" aria-label="Zatvori radar">&times;</button>
+  </div>
+  <div id="radar-mapa"></div>
+  <div class="radar-dno">
+    <button id="radar-play" type="button" aria-label="Pokreni ili pauziraj animaciju">▶</button>
+    <div id="radar-traka" role="slider" aria-label="Vremenska traka radara">
+      <div class="pun"></div>
+      <div class="kvoci"></div>
+    </div>
+    <span id="radar-vreme">—</span>
+  </div>
+</div>
+<div class="galerija" id="galerija" role="dialog" aria-label="Galerija lavova">
+  <button class="galerija-zatvori" id="galerija-zatvori" type="button" aria-label="Zatvori galeriju">&times;</button>
+  <div class="galerija-unutra">
+    <h3>Lavovi</h3>
+    <div class="galerija-lepeza" id="galerija-lepeza"></div>
+    <div class="galerija-krupno" id="galerija-krupno">
+      <img id="galerija-krupno-img" src="" alt="">
+      <div class="potpis" id="galerija-krupno-potpis"></div>
+      <div class="hint">tap bilo gde za nazad</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
