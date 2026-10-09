@@ -756,6 +756,12 @@
     pointer-events: none;
     z-index: 0;
   }
+  #sunce-canvas {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
   @keyframes ef-zrak-vrti {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
@@ -2252,6 +2258,91 @@ function zvezdeCanvas(vrsta, fazaDana) {
   });
 }
 
+// ——— Canvas sunce engine — krug sunca + zraci (rotacija) + sjaj, boje po fazi dana ———
+var SUNCE_GEN = 0;
+function sunceCanvas(vrsta, fazaDana) {
+  SUNCE_GEN++;
+  var gen = SUNCE_GEN;
+  var sc = document.getElementById("scena");
+  if (!sc) return;
+  var stari = sc.querySelector("#sunce-canvas");
+  if (stari) stari.remove();
+  var cv = document.createElement("canvas");
+  cv.id = "sunce-canvas";
+  sc.appendChild(cv);
+  var ctx = cv.getContext("2d");
+  var W = 0, H = 0, DPR = 1;
+  function resize() {
+    var r = sc.getBoundingClientRect();
+    W = r.width; H = r.height;
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    cv.width = Math.max(1, Math.floor(W * DPR));
+    cv.height = Math.max(1, Math.floor(H * DPR));
+    cv.style.width = W + "px";
+    cv.style.height = H + "px";
+  }
+  resize();
+  // boje po fazi dana
+  var bojaCentar, bojaZrak, bojaSjaj;
+  if (fazaDana === "sumrak") { bojaCentar = "255,150,80"; bojaZrak = "255,120,60"; bojaSjaj = "255,130,60"; }
+  else if (fazaDana === "jutro") { bojaCentar = "255,198,120"; bojaZrak = "255,180,100"; bojaSjaj = "255,190,110"; }
+  else { bojaCentar = "255,224,140"; bojaZrak = "255,208,120"; bojaSjaj = "255,216,120"; }
+  function loop() {
+    if (gen !== SUNCE_GEN) return;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    ctx.scale(DPR, DPR);
+    var t = performance.now() * 0.001;
+    var suncex = W * 0.5;
+    var suncey = H * 0.22;
+    var R = Math.max(6, Math.min(W, H) * 0.07);  // poluprecnik sunca
+    var puls = 0.82 + 0.18 * Math.sin(t * 0.7);  // pulsiranje
+    // sjaj oko sunca — radial gradient (mekano zlatno svetlo)
+    var sjajR = R * 7 * puls;
+    var grd = ctx.createRadialGradient(suncex, suncey, 0, suncex, suncey, sjajR);
+    grd.addColorStop(0, "rgba(" + bojaSjaj + "," + (0.32 * puls).toFixed(3) + ")");
+    grd.addColorStop(0.25, "rgba(" + bojaSjaj + "," + (0.14 * puls).toFixed(3) + ")");
+    grd.addColorStop(1, "rgba(" + bojaSjaj + ",0)");
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, W, H);
+    // zraci — 12 zrakova, sporo rotacija
+    var ugao = t * 0.04;
+    ctx.save();
+    ctx.translate(suncex, suncey);
+    ctx.rotate(ugao);
+    ctx.strokeStyle = "rgba(" + bojaZrak + "," + (0.45 * puls).toFixed(3) + ")";
+    ctx.lineWidth = 2;
+    ctx.lineCap = "round";
+    var brojZraka = 12;
+    for (var i = 0; i < brojZraka; i++) {
+      ctx.rotate((Math.PI * 2) / brojZraka);
+      ctx.beginPath();
+      ctx.moveTo(R * 1.25, 0);
+      ctx.lineTo(R * 2.6, 0);
+      ctx.stroke();
+    }
+    ctx.restore();
+    // krug sunca
+    ctx.fillStyle = "rgba(" + bojaCentar + "," + (0.95 * puls).toFixed(3) + ")";
+    ctx.beginPath();
+    ctx.arc(suncex, suncey, R, 0, Math.PI * 2);
+    ctx.fill();
+    // sjajno jezgro
+    ctx.fillStyle = "rgba(255,250,235," + (0.55 * puls).toFixed(3) + ")";
+    ctx.beginPath();
+    ctx.arc(suncex, suncey, R * 0.58, 0, Math.PI * 2);
+    ctx.fill();
+    requestAnimationFrame(loop);
+  }
+  loop();
+  var toR5 = null;
+  window.addEventListener("resize", function() {
+    if (gen !== SUNCE_GEN) return;
+    clearTimeout(toR5);
+    toR5 = setTimeout(resize, 200);
+  });
+}
+
 function postaviScenu(vrsta) {
   var sc = document.getElementById("scena");
   if (!sc) return;
@@ -2292,6 +2383,8 @@ function postaviScenu(vrsta) {
     if (typeof PROBA !== "undefined" && PROBA.get("kisa") === "1") {
       kisaCanvas("maglovita", document.body.classList.contains("je-noc") ? "noc" : "dan");
     }
+  } else if (vrsta === "sunce") {
+    sunceCanvas(vrsta, faza);
   } else if (vrsta === "noc") {
     zvezdeCanvas(vrsta, faza);
   }

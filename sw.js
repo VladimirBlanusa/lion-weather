@@ -1,7 +1,7 @@
 // ——— Service worker: prvi pogled i bez neta ———
 // Keš "lav-vreme-v1" nosi okvir appa; slike i ostalo se keširaju kako se koriste.
 // API pozivi (open-meteo) se ne diraju — kad nema mreze, podatke drzi localStorage kes u index.html.
-var KES = "lav-vreme-v48"; // v3.98: Zvezde krstaste — 4 zraka (romb) + dijagonalni za vece + sjajan beli centar
+var KES = "lav-vreme-v49"; // v3.99: Canvas sunce — sunceCanvas engine (krug + 12 zrakova rotacija + sjaj), boje po fazi (dan/jutro/sumrak)
 var OKVIR = ["index.html", "manifest.json", "apple-touch-icon.png", "og-lav.jpg"];
 
 self.addEventListener("install", function(e) {
