@@ -1614,15 +1614,15 @@ var KAP_SVG = '<svg viewBox="0 0 8 16" preserveAspectRatio="none"><path d="M4,0.
 //   — baršunasto-mekana tekstura, svetlo odozdo
 // ═══════════════════════════════════════════════════════════
 var OBL_PALETA = {
-  // hladni kišni oblaci — Vlad ref. slika 1
-  kisa:  { vrh: '#4a5a78', mid: '#7d92ab', don: '#c9d4e1', svet: '#e0e8f1', alfa: .85 },
-  oluja: { vrh: '#2d3850', mid: '#475264', don: '#6e7a96', svet: '#9aa6c0', alfa: .88 },
-  sneg:  { vrh: '#7d8da8', mid: '#a5c0e2', don: '#dde9f5', svet: '#ffffff', alfa: .82 },
-  oblacno:{ vrh: '#8a9aae', mid: '#b0bdce', don: '#d8e0ea', svet: '#e8eef4', alfa: .78 },
+  // hladni kišni oblaci — Vlad ref. slika 1; potamnjeni vrh za separaciju
+  kisa:  { vrh: '#2a3142', mid: '#6a7a92', don: '#c9d4e1', svet: '#e8eef4', alfa: .88 },
+  oluja: { vrh: '#161c2e', mid: '#3a4258', don: '#6e7a96', svet: '#9aa6c0', alfa: .90 },
+  sneg:  { vrh: '#4a5a75', mid: '#8aa0c2', don: '#dde9f5', svet: '#ffffff', alfa: .84 },
+  oblacno:{ vrh: '#5a6a7e', mid: '#9aa7b8', don: '#d8e0ea', svet: '#eef2f6', alfa: .80 },
   // sumrak — Vlad ref. slika 2: donje ivice ružičasto-lila
-  sumrak:{ vrh: '#3a2f52', mid: '#6d4e7a', don: '#c8788e', svet: '#e8a0b8', alfa: .80 },
+  sumrak:{ vrh: '#1e1838', mid: '#5d3e6a', don: '#c8788e', svet: '#f0a8c0', alfa: .82 },
   // noćni oblaci — prigušeno
-  noc:   { vrh: '#1a2030', mid: '#2d3850', don: '#4a5670', svet: '#5a6680', alfa: .72 }
+  noc:   { vrh: '#080c18', mid: '#1d2840', don: '#4a5670', svet: '#5a6680', alfa: .74 }
 };
 
 var OBL_GEN = 0;     // generacija — kad se scena menja, stari loop stane
@@ -1732,28 +1732,28 @@ function oblaciCanvas(vrsta, fazaDana) {
     slojevi = [];
     // pozadina: veliki, zamućeni, tamni, sporo
     slojevi.push(napraviSloj({
-      n: 4, brzina: .006, skala: 1.8, alfa: .55, blur: 8,
+      n: 4, brzina: .003, skala: 1.8, alfa: .55, blur: 8,
       yBase: .15, yRazmak: .12, rMin: .22, rRazmak: .14
     }));
     // sredina: umerena veličina, umerena brzina
     slojevi.push(napraviSloj({
-      n: 5, brzina: .012, skala: 1.3, alfa: .72, blur: 4,
+      n: 5, brzina: .006, skala: 1.3, alfa: .72, blur: 4,
       yBase: .28, yRazmak: .15, rMin: .16, rRazmak: .12
     }));
     // prednji: manji, oštriji, brži
     slojevi.push(napraviSloj({
-      n: 6, brzina: .02, skala: .9, alfa: .88, blur: 1,
+      n: 6, brzina: .01, skala: .9, alfa: .88, blur: 1,
       yBase: .45, yRazmak: .18, rMin: .12, rRazmak: .1
     }));
     // magla ima samo dva široka sloja
     if (vrsta === "magla") {
       slojevi = [];
       slojevi.push(napraviSloj({
-        n: 3, brzina: .004, skala: 2.5, alfa: .5, blur: 12,
+        n: 3, brzina: .002, skala: 2.5, alfa: .5, blur: 12,
         yBase: .3, yRazmak: .2, rMin: .3, rRazmak: .15
       }));
       slojevi.push(napraviSloj({
-        n: 4, brzina: .008, skala: 1.8, alfa: .6, blur: 8,
+        n: 4, brzina: .004, skala: 1.8, alfa: .6, blur: 8,
         yBase: .55, yRazmak: .15, rMin: .2, rRazmak: .12
       }));
     }
@@ -1765,13 +1765,13 @@ function oblaciCanvas(vrsta, fazaDana) {
   function nacrtajPuf(ctx2, px, py, poluprecnik, alfa, seed, t) {
     var r = Math.max(2, poluprecnik);
     // pixelska rešenost — manje tačaka = mekše, brže
-    var N = 28; // tačke po pufnu
+    var N = 42; // tačke po pufnu — više tačaka za prirodniji oblik
     ctx2.save();
     ctx2.translate(px, py);
 
     // nacrtaj nekoliko preklopljenih "blobova" sa fbm perturbacijom
     // svaki blob ima gradijent: vrh (tamno) → donja ivica (svetlo)
-    var blobovi = 3;
+    var blobovi = 5;
     for (var b = 0; b < blobovi; b++) {
       var bx = (b - 1) * r * .45;
       var by = (b - 1) * r * .15 * (b % 2 ? -1 : 1);
@@ -1795,8 +1795,8 @@ function oblaciCanvas(vrsta, fazaDana) {
 
       // gradijent — vertikalni: vrh tamno (senka), donja ivica svetlo (svetlo odozdo)
       var g = ctx2.createLinearGradient(0, -br, 0, br * .62);
-      g.addColorStop(0,    "rgba(" + cVrh[0] + "," + cVrh[1] + "," + cVrh[2] + "," + (alfa * .85) + ")");
-      g.addColorStop(.4,   "rgba(" + cMid[0] + "," + cMid[1] + "," + cMid[2] + "," + (alfa * .9) + ")");
+      g.addColorStop(0,    "rgba(" + cVrh[0] + "," + cVrh[1] + "," + cVrh[2] + "," + (alfa * .97) + ")");
+      g.addColorStop(.3,   "rgba(" + cMid[0] + "," + cMid[1] + "," + cMid[2] + "," + (alfa * .94) + ")");
       g.addColorStop(.75,  "rgba(" + cDon[0] + "," + cDon[1] + "," + cDon[2] + "," + alfa + ")");
       g.addColorStop(1,    "rgba(" + cSvet[0] + "," + cSvet[1] + "," + cSvet[2] + "," + (alfa * .95) + ")");
       ctx2.fillStyle = g;
