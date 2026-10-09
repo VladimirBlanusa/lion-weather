@@ -2846,7 +2846,6 @@ function obradi(tekst) {
   if (jeJutro(tekst) && LAVOVI[moodKlasa + "Jutro"]) postaviLava(moodKlasa + "Jutro");
   if (jeSumrak(tekst) && LAVOVI[moodKlasa + "Sumrak"]) postaviLava(moodKlasa + "Sumrak");
   postaviEfekte(moodKlasa);
-  postaviScenu(moodKlasa);
   var stare = document.body.className.match(/mood-\S+/g) || [];
   for (var mi = 0; mi < stare.length; mi++) document.body.classList.remove(stare[mi]);
   document.body.classList.add("mood-" + moodKlasa);
@@ -2856,6 +2855,7 @@ function obradi(tekst) {
   else document.body.classList.remove("je-jutro");
   if (jeSumrak(tekst)) document.body.classList.add("je-sumrak");
   else document.body.classList.remove("je-sumrak");
+  postaviScenu(moodKlasa);
   // Traka brauzera prati nebo
   var TEMA = { sunce: "#103a75", oblacno: "#1f3350", magla: "#2c3543", kisa: "#12335c", sneg: "#224678", oluja: "#31415f", noc: "#0a0e20" };
   var tema = TEMA[moodKlasa] || "#0a0f1a";
