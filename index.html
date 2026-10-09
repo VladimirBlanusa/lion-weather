@@ -2293,9 +2293,18 @@ function sunceCanvas(vrsta, fazaDana) {
     ctx.clearRect(0, 0, cv.width, cv.height);
     ctx.scale(DPR, DPR);
     var t = performance.now() * 0.001;
+    // sunce centrirano na lav centru — lav u srcu sunca (krakovi zrače iz lava)
     var suncex = W * 0.5;
-    var suncey = H * 0.22;
-    var R = Math.max(6, Math.min(W, H) * 0.07);  // poluprecnik sunca
+    var lav = document.getElementById("lav");
+    var suncey;
+    if (lav) {
+      var lavR = lav.getBoundingClientRect();
+      var scR = sc.getBoundingClientRect();
+      suncey = (lavR.top + lavR.height / 2) - scR.top;
+    } else {
+      suncey = H * 0.22;
+    }
+    var R = Math.max(8, Math.min(W, H) * 0.15);  // poluprecnik sunca (veći — lav u srcu)
     var puls = 0.82 + 0.18 * Math.sin(t * 0.7);  // pulsiranje
     // sjaj oko sunca — radial gradient (toplo zlatno-narandžasto svetlo)
     var sjajR = R * 7 * puls;
@@ -2313,16 +2322,16 @@ function sunceCanvas(vrsta, fazaDana) {
     ctx.save();
     ctx.translate(suncex, suncey);
     ctx.rotate(ugao);
-    ctx.strokeStyle = "rgba(" + bojaZrak + "," + (0.18 * puls).toFixed(3) + ")";
-    ctx.lineWidth = 12;
+    ctx.strokeStyle = "rgba(" + bojaZrak + "," + (0.22 * puls).toFixed(3) + ")";
+    ctx.lineWidth = 14;
     ctx.lineCap = "round";
-    ctx.shadowBlur = R * 0.8;
-    ctx.shadowColor = "rgba(" + bojaZrak + "," + (0.45 * puls).toFixed(3) + ")";
+    ctx.shadowBlur = R * 0.9;
+    ctx.shadowColor = "rgba(" + bojaZrak + "," + (0.5 * puls).toFixed(3) + ")";
     for (var i = 0; i < brojZraka; i++) {
       ctx.rotate((Math.PI * 2) / brojZraka);
       ctx.beginPath();
-      ctx.moveTo(R * 1.15, 0);
-      ctx.lineTo(R * 4.0 * dugPuls, 0);
+      ctx.moveTo(R * 1.1, 0);
+      ctx.lineTo(R * 3.0 * dugPuls, 0);
       ctx.stroke();
     }
     ctx.restore();
@@ -2330,16 +2339,16 @@ function sunceCanvas(vrsta, fazaDana) {
     ctx.save();
     ctx.translate(suncex, suncey);
     ctx.rotate(ugao);
-    ctx.strokeStyle = "rgba(" + bojaZrak + "," + (0.8 * puls).toFixed(3) + ")";
-    ctx.lineWidth = 4.5;
+    ctx.strokeStyle = "rgba(" + bojaZrak + "," + (0.85 * puls).toFixed(3) + ")";
+    ctx.lineWidth = 5.5;
     ctx.lineCap = "round";
-    ctx.shadowBlur = R * 0.4;
-    ctx.shadowColor = "rgba(" + bojaZrak + "," + (0.7 * puls).toFixed(3) + ")";
+    ctx.shadowBlur = R * 0.5;
+    ctx.shadowColor = "rgba(" + bojaZrak + "," + (0.75 * puls).toFixed(3) + ")";
     for (var i = 0; i < brojZraka; i++) {
       ctx.rotate((Math.PI * 2) / brojZraka);
       ctx.beginPath();
-      ctx.moveTo(R * 1.2, 0);
-      ctx.lineTo(R * 3.8 * dugPuls, 0);
+      ctx.moveTo(R * 1.15, 0);
+      ctx.lineTo(R * 2.8 * dugPuls, 0);
       ctx.stroke();
     }
     ctx.restore();
