@@ -2073,6 +2073,10 @@ function postaviScenu(vrsta) {
     }
   } else if (vrsta === "magla") {
     maglaCanvas(vrsta, faza);
+    // Kombinacija: magla + kiša (maglovita kiša) — test ?proba=1&efekt=magla&kisa=1
+    if (typeof PROBA !== "undefined" && PROBA.get("kisa") === "1") {
+      kisaCanvas("kisa", document.body.classList.contains("je-noc") ? "noc" : "dan");
+    }
   } else if (vrsta === "noc") {
     // noć bez oblaka — zvezde (oblaciCanvas se već vratio rano)
     for (i = 0; i < 28; i++) {
