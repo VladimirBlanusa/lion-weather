@@ -1732,7 +1732,7 @@ function oblaciCanvas(vrsta, fazaDana) {
     slojevi = [];
     // pozadina: veliki, zamućeni, tamni, sporo
     slojevi.push(napraviSloj({
-      n: 4, brzina: .003, skala: 1.8, alfa: .55, blur: 8,
+      n: 4, brzina: .006, skala: 1.8, alfa: .38, blur: 10,
       yBase: .15, yRazmak: .12, rMin: .22, rRazmak: .14
     }));
     // sredina: umerena veličina, umerena brzina
@@ -1742,14 +1742,14 @@ function oblaciCanvas(vrsta, fazaDana) {
     }));
     // prednji: manji, oštriji, brži
     slojevi.push(napraviSloj({
-      n: 6, brzina: .01, skala: .9, alfa: .88, blur: 1,
+      n: 6, brzina: .005, skala: .9, alfa: .95, blur: 0,
       yBase: .45, yRazmak: .18, rMin: .12, rRazmak: .1
     }));
     // magla ima samo dva široka sloja
     if (vrsta === "magla") {
       slojevi = [];
       slojevi.push(napraviSloj({
-        n: 3, brzina: .002, skala: 2.5, alfa: .5, blur: 12,
+        n: 3, brzina: .003, skala: 2.5, alfa: .35, blur: 14,
         yBase: .3, yRazmak: .2, rMin: .3, rRazmak: .15
       }));
       slojevi.push(napraviSloj({
@@ -1771,7 +1771,7 @@ function oblaciCanvas(vrsta, fazaDana) {
 
     // nacrtaj nekoliko preklopljenih "blobova" sa fbm perturbacijom
     // svaki blob ima gradijent: vrh (tamno) → donja ivica (svetlo)
-    var blobovi = 5;
+    var blobovi = 7;
     for (var b = 0; b < blobovi; b++) {
       var bx = (b - 1) * r * .45;
       var by = (b - 1) * r * .15 * (b % 2 ? -1 : 1);
@@ -1801,6 +1801,15 @@ function oblaciCanvas(vrsta, fazaDana) {
       g.addColorStop(1,    "rgba(" + cSvet[0] + "," + cSvet[1] + "," + cSvet[2] + "," + (alfa * .95) + ")");
       ctx2.fillStyle = g;
       ctx2.fill();
+      // tamna donja senka — osećaj težine i volumena
+      ctx2.save();
+      ctx2.globalCompositeOperation = "multiply";
+      var sg = ctx2.createLinearGradient(0, br * .3, 0, br * .62);
+      sg.addColorStop(0, "rgba(0,0,0,0)");
+      sg.addColorStop(1, "rgba(0,0,0,.18)");
+      ctx2.fillStyle = sg;
+      ctx2.fill();
+      ctx2.restore();
     }
     ctx2.restore();
   }
