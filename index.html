@@ -390,8 +390,8 @@
     gap: 6px;
     margin-top: 16px;
   }
-  #temp { font-size: 64px; font-weight: 300; line-height: 1; letter-spacing: -1px; color: var(--text); }
-  .temp-unit { font-size: 28px; color: var(--gold-light); }
+  #temp { font-size: 64px; font-weight: 400; line-height: 1; letter-spacing: -1px; color: var(--text); }
+  .temp-unit { font-size: 28px; font-weight: 500; color: var(--gold-light); }
   #desc {
     margin-top: 6px;
     font-size: 16px;
@@ -533,13 +533,21 @@
   .mood-magla #grad, .mood-oblacno #grad,
   .mood-magla .meta span b, .mood-oblacno .meta span b {
     color: var(--gold);
-    text-shadow: 0 1px 10px rgba(0,0,0,.42);
+    text-shadow: 0 2px 14px rgba(0,0,0,.62);
+  }
+  .mood-magla #mood, .mood-oblacno #mood {
+    color: var(--gold);
+    text-shadow: 0 2px 14px rgba(0,0,0,.7);
+  }
+  .mood-magla #kisa-paznja, .mood-oblacno #kisa-paznja {
+    color: var(--gold);
+    text-shadow: 0 2px 12px rgba(0,0,0,.55);
   }
   .mood-magla #desc, .mood-oblacno #desc,
   .mood-magla .meta, .mood-oblacno .meta,
   .mood-magla .meta-detalji, .mood-oblacno .meta-detalji {
-    color: rgba(212, 175, 55, .9);
-    text-shadow: 0 1px 8px rgba(0,0,0,.38);
+    color: var(--gold);
+    text-shadow: 0 2px 12px rgba(0,0,0,.55);
   }
   /* ——— Scena u kvadratu: kapi, pahulje, blesak, oblaci, zvezde ——— */
   .sc-kapa {
