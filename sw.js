@@ -1,7 +1,7 @@
 // ——— Service worker: prvi pogled i bez neta ———
 // Keš "lav-vreme-v1" nosi okvir appa; slike i ostalo se keširaju kako se koriste.
 // API pozivi (open-meteo) se ne diraju — kad nema mreze, podatke drzi localStorage kes u index.html.
-var KES = "lav-vreme-v66"; // v4.16: uklonjen backdrop-filter sa .vb-pecat (scroll-lag krivac) + body bg fixed
+var KES = "lav-vreme-v97"; // SKROL FIX: uklonjen will-change: transform sa #scena (stvarao GPU sloj koji koči skrol — ChatGPT analiza). Gradijent fix iz v96 i dalje na mestu. // GRADIJENT FIX: napraviGradijent(r) sada pravi createLinearGradient(0,-r,0,r) — pravi prelaz preko celog oblaka, ne 2px. Gradijent se pravi po oblaku u nacrtajPuf (ne keširan jednom). ChatGPT analiza: 2px gradijent na 200px blobu → 99% čvrste krajnje boje. // v4.33: Bug1 — getBoundingClientRect iz sunceCanvas loop-a prebačen u racunajSunceY() (keširano, re-layout svaki frame uklonjen). Bug2 — SCENA_TIK zajednički za 6 petlji → svaka ima svoj lokalni `tik` (na oluji brojač više ne raste 3x). + racunajSunceY() u resize(). + BUG FIX: gradKes = napraviGradijent() (gradKes je bio null — fillStyle crna po defaultu). contain:paint na #scena. + DIJAGNOSTIKA: performance.now() merenje oblaciCanvas loopa (privremeno)
 var OKVIR = ["index.html", "manifest.json", "apple-touch-icon.png", "og-lav.jpg"];
 
 self.addEventListener("install", function(e) {

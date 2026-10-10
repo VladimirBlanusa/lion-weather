@@ -100,6 +100,7 @@
     border: 1px solid rgba(212, 175, 55, .45);
     border-radius: 999px;
     box-shadow: 0 6px 18px rgba(0, 0, 0, .5);
+    /* backdrop-filter: blur(6px) uklonjen — koči scroll na fixed elementu (višak iz eksperimenata) */
   }
   .card {
     width: 100%;
@@ -127,60 +128,10 @@
   }
   #lav.fade { opacity: 0; }
   #lav-wrap { position: relative; display: inline-block; }
-  #efekti { position: absolute; top: -20px; left: -20px; width: calc(100% + 40px); height: calc(100% + 40px); pointer-events: none; }
-  .ef-halo {
-    position: absolute; top: 50%; left: 50%;
-    width: 260px; height: 260px; margin: -130px 0 0 -130px;
-    border-radius: 50%;
-    animation: ef-disi 6s ease-in-out infinite;
-  }
-  .ef-halo-sunce   { background: radial-gradient(closest-side, transparent 52%, rgba(255,196,77,.62) 74%, rgba(255,196,77,0) 100%); }
-  .ef-halo-kisa    { background: radial-gradient(closest-side, transparent 50%, rgba(88,115,142,.85) 72%, rgba(88,115,142,0) 100%); }
-  .ef-halo-oluja   { background: radial-gradient(closest-side, transparent 50%, rgba(88,120,158,.78) 72%, rgba(88,120,158,0) 100%); }
-  .ef-halo-sneg    { background: radial-gradient(closest-side, transparent 50%, rgba(225,238,252,.85) 72%, rgba(225,238,252,0) 100%); }
-  .ef-halo-oblacno { background: radial-gradient(closest-side, transparent 48%, rgba(158,172,182,.8) 70%, rgba(158,172,182,0) 100%); }
+  /* ef-* klase (stari CSS DOM efekti) UKLONJENE — zamenjene canvas engine-om; ef-disi ostaje (koristi ga nebo-sunce, #scena::before, dugme) */
   @keyframes ef-disi {
     0%, 100% { transform: scale(.94); opacity: .8; }
     50% { transform: scale(1.07); opacity: 1; }
-  }
-  .ef-kisa-crp {
-    position: absolute; width: 2px; height: 19px; border-radius: 2px;
-    background: linear-gradient(rgba(185,210,232,0), rgba(205,228,250,.95));
-    filter: drop-shadow(0 0 2px rgba(170,205,240,.4));
-    animation: ef-kisapad .9s linear infinite;
-  }
-  @keyframes ef-kisapad {
-    0% { transform: translateY(-24px) rotate(8deg); opacity: 0; }
-    12% { opacity: .95; }
-    80% { opacity: .8; }
-    100% { transform: translateY(300px) rotate(8deg); opacity: 0; }
-  }
-  .ef-pahulja {
-    position: absolute; top: -8%;
-    color: rgba(255,255,255,.96);
-    filter: drop-shadow(0 0 8px rgba(235,242,255,.5));
-    line-height: 1;
-    animation: ef-pahuljopad 6s linear infinite;
-  }
-  .ef-pahulja svg { width: 1em; height: 1em; display: block; }
-  @keyframes ef-pahuljopad {
-    0% { transform: translateY(-16px) rotate(0deg); opacity: 0; }
-    10% { opacity: .95; }
-    50% { transform: translateY(140px) translateX(7px) rotate(190deg); opacity: .95; }
-    90% { opacity: .8; }
-    100% { transform: translateY(280px) translateX(-5px) rotate(360deg); opacity: 0; }
-  }
-  .ef-blesak-zlatni {
-    position: absolute; top: 50%; left: 50%;
-    width: 260px; height: 260px; margin: -130px 0 0 -130px;
-    border-radius: 50%;
-    background: radial-gradient(closest-side, rgba(255,250,230,.5) 30%, rgba(255,196,60,.38) 62%, rgba(255,196,60,0) 100%);
-    opacity: 0;
-  }
-  .ef-magla {
-    position: absolute; width: 96px; height: 34px; border-radius: 50%;
-    background: rgba(178,190,200,.8); filter: blur(7px);
-    animation: ef-pluta 5.5s ease-in-out infinite;
   }
   /* Oluja: 2-3 brza bleska u nizu pa pauza — pokrece ih grmljavina() */
   @keyframes bljesak-udar {
@@ -188,12 +139,8 @@
     22% { opacity: .88; } 34% { opacity: .12; } 44% { opacity: .5; }
     62% { opacity: .06; } 100% { opacity: 0; }
   }
-  .ef-blesak-zlatni.udar, .sc-blesak.udar, .sc-munja.udar {
+  .sc-blesak.udar, .sc-munja.udar {
     animation: bljesak-udar .75s linear;
-  }
-  @keyframes ef-pluta {
-    0%, 100% { transform: translateX(-4px); opacity: .7; }
-    50% { transform: translateX(4px); opacity: 1; }
   }
   /* ——— Kutijica u uglu: Sunce danju, Mesec noću ——— */
   .ugao-nebo {
@@ -503,6 +450,7 @@
     overflow: hidden;
     pointer-events: none;
     z-index: 0;
+    /* will-change: transform uklonjen — stvarao GPU sloj koji koči skrol (ChatGPT analiza) */
   }
   .card > *:not(#scena):not(.ugao-nebo):not(#lok-radar) { position: relative; z-index: 1; }
   /* Sunce diše na celoj kartici — zlatno svetlo od lava preko kvadrata */
@@ -512,7 +460,7 @@
     animation: ef-disi 6s ease-in-out infinite;
   }
   .mood-sunce   .card { background: linear-gradient(180deg, rgba(72, 148, 220, .6), rgba(22, 62, 132, .72)); }
-  .mood-oblacno .card { background-color: rgba(120, 135, 155, .62); }
+  .mood-oblacno .card { background-color: rgba(120, 135, 155, .88); }
   .mood-magla   .card { background-color: rgba(185, 190, 196, .58); }
   .mood-kisa    .card { background-color: rgba(28, 78, 148, .7); }
   .mood-sneg    .card { background-color: rgba(170, 200, 235, .6); }
@@ -549,72 +497,7 @@
     text-shadow: 0 2px 12px rgba(0,0,0,.55);
   }
   /* ——— Scena u kvadratu: kapi, pahulje, blesak, oblaci, zvezde ——— */
-  .sc-kapa {
-    position: absolute; width: 8px; height: 24px; background: transparent;
-    animation: sc-kisa-pad 2.6s linear infinite;
-  }
-  .sc-kapa svg { display: block; width: 100%; height: 100%; }
-  @keyframes sc-kisa-pad {
-    0% { transform: translateY(-24px); opacity: 0; }
-    12% { opacity: .9; }
-    100% { transform: translateY(400px); opacity: 0; }
-  }
-  /* Kiša na staklu: kap sleti, zastane, pa se sliva — tanak trag se gasi za njom */
-  .sc-kap {
-    position: absolute;
-    width: 9px; height: 12px;
-    border-radius: 50% 50% 55% 55% / 62% 62% 45% 45%;
-    background: radial-gradient(circle at 30% 25%, rgba(255,255,255,.98) 0 8%, rgba(210,230,250,.75) 34%, rgba(170,205,240,.45) 68%, rgba(170,205,240,0) 100%);
-    box-shadow: inset 0 0 3px rgba(255,255,255,.6), 0 0 6px rgba(190,220,250,.22);
-    opacity: 0;
-    animation: sc-kap-zivot-a 9s linear infinite;
-  }
-  .sc-kap::after {
-    content: ""; position: absolute; left: 20%; bottom: 88%;
-    width: 62%; height: 42px;
-    background: linear-gradient(to bottom, rgba(190,215,240,0), rgba(200,225,250,.12) 55%, rgba(205,228,250,.5));
-    border-radius: 3px;
-    filter: blur(.6px);
-  }
-  .sc-kap.levo { animation-name: sc-kap-zivot-b; }
-  @keyframes sc-kap-zivot-a {
-    0%   { transform: translate(0px, -6px) scale(.5); opacity: 0; }
-    5%   { transform: translate(0px, 0px) scale(1.2); opacity: 1; }
-    8%   { transform: translate(0px, 3px) scale(1); opacity: .95; }
-    9%   { transform: translate(0px, 3px) scale(1); opacity: .95; }
-    22%  { transform: translate(2px, 130px) scale(1); opacity: .95; }
-    23%  { transform: translate(2px, 135px) scale(1); opacity: .95; }
-    38%  { transform: translate(-1px, 310px) scale(1); opacity: .92; }
-    39%  { transform: translate(-1px, 316px) scale(1); opacity: .92; }
-    54%  { transform: translate(3px, 490px) scale(1); opacity: .88; }
-    55%  { transform: translate(3px, 497px) scale(1); opacity: .88; }
-    70%  { transform: translate(0px, 570px) scale(.97); opacity: .55; }
-    100% { transform: translate(0px, 660px) scale(.9); opacity: 0; }
-  }
-  @keyframes sc-kap-zivot-b {
-    0%   { transform: translate(0px, -6px) scale(.5); opacity: 0; }
-    5%   { transform: translate(0px, 0px) scale(1.2); opacity: 1; }
-    8%   { transform: translate(0px, 3px) scale(1); opacity: .95; }
-    9%   { transform: translate(0px, 3px) scale(1); opacity: .95; }
-    22%  { transform: translate(-2px, 130px) scale(1); opacity: .95; }
-    23%  { transform: translate(-2px, 135px) scale(1); opacity: .95; }
-    38%  { transform: translate(1px, 310px) scale(1); opacity: .92; }
-    39%  { transform: translate(1px, 316px) scale(1); opacity: .92; }
-    54%  { transform: translate(-3px, 490px) scale(1); opacity: .88; }
-    55%  { transform: translate(-3px, 497px) scale(1); opacity: .88; }
-    70%  { transform: translate(0px, 570px) scale(.97); opacity: .55; }
-    100% { transform: translate(0px, 660px) scale(.9); opacity: 0; }
-  }
-  .sc-pahulja {
-    position: absolute; width: 8px; height: 8px; border-radius: 50%;
-    background: rgba(255,255,255,.95); box-shadow: 0 0 8px rgba(255,255,255,.78);
-    animation: sc-sneg-pad 5s linear infinite;
-  }
-  @keyframes sc-sneg-pad {
-    0% { transform: translateY(-20px); opacity: 0; }
-    10% { opacity: .95; }
-    100% { transform: translateY(400px); opacity: 0; }
-  }
+  /* ——— STARI CSS efekti (.sc-kapa, .sc-kap, .sc-pahulja) UKLONJENI — zamenjeni canvas engine-om (kisaCanvas, snegCanvas) ——— */
   .sc-blesak {
     position: absolute; inset: 0;
     background: rgba(255,204,96,.22);
@@ -639,91 +522,9 @@
     0%, 100% { opacity: .3; }
     50% { opacity: 1; }
   }
-  .sc-oblak {
-    position: absolute; width: 130px; height: 44px; border-radius: 50%;
-    background: rgba(178,190,200,.55); filter: blur(10px);
-    animation: sc-pluta 7s ease-in-out infinite;
-  }
-  @keyframes sc-pluta {
-    0%, 100% { transform: translateX(-10px); opacity: .6; }
-    50% { transform: translateX(10px); opacity: .95; }
-  }
-  .sc-zvezda {
-    position: absolute; width: 3px; height: 3px; border-radius: 50%;
-    background: #ffe9a8;
-    box-shadow: 0 0 3px rgba(255, 222, 130, .95), 0 0 7px rgba(255, 210, 100, .8), 0 0 12px rgba(240, 195, 90, .35);
-    animation: sc-trepti 3s ease-in-out infinite;
-  }
-  @keyframes sc-trepti {
-    0%, 100% { opacity: .25; }
-    50% { opacity: 1; }
-  }
-  .ef-halo-magla { background: radial-gradient(closest-side, transparent 48%, rgba(200,204,208,.75) 70%, rgba(200,204,208,0) 100%); }
-  .ef-halo-noc   { background: radial-gradient(closest-side, transparent 48%, rgba(210,220,255,.42) 72%, rgba(210,220,255,0) 100%); }
-  .ef-zrak {
-    position: absolute; top: 50%; left: 50%;
-    width: 300px; height: 300px; margin: -150px 0 0 -150px;
-    border-radius: 50%;
-    background: repeating-conic-gradient(from 0deg, rgba(255,216,120,0) 0deg 14.3deg, rgba(255,216,120,.5) 14.65deg 15.35deg, rgba(255,216,120,0) 15.7deg 30deg);
-    -webkit-mask-image: radial-gradient(circle closest-side, transparent 76%, #000 86%, #000 96%, transparent 100%);
-    mask-image: radial-gradient(circle closest-side, transparent 76%, #000 86%, #000 96%, transparent 100%);
-    animation: ef-zrak-vrti 26s linear infinite;
-  }
-  /* Odsjaj: bele iskrice između zlatnih iglica — sunce treperi zlato-beo */
-  .ef-zrak-beli {
-    position: absolute; top: 50%; left: 50%;
-    width: 300px; height: 300px; margin: -150px 0 0 -150px;
-    border-radius: 50%;
-    background: repeating-conic-gradient(from 0deg, rgba(255,250,235,0) 0deg 0.1deg, rgba(255,250,235,.68) 0.35deg 0.85deg, rgba(255,250,235,0) 1.2deg 30deg);
-    -webkit-mask-image: radial-gradient(circle closest-side, transparent 79%, #000 84%, #000 88%, transparent 92%);
-    mask-image: radial-gradient(circle closest-side, transparent 79%, #000 84%, #000 88%, transparent 92%);
-    animation: ef-zrak-vrti 26s linear infinite;
-  }
-  /* ——— Oblaci oko lava: beli, sivi, snežni, tamni — prirodno nebo u istom rukopisu ——— */
-  /* Vlad 3.0: organski SVG oblaci — pufnaste mase, talasasta gornja i donja ivica, bez pill baze */
-  .ef-oblak {
-    position: absolute; height: auto; aspect-ratio: 200 / 124;
-    margin-top: -54px;
-    opacity: .97;
-    animation: ef-oblak-pluta 9s ease-in-out infinite;
-    --ob-g: #f6efdd; --ob-z: #e3d7bd; --ob-h: #fdf8ec; --ob-s: rgba(7, 23, 16, .14);
-  }
-  .ef-oblak svg { display: block; width: 100%; height: 100%; filter: brightness(.93) saturate(.97) drop-shadow(0 10px 12px var(--ob-s)); }
-  .ef-oblak-siv   { --ob-g: #c9d4e1; --ob-z: #9aa9bd; --ob-h: #e0e8f1; --ob-s: rgba(7, 23, 16, .2); }
-  .ef-oblak-sneg  { --ob-g: #eaf2fb; --ob-z: #a5c0e2; --ob-h: #ffffff; --ob-s: rgba(7, 23, 16, .16); }
-  .ef-oblak-taman { --ob-g: #5e6a87; --ob-z: #475264; --ob-h: #9aa6c0; --ob-s: rgba(7, 23, 16, .28); opacity: .9; }
-  /* v3.53: parallax slojevi — pozadina sporo plovi + tamna/zamućena; prednji brže + svetao/oštar */
-  .obl-paralaks-pozadina {
-    animation: ef-oblak-pluta 18s ease-in-out infinite;
-    filter: blur(2.5px) brightness(.78) saturate(.85) drop-shadow(0 8px 10px var(--ob-s));
-    opacity: .8;
-  }
-  .obl-paralaks-prednji {
-    animation: ef-oblak-pluta 9s ease-in-out infinite;
-    filter: brightness(1.03) saturate(1.02) drop-shadow(0 10px 12px var(--ob-s));
-    opacity: .96;
-  }
-  .je-noc .ef-oblak svg, .je-noc .sc-kulisa svg { filter: brightness(.75) saturate(.8) drop-shadow(0 10px 12px var(--ob-s)); }
-  /* Vlad: oblaci u sumraku prate toplu svetlost — ne hladno dnevno */
-  .je-sumrak .ef-oblak svg, .je-sumrak .sc-kulisa svg { filter: sepia(.3) saturate(.85) contrast(1.04) brightness(.95) drop-shadow(0 10px 12px var(--ob-s)); }
-  /* Vlad: oblaci u zori prate sveze zlatno-plavo svetlo izlaska sunca */
-  .je-jutro .ef-oblak svg, .je-jutro .sc-kulisa svg { filter: sepia(.14) saturate(.88) contrast(1.07) brightness(.96) drop-shadow(0 10px 12px var(--ob-s)); }
-  /* Vlad: oblacne ikonice u sat karticama prate fazu dana — ista svetlost kao glavni oblaci; velicina 18px netaknuta */
   .sat-item.faza-jutro .sat-emoji { filter: sepia(.14) saturate(.85) brightness(1.04); }
   .sat-item.faza-sumrak .sat-emoji { filter: sepia(.28) saturate(.82) brightness(1); }
   .sat-item.faza-noc .sat-emoji { filter: brightness(.75) saturate(.8); }
-  /* Vlad 3.0: oblačna kulisa — deo većeg neba ulazi iz donjeg desnog ugla */
-  .sc-kulisa {
-    position: absolute; right: -26px; bottom: 30%; width: 172px;
-    height: auto; aspect-ratio: 200 / 124;
-    opacity: .5; filter: blur(1px);
-    animation: ef-oblak-pluta 13s ease-in-out infinite;
-    --ob-g: #f6efdd; --ob-z: #e3d7bd; --ob-h: #fdf8ec;
-  }
-  .sc-kulisa svg { display: block; width: 100%; height: 100%; }
-  .mood-kisa .sc-kulisa  { --ob-g: #c9d4e1; --ob-z: #9aa9bd; --ob-h: #e0e8f1; }
-  .mood-oluja .sc-kulisa { --ob-g: #5e6a87; --ob-z: #475264; --ob-h: #9aa6c0; opacity: .68; }
-  .mood-sneg .sc-kulisa  { --ob-g: #e7f0fb; --ob-z: #a5c0e2; --ob-h: #fdfefe; opacity: .5; }
   /* ——— Canvas oblaci — zamenjuju SVG crtice ——— */
   #obl-canvas {
     position: absolute; inset: 0;
@@ -760,10 +561,6 @@
     width: 100%; height: 100%;
     pointer-events: none;
     z-index: 0;
-  }
-  @keyframes ef-zrak-vrti {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
   }
   /* ——— Sati traka: neutralno staklo ——— */
   .panel.sati h3 { color: var(--gold-light); }
@@ -814,7 +611,7 @@
     border-radius: 50%;
     object-fit: cover;
     border: 1px solid rgba(255, 255, 255, .12);
-    filter: brightness(1.18);
+    /* filter: brightness(1.18) uklonjen — 24 filtera je kočilo scroll; ikone već imaju boju */
   }
   .sat-item b { color: var(--text); font-size: 14px; }
   /* ——— v3.68 Grupa 7: Minutna kiša — bar chart + pametni rezime ——— */
@@ -838,7 +635,7 @@
     background: linear-gradient(180deg, rgba(120, 185, 240, .9), rgba(60, 130, 205, .55));
     border-radius: 3px 3px 0 0;
     min-height: 3px;
-    transition: height .35s ease;
+    transition: height .15s ease; /* 0.35s → 0.15s: brže se smiri, manje koči tokom učitavanja */
   }
   .kisa-bar.nula { background: rgba(255, 255, 255, .07); min-height: 2px; }
   .kisa-minutno-vremena {
@@ -865,7 +662,7 @@
   .vazduh-savet { font-size: 12px; color: rgba(245, 241, 230, .65); margin-top: 2px; line-height: 1.35; }
   .vazduh-stubici { display: flex; align-items: flex-end; gap: 6px; height: 70px; margin-top: 12px; }
   .vazduh-stub { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; }
-  .vazduh-stub .bar { width: 100%; border-radius: 3px 3px 0 0; min-height: 4px; transition: height .35s ease; box-shadow: 0 2px 6px rgba(0,0,0,.25); }
+  .vazduh-stub .bar { width: 100%; border-radius: 3px 3px 0 0; min-height: 4px; transition: height .15s ease; box-shadow: 0 2px 6px rgba(0,0,0,.25); }
   .vazduh-stub .val { font-size: 11px; color: var(--text); font-weight: 600; margin-top: 3px; font-variant-numeric: tabular-nums; }
   .vazduh-stub .ime { font-size: 9px; color: rgba(245, 241, 230, .5); text-transform: uppercase; letter-spacing: .04em; }
 
@@ -1109,7 +906,6 @@
     <div class="ugao-nebo"><span class="nebo-telo nebo-sunce"></span><span class="nebo-telo nebo-mesec"></span><span class="nebo-telo nebo-oblak"><span class="nebo-pad"></span><span class="nebo-munja"></span></span></div>
     <div id="lav-wrap">
       <img id="lav" src="https://oss-macaron-ai.macaron.im/image/text_to_image/6ac3d08be1c9684dbf1fdfbf.webp" alt="Lav — vremensko raspoloženje" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20210%20210%22%3E%3Ctext%20x=%22105%22%20y=%22140%22%20font-size=%22100%22%20text-anchor=%22middle%22%3E%F0%9F%A6%81%3C%2Ftext%3E%3C%2Fsvg%3E';">
-      <div id="efekti"></div>
     </div>
     <div class="temp-row">
       <span id="temp">–</span>
@@ -1392,70 +1188,7 @@ function postaviLava(vrsta) {
   }
 }
 
-function postaviEfekte(vrsta) {
-  var wrap = document.getElementById("efekti");
-  if (!wrap) return;
-  wrap.innerHTML = "";
-  var h = document.createElement("div");
-  h.className = "ef-halo ef-halo-" + vrsta;
-  wrap.appendChild(h);
-  if (vrsta === "sunce") {
-    var z = document.createElement("div");
-    z.className = "ef-zrak";
-    wrap.appendChild(z);
-    var zb = document.createElement("div");
-    zb.className = "ef-zrak-beli";
-    wrap.appendChild(zb);
-  }
-  var i, s;
-  if (vrsta === "kisa") {
-    for (i = 0; i < 16; i++) {
-      s = document.createElement("span");
-      s.className = "ef-kisa-crp";
-      s.style.left = (-4 + Math.floor(Math.random() * 102)) + "%";
-      s.style.top = "-12%";
-      s.style.animationDelay = (Math.random() * 1.3).toFixed(2) + "s";
-      s.style.animationDuration = (0.6 + Math.random() * 0.5).toFixed(2) + "s";
-      wrap.appendChild(s);
-    }
-  } else if (vrsta === "sneg") {
-    for (i = 0; i < 9; i++) {
-      s = document.createElement("span");
-      s.className = "ef-pahulja";
-      s.innerHTML = IKONE["\u2744\ufe0f"];
-      s.style.left = Math.floor(Math.random() * 100) + "%";
-      s.style.top = "-4%";
-      s.style.fontSize = (11 + Math.floor(Math.random() * 12)) + "px";
-      s.style.animationDelay = (Math.random() * 4.2).toFixed(2) + "s";
-      s.style.animationDuration = (4.5 + Math.random() * 3.5).toFixed(2) + "s";
-      wrap.appendChild(s);
-    }
-  } else if (vrsta === "oluja") {
-    s = document.createElement("div");
-    s.className = "ef-blesak-zlatni";
-    wrap.appendChild(s);
-    for (i = 0; i < 16; i++) {
-      s = document.createElement("span");
-      s.className = "ef-kisa-crp";
-      s.style.left = (-4 + Math.floor(Math.random() * 102)) + "%";
-      s.style.top = "-12%";
-      s.style.animationDelay = (Math.random() * 1.3).toFixed(2) + "s";
-      s.style.animationDuration = (0.6 + Math.random() * 0.5).toFixed(2) + "s";
-      wrap.appendChild(s);
-    }
-  } else if (vrsta === "oblacno") {
-  } else if (vrsta === "magla") {
-    var POZE = [[-10, 14], [72, 6], [0, 80]];
-    for (i = 0; i < POZE.length; i++) {
-      s = document.createElement("span");
-      s.className = "ef-magla";
-      s.style.left = POZE[i][0] + "%";
-      s.style.top = POZE[i][1] + "%";
-      s.style.animationDelay = (i * 0.9).toFixed(2) + "s";
-      wrap.appendChild(s);
-    }
-  }
-}
+// postaviEfekte() UKLONJENA — stari CSS DOM efekti (16 kapi, 9 pahulja, blesak, magla, halo, zrak) zamenjeni canvas engine-om; poziv komentarisan
 
 // ——— Probni režim: ?faza=jutro|sumrak|noc forsira doba dana, ?efekt= vreme ———
 var PROBA = new URLSearchParams(window.location.search);
@@ -1671,7 +1404,7 @@ var OBL_PALETA = {
   kisa:  { vrh: '#2a3142', mid: '#6a7a92', don: '#c9d4e1', svet: '#e8eef4', alfa: .88 },
   oluja: { vrh: '#161c2e', mid: '#3a4258', don: '#6e7a96', svet: '#9aa6c0', alfa: .90 },
   sneg:  { vrh: '#4a5a75', mid: '#8aa0c2', don: '#dde9f5', svet: '#ffffff', alfa: .84 },
-  oblacno:{ vrh: '#5a6a7e', mid: '#9aa7b8', don: '#d8e0ea', svet: '#eef2f6', alfa: .80 },
+  oblacno:{ vrh: '#b4c0d4', mid: '#c8d4e4', don: '#e8eef6', svet: '#f5f8fc', alfa: .97 },
   // sumrak — Vlad ref. slika 2: donje ivice ružičasto-lila
   sumrak:{ vrh: '#1e1838', mid: '#564852', don: '#c89878', svet: '#f0d0b8', alfa: .82 },
   // noćni oblaci — prigušeno
@@ -1722,9 +1455,10 @@ function oblaciCanvas(vrsta, fazaDana) {
   function resize() {
     var r = sc.getBoundingClientRect();
     W = r.width; H = r.height;
-    DPR = Math.min(window.devicePixelRatio || 1, 1.5);
+    DPR = Math.min(window.devicePixelRatio || 1, (window.matchMedia && window.matchMedia("(pointer: fine)").matches) ? 1 : 1.5); // komp DPR 1, telefon 1.5
     cv.width = Math.max(1, Math.floor(W * DPR));
     cv.height = Math.max(1, Math.floor(H * DPR));
+    console.log("[oblaci resize] W:" + W + " H:" + H + " cvw:" + cv.width + " cvh:" + cv.height);
     cv.style.width = W + "px";
     cv.style.height = H + "px";
   }
@@ -1747,7 +1481,7 @@ function oblaciCanvas(vrsta, fazaDana) {
   // fraktalni noise — više oktava za bogatiju teksturu
   function fbm(x, y) {
     var v = 0, amp = .5, fr = 1;
-    for (var o = 0; o < 4; o++) {
+    for (var o = 0; o < 2; o++) { // 2 oktave (bilo 4) → 2× manje noise poziva
       v += amp * vnoise(x * fr, y * fr);
       fr *= 2; amp *= .5;
     }
@@ -1783,48 +1517,59 @@ function oblaciCanvas(vrsta, fazaDana) {
 
   function initSlojeve() {
     slojevi = [];
-    // pozadina: veliki, zamućeni, tamni, sporo
+    // pozadina: veliki, zamućeni, tamni, sporo — alfa niža nadoknađuje odsustvo blur-a
     slojevi.push(napraviSloj({
-      n: 4, brzina: .0018, skala: 1.8, alfa: .55, blur: 5,
-      yBase: .15, yRazmak: .12, rMin: .22, rRazmak: .14
+      n: 4, brzina: .0018, skala: 2.0, alfa: .4, blur: 0,
+      yBase: .15, yRazmak: .12, rMin: .24, rRazmak: .15
     }));
     // sredina: umerena veličina, umerena brzina
     slojevi.push(napraviSloj({
-      n: 5, brzina: .0036, skala: 1.3, alfa: .72, blur: 2,
+      n: 5, brzina: .0036, skala: 1.35, alfa: .6, blur: 0,
       yBase: .28, yRazmak: .15, rMin: .16, rRazmak: .12
     }));
     // prednji: manji, oštriji, brži
     slojevi.push(napraviSloj({
-      n: 6, brzina: .006, skala: .9, alfa: .88, blur: 1,
+      n: 6, brzina: .006, skala: .9, alfa: .78, blur: 0,
       yBase: .45, yRazmak: .18, rMin: .12, rRazmak: .1
     }));
     // magla ima samo dva široka sloja
     if (vrsta === "magla") {
       slojevi = [];
       slojevi.push(napraviSloj({
-        n: 3, brzina: .0012, skala: 2.5, alfa: .5, blur: 7,
-        yBase: .3, yRazmak: .2, rMin: .3, rRazmak: .15
+        n: 3, brzina: .0012, skala: 2.7, alfa: .35, blur: 0,
+        yBase: .3, yRazmak: .2, rMin: .32, rRazmak: .15
       }));
       slojevi.push(napraviSloj({
-        n: 4, brzina: .0024, skala: 1.8, alfa: .6, blur: 5,
-        yBase: .55, yRazmak: .15, rMin: .2, rRazmak: .12
+        n: 4, brzina: .0024, skala: 1.9, alfa: .45, blur: 0,
+        yBase: .55, yRazmak: .15, rMin: .22, rRazmak: .12
       }));
     }
   }
   initSlojeve();
 
+  // keširani gradijent po bojama — pravi se jednom po sceni, ne 60× po frame
+  function napraviGradijent(r) {
+    var g = ctx.createLinearGradient(0, -r, 0, r);
+    g.addColorStop(0,    "rgba(" + cVrh[0] + "," + cVrh[1] + "," + cVrh[2] + ",1)");
+    g.addColorStop(.3,   "rgba(" + cMid[0] + "," + cMid[1] + "," + cMid[2] + ",1)");
+    g.addColorStop(.75,  "rgba(" + cDon[0] + "," + cDon[1] + "," + cDon[2] + ",1)");
+    g.addColorStop(1,    "rgba(" + cSvet[0] + "," + cSvet[1] + "," + cSvet[2] + ",1)");
+    return g;
+  }
+
   // ——— nacrtaj jedan pufnast oblak na datoj poziciji ———
   // koristi fbm noise za organski oblik sa svetlom odozdo
   function nacrtajPuf(ctx2, px, py, poluprecnik, alfa, seed, t) {
     var r = Math.max(2, poluprecnik);
-    // pixelska rešenost — manje tačaka = mekše, brže
-    var N = 28; // tačke po pufnu — više tačaka za prirodniji oblik
+    var gradKes = napraviGradijent(r); // gradijent (0,-r,0,r) — pravi prelaz preko celog oblaka, ne 2px
+    var N = 14; // smanjeno sa 18 → brže, oblik i dalje mekan
     ctx2.save();
     ctx2.translate(px, py);
+    ctx2.globalAlpha = alfa; // alfa na celom pufnu — ne po blobu u gradijentu
 
     // nacrtaj nekoliko preklopljenih "blobova" sa fbm perturbacijom
     // svaki blob ima gradijent: vrh (tamno) → donja ivica (svetlo)
-    var blobovi = 4;
+    var blobovi = 3;
     for (var b = 0; b < blobovi; b++) {
       var bx = (b - 1) * r * .45;
       var by = (b - 1) * r * .15 * (b % 2 ? -1 : 1);
@@ -1846,37 +1591,37 @@ function oblaciCanvas(vrsta, fazaDana) {
       }
       ctx2.closePath();
 
-      // gradijent — vertikalni: vrh tamno (senka), donja ivica svetlo (svetlo odozdo)
-      var g = ctx2.createLinearGradient(0, -br, 0, br * .62);
-      g.addColorStop(0,    "rgba(" + cVrh[0] + "," + cVrh[1] + "," + cVrh[2] + "," + (alfa * .97) + ")");
-      g.addColorStop(.3,   "rgba(" + cMid[0] + "," + cMid[1] + "," + cMid[2] + "," + (alfa * .94) + ")");
-      g.addColorStop(.75,  "rgba(" + cDon[0] + "," + cDon[1] + "," + cDon[2] + "," + alfa + ")");
-      g.addColorStop(1,    "rgba(" + cSvet[0] + "," + cSvet[1] + "," + cSvet[2] + "," + (alfa * .95) + ")");
-      ctx2.fillStyle = g;
+      // keširani gradijent (pravi se jednom) — alfa je na globalAlpha, ne u gradijentu
+      ctx2.fillStyle = gradKes;
       ctx2.fill();
     }
+    ctx2.globalAlpha = 1;
     ctx2.restore();
   }
 
   // ——— animacijski loop ———
   var t = 0;
+  var frameSkip = 0, tik = 0; // frame-rate cap: crta se svaki 2. frame (~30fps umesto 60fps)
   function loop() {
     if (gen !== OBL_GEN) return; // scena je promenjena — stani
-    if (!SCENA_VIDANA) { requestAnimationFrame(loop); return; }
+    if (!SCENA_VIDANA && !SCENA_SVEZA) { if (++tik >= 48) { tik = 0; SCENA_SVEZA = true; } requestAnimationFrame(loop); return; }
+    frameSkip++;
+    if (frameSkip % FRAME_KORAK) { requestAnimationFrame(loop); return; } // crta se svaki FRAME_KORAK frame (komp 20fps, telefon 30fps)
     t += 1;
+
+    // === DIJAGNOSTIKA vremena crtanja (privremeno) ===
+    var m0 = performance.now();
 
     // clear
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, cv.width, cv.height);
     ctx.scale(DPR, DPR);
 
+    var m1 = performance.now();
+
     for (var si = 0; si < slojevi.length; si++) {
       var sloj = slojevi[si];
-      if (sloj.blur > 0) {
-        ctx.filter = "blur(" + sloj.blur + "px)";
-      } else {
-        ctx.filter = "none";
-      }
+      ctx.filter = "none"; // uklonjen blur filter (skup) — mekoća se dobija alfa + radijus
       for (var pi = 0; pi < sloj.pufnovi.length; pi++) {
         var pf = sloj.pufnovi[pi];
         // pomeraj X — sporo plutanje
@@ -1892,6 +1637,11 @@ function oblaciCanvas(vrsta, fazaDana) {
     }
     ctx.filter = "none";
 
+    var m2 = performance.now();
+    if (t % 20 === 0) console.log("[oblaci] clear:" + (m1-m0).toFixed(2) + "ms | slojevi:" + (m2-m1).toFixed(2) + "ms | ukupno:" + (m2-m0).toFixed(2) + "ms");
+    // === KRAJ DIJAGNOSTIKE ===
+
+    SCENA_SVEZA = false; // scena nacrtana — sledeći put poštuj scroll-pauzu
     OBL_RAF = requestAnimationFrame(loop);
   }
   loop();
@@ -1922,7 +1672,7 @@ function kisaCanvas(vrsta, fazaDana) {
   function resize() {
     var r = sc.getBoundingClientRect();
     W = r.width; H = r.height;
-    DPR = Math.min(window.devicePixelRatio || 1, 1.5);
+    DPR = Math.min(window.devicePixelRatio || 1, (window.matchMedia && window.matchMedia("(pointer: fine)").matches) ? 1 : 1.5); // komp DPR 1, telefon 1.5
     cv.width = Math.max(1, Math.floor(W * DPR));
     cv.height = Math.max(1, Math.floor(H * DPR));
     cv.style.width = W + "px";
@@ -1948,9 +1698,12 @@ function kisaCanvas(vrsta, fazaDana) {
       deb: vrsta === "maglovita" ? (1.3 + dubina * 1.3) : (0.8 + dubina * 1.2)
     });
   }
+  var frameSkip = 0, tik = 0; // frame cap 30fps
   function loop() {
     if (gen !== KISA_GEN) return;
-    if (!SCENA_VIDANA) { requestAnimationFrame(loop); return; }
+    if (!SCENA_VIDANA && !SCENA_SVEZA) { if (++tik >= 48) { tik = 0; SCENA_SVEZA = true; } requestAnimationFrame(loop); return; }
+    frameSkip++;
+    if (frameSkip % FRAME_KORAK) { requestAnimationFrame(loop); return; }
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, cv.width, cv.height);
     ctx.scale(DPR, DPR);
@@ -1968,6 +1721,7 @@ function kisaCanvas(vrsta, fazaDana) {
       ctx.lineTo(k.x + dx * k.duz, k.y + dy * k.duz);
       ctx.stroke();
     }
+    SCENA_SVEZA = false;
     requestAnimationFrame(loop);
   }
   loop();
@@ -1996,7 +1750,7 @@ function maglaCanvas(vrsta, fazaDana) {
   function resize() {
     var r = sc.getBoundingClientRect();
     W = r.width; H = r.height;
-    DPR = Math.min(window.devicePixelRatio || 1, 1.5);
+    DPR = Math.min(window.devicePixelRatio || 1, (window.matchMedia && window.matchMedia("(pointer: fine)").matches) ? 1 : 1.5); // komp DPR 1, telefon 1.5
     cv.width = Math.max(1, Math.floor(W * DPR));
     cv.height = Math.max(1, Math.floor(H * DPR));
     cv.style.width = W + "px";
@@ -2014,19 +1768,22 @@ function maglaCanvas(vrsta, fazaDana) {
     { brzina: 0.0014, yBase: 0.58, amplituda: 18, alfa: 0.42, phase: 1.7, period: 0.014 },
     { brzina: 0.0020, yBase: 0.74, amplituda: 16, alfa: 0.55, phase: 3.3, period: 0.017 }
   ];
+  var frameSkip = 0, tik = 0; // frame cap 30fps
   function loop() {
     if (gen !== MAGLA_GEN) return;
-    if (!SCENA_VIDANA) { requestAnimationFrame(loop); return; }
+    if (!SCENA_VIDANA && !SCENA_SVEZA) { if (++tik >= 48) { tik = 0; SCENA_SVEZA = true; } requestAnimationFrame(loop); return; }
+    frameSkip++;
+    if (frameSkip % FRAME_KORAK) { requestAnimationFrame(loop); return; }
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, cv.width, cv.height);
     ctx.scale(DPR, DPR);
     var t = performance.now();
-    ctx.filter = "blur(5px)";
+    ctx.filter = "none"; // uklonjen blur(5px) — skup; mekoća se dobija alfa slojeva
     for (var i = 0; i < slojevi.length; i++) {
       var s = slojevi[i];
       ctx.beginPath();
       ctx.moveTo(0, H);
-      for (var x = 0; x <= W; x += 12) {
+      for (var x = 0; x <= W; x += 16) { // korak 12→16: manje tačaka po talasu
         var y = s.yBase * H
               + Math.sin((x + t * s.brzina) * s.period + s.phase) * s.amplituda
               + Math.sin((x + t * s.brzina * 1.7) * s.period * 2.1 + s.phase) * s.amplituda * 0.4;
@@ -2042,7 +1799,7 @@ function maglaCanvas(vrsta, fazaDana) {
       ctx.fillStyle = grd;
       ctx.fill();
     }
-    ctx.filter = "none";
+    SCENA_SVEZA = false;
     requestAnimationFrame(loop);
   }
   loop();
@@ -2071,7 +1828,7 @@ function snegCanvas(vrsta, fazaDana) {
   function resize() {
     var r = sc.getBoundingClientRect();
     W = r.width; H = r.height;
-    DPR = Math.min(window.devicePixelRatio || 1, 1.5);
+    DPR = Math.min(window.devicePixelRatio || 1, (window.matchMedia && window.matchMedia("(pointer: fine)").matches) ? 1 : 1.5); // komp DPR 1, telefon 1.5
     cv.width = Math.max(1, Math.floor(W * DPR));
     cv.height = Math.max(1, Math.floor(H * DPR));
     cv.style.width = W + "px";
@@ -2084,9 +1841,9 @@ function snegCanvas(vrsta, fazaDana) {
   else if (fazaDana === "sumrak") boja = "255,240,222";
   else if (fazaDana === "jutro") boja = "255,248,235";
   else boja = "255,255,255";
-  // 80 pahulja — parallax dubina, veca = brza i svetlija
+  // 60 pahulja — parallax dubina, veca = brza i svetlija (bilo 80)
   var pahulje = [];
-  for (var i = 0; i < 80; i++) {
+  for (var i = 0; i < 60; i++) {
     var dubina = Math.random();
     pahulje.push({
       x: Math.random() * W, y: Math.random() * H,
@@ -2134,9 +1891,12 @@ function snegCanvas(vrsta, fazaDana) {
     }
     ctx.restore();
   }
+  var frameSkip = 0, tik = 0; // frame cap 30fps
   function loop() {
     if (gen !== SNEG_GEN) return;
-    if (!SCENA_VIDANA) { requestAnimationFrame(loop); return; }
+    if (!SCENA_VIDANA && !SCENA_SVEZA) { if (++tik >= 48) { tik = 0; SCENA_SVEZA = true; } requestAnimationFrame(loop); return; }
+    frameSkip++;
+    if (frameSkip % FRAME_KORAK) { requestAnimationFrame(loop); return; }
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, cv.width, cv.height);
     ctx.scale(DPR, DPR);
@@ -2151,6 +1911,7 @@ function snegCanvas(vrsta, fazaDana) {
       if (p.x < -12) p.x = W + 12;
       nacrtajPahulju(p.x, p.y, p);
     }
+    SCENA_SVEZA = false;
     requestAnimationFrame(loop);
   }
   loop();
@@ -2179,16 +1940,16 @@ function zvezdeCanvas(vrsta, fazaDana) {
   function resize() {
     var r = sc.getBoundingClientRect();
     W = r.width; H = r.height;
-    DPR = Math.min(window.devicePixelRatio || 1, 1.5);
+    DPR = Math.min(window.devicePixelRatio || 1, (window.matchMedia && window.matchMedia("(pointer: fine)").matches) ? 1 : 1.5); // komp DPR 1, telefon 1.5
     cv.width = Math.max(1, Math.floor(W * DPR));
     cv.height = Math.max(1, Math.floor(H * DPR));
     cv.style.width = W + "px";
     cv.style.height = H + "px";
   }
   resize();
-  // 60 zvezda — parallax dubina, gornji deo neba
+  // 40 zvezda — parallax dubina, gornji deo neba (bilo 60)
   var zvezde = [];
-  for (var i = 0; i < 60; i++) {
+  for (var i = 0; i < 40; i++) {
     var dubina = Math.random();
     zvezde.push({
       x: Math.random() * W,
@@ -2200,9 +1961,12 @@ function zvezdeCanvas(vrsta, fazaDana) {
       sjaj: dubina > 0.7                       // vece zvezde imaju sjaj
     });
   }
+  var frameSkip = 0, tik = 0; // frame cap 30fps
   function loop() {
     if (gen !== ZVEZDE_GEN) return;
-    if (!SCENA_VIDANA) { requestAnimationFrame(loop); return; }
+    if (!SCENA_VIDANA && !SCENA_SVEZA) { if (++tik >= 48) { tik = 0; SCENA_SVEZA = true; } requestAnimationFrame(loop); return; }
+    frameSkip++;
+    if (frameSkip % FRAME_KORAK) { requestAnimationFrame(loop); return; }
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, cv.width, cv.height);
     ctx.scale(DPR, DPR);
@@ -2259,6 +2023,7 @@ function zvezdeCanvas(vrsta, fazaDana) {
       ctx.fill();
       ctx.restore();
     }
+    SCENA_SVEZA = false;
     requestAnimationFrame(loop);
   }
   loop();
@@ -2284,50 +2049,60 @@ function sunceCanvas(vrsta, fazaDana) {
   sc.appendChild(cv);
   var ctx = cv.getContext("2d");
   var W = 0, H = 0, DPR = 1;
+  // suncey = centar lava u sceni — keširano, računa se jednom + na resize (getBoundingClientRect u loopu izaziva layout reflow svaki frame)
+  var suncey = H * 0.22;
+  function racunajSunceY() {
+    var lavEl = document.getElementById("lav");
+    if (!lavEl) { suncey = H * 0.22; return; }
+    var lR = lavEl.getBoundingClientRect();
+    var sR = sc.getBoundingClientRect();
+    suncey = (lR.top + lR.height / 2) - sR.top;
+  }
   function resize() {
     var r = sc.getBoundingClientRect();
     W = r.width; H = r.height;
-    DPR = Math.min(window.devicePixelRatio || 1, 1.5);
+    DPR = Math.min(window.devicePixelRatio || 1, (window.matchMedia && window.matchMedia("(pointer: fine)").matches) ? 1 : 1.5); // komp DPR 1, telefon 1.5
     cv.width = Math.max(1, Math.floor(W * DPR));
     cv.height = Math.max(1, Math.floor(H * DPR));
     cv.style.width = W + "px";
     cv.style.height = H + "px";
+    racunajSunceY(); // osveži suncey posle promene veličine (rotacija ekrana itd.)
   }
-  resize();
+  resize(); // prvi poziv — postavlja W/H/DPR + računa suncey
   // boje po fazi dana
   var bojaCentar, bojaZrak, bojaSjaj;
   if (fazaDana === "sumrak") { bojaCentar = "255,150,80"; bojaZrak = "255,120,60"; bojaSjaj = "255,130,60"; }
   else if (fazaDana === "jutro") { bojaCentar = "255,198,120"; bojaZrak = "255,180,100"; bojaSjaj = "255,190,110"; }
   else { bojaCentar = "255,224,140"; bojaZrak = "255,208,120"; bojaSjaj = "255,216,120"; }
+  // keširani radial gradient za sjaj — pravi se jednom po sceni (puls je blaga,alfa fiksna)
+  var sjajGrd = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
+  sjajGrd.addColorStop(0, "rgba(" + bojaSjaj + ",0.42)");
+  sjajGrd.addColorStop(0.25, "rgba(" + bojaSjaj + ",0.18)");
+  sjajGrd.addColorStop(1, "rgba(" + bojaSjaj + ",0)");
+  var frameSkip = 0, tik = 0; // frame cap 30fps
   function loop() {
     if (gen !== SUNCE_GEN) return;
-    if (!SCENA_VIDANA) { requestAnimationFrame(loop); return; }
+    if (!SCENA_VIDANA && !SCENA_SVEZA) { if (++tik >= 48) { tik = 0; SCENA_SVEZA = true; } requestAnimationFrame(loop); return; }
+    frameSkip++;
+    if (frameSkip % FRAME_KORAK) { requestAnimationFrame(loop); return; }
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, cv.width, cv.height);
     ctx.scale(DPR, DPR);
     var t = performance.now() * 0.001;
     // sunce centrirano na lav centru — lav u srcu sunca (krakovi zrače iz lava)
     var suncex = W * 0.5;
-    var lav = document.getElementById("lav");
-    var suncey;
-    if (lav) {
-      var lavR = lav.getBoundingClientRect();
-      var scR = sc.getBoundingClientRect();
-      suncey = (lavR.top + lavR.height / 2) - scR.top;
-    } else {
-      suncey = H * 0.22;
-    }
+    // suncey keširano u racunajSunceY() — bez getBoundingClientRect u loopu
     var R = Math.max(8, Math.min(W, H) * 0.15);  // poluprecnik sunca (veći — lav u srcu)
     var puls = 0.82 + 0.18 * Math.sin(t * 0.7);  // pulsiranje
-    // sjaj oko sunca — radial gradient (toplo zlatno-narandžasto svetlo)
+    // sjaj oko sunca — keširani radial gradient (skalira se na puls)
     var sjajR = R * 7 * puls;
-    var grd = ctx.createRadialGradient(suncex, suncey, 0, suncex, suncey, sjajR);
-    grd.addColorStop(0, "rgba(" + bojaSjaj + "," + (0.42 * puls).toFixed(3) + ")");
-    grd.addColorStop(0.25, "rgba(" + bojaSjaj + "," + (0.18 * puls).toFixed(3) + ")");
-    grd.addColorStop(1, "rgba(" + bojaSjaj + ",0)");
-    ctx.fillStyle = grd;
-    ctx.fillRect(0, 0, W, H);
-    // zraci — 12 zrakova sa shadowBlur (pravi zrak svetla), sporo rotacija
+    ctx.save();
+    ctx.translate(suncex, suncey);
+    ctx.scale(sjajR, sjajR);
+    ctx.fillStyle = sjajGrd;
+    ctx.fillRect(-1, -1, 2, 2);
+    ctx.restore();
+    // zraci — 12 zrakova, sporo rotacija; shadowBlur uklonjen (skup) — sjaj preko debelih poluprovodnih zraka
     var ugao = t * 0.018;
     var brojZraka = 12;
     var dugPuls = 1 + 0.15 * Math.sin(t * 0.5);  // pulsiranje dužine krakova
@@ -2338,8 +2113,7 @@ function sunceCanvas(vrsta, fazaDana) {
     ctx.strokeStyle = "rgba(" + bojaZrak + "," + (0.22 * puls).toFixed(3) + ")";
     ctx.lineWidth = 14;
     ctx.lineCap = "round";
-    ctx.shadowBlur = R * 0.5;
-    ctx.shadowColor = "rgba(" + bojaZrak + "," + (0.5 * puls).toFixed(3) + ")";
+    ctx.shadowBlur = 0;
     for (var i = 0; i < brojZraka; i++) {
       ctx.rotate((Math.PI * 2) / brojZraka);
       ctx.beginPath();
@@ -2355,8 +2129,7 @@ function sunceCanvas(vrsta, fazaDana) {
     ctx.strokeStyle = "rgba(" + bojaZrak + "," + (0.85 * puls).toFixed(3) + ")";
     ctx.lineWidth = 5.5;
     ctx.lineCap = "round";
-    ctx.shadowBlur = R * 0.3;
-    ctx.shadowColor = "rgba(" + bojaZrak + "," + (0.75 * puls).toFixed(3) + ")";
+    ctx.shadowBlur = 0; // uklonjen drugi shadowBlur — sjaj se dobija debelim oreol zracima iznad
     for (var i = 0; i < brojZraka; i++) {
       ctx.rotate((Math.PI * 2) / brojZraka);
       ctx.beginPath();
@@ -2382,19 +2155,44 @@ function sunceCanvas(vrsta, fazaDana) {
   window.addEventListener("resize", function() {
     if (gen !== SUNCE_GEN) return;
     clearTimeout(toR5);
-    toR5 = setTimeout(resize, 200);
+    toR5 = setTimeout(function() { resize(); racunajSunceY(); }, 200);
   });
 }
 
-// ——— Pauzira canvas kada hero (.card) izađe iz ekrana — štedi CPU tokom skrola ———
+// ——— Pauzira canvas dok korisnik skroluje — štedi CPU; scena se gleda tek kad se umiri ———
 var SCENA_VIDANA = true;
+var SCENA_SVEZA = true; // posle postaviScenu → canvas nacrta barem jednom (sprečava bele kocke)
+// SCENA_TIK uklonjen — svaka petlja ima svoj lokalni `tik` (zajednički brojač je rastao 3x na oluji)
+// FRAME_KORAK: 2 = crta svaki 2. frame (~30fps), 3 = svaki 3. frame (~20fps). Komp bez jake GPU → 3, telefon → 2.
+var FRAME_KORAK = (window.matchMedia && window.matchMedia("(pointer: fine)").matches) ? 3 : 2;
 (function() {
   var card = document.querySelector(".card");
+  function heroVidan() {
+    if (!card) return true;
+    var r = card.getBoundingClientRect();
+    return r.bottom > 60 && r.top < (window.innerHeight * 0.8);
+  }
+  // IntersectionObserver: kad hero skroz izađe, gasi scenu
   if (card && "IntersectionObserver" in window) {
     new IntersectionObserver(function(entries) {
-      for (var i = 0; i < entries.length; i++) SCENA_VIDANA = entries[i].isIntersecting;
-    }, { threshold: 0.25 }).observe(card);
+      for (var i = 0; i < entries.length; i++) {
+        if (!entries[i].isIntersecting) SCENA_VIDANA = false;
+      }
+    }, { threshold: 0.01 }).observe(card);
   }
+  // Scroll-pauza: čim korisnik skroluje, pauziraj canvas; kad se umiri, pusti ako je hero u fokusu
+  var tajmerSkrola = null;
+  function naSkrol() {
+    SCENA_VIDANA = false;
+    if (tajmerSkrola) clearTimeout(tajmerSkrola);
+    tajmerSkrola = setTimeout(function() {
+      SCENA_VIDANA = heroVidan();
+      if (SCENA_VIDANA) SCENA_SVEZA = true; // scena se vratila u viewport → nacrta barem jednom (sprečava bele kocke)
+    }, 220);
+  }
+  window.addEventListener("scroll", naSkrol, { passive: true });
+  window.addEventListener("touchmove", naSkrol, { passive: true });
+  window.addEventListener("wheel", naSkrol, { passive: true });
 })();
 
 function postaviScenu(vrsta) {
@@ -2402,6 +2200,7 @@ function postaviScenu(vrsta) {
   if (!sc) return;
   sc.innerHTML = "";
   GRM_GEN++; // nova scena → stara grmljavina se gasi
+  SCENA_SVEZA = true; // obeleži novu scenu → loop-ovi moraju nacrtati barem jednom (sprečava bele kocke)
   var i, s;
 
   // odredi fazu dana iz body klasa (postavlja se pre postaviScenu u prikaziVreme)
@@ -2484,9 +2283,8 @@ function grmCiklus(gen) {
   if (gen !== GRM_GEN || !document.body.classList.contains("mood-oluja")) return;
   var blesk = document.querySelector(".sc-blesak");
   var munja = document.querySelector(".sc-munja");
-  var ef = document.querySelector(".ef-blesak-zlatni");
   crtaMunju(munja);
-  [blesk, munja, ef].forEach(function(el) {
+  [blesk, munja].forEach(function(el) {
     if (el) { el.classList.remove("udar"); void el.offsetWidth; el.classList.add("udar"); }
   });
   setTimeout(function() { grmCiklus(gen); }, 6000 + Math.random() * 8000);
@@ -2860,7 +2658,7 @@ function obradi(tekst) {
   if (jeNoc(tekst) && LAVOVI[moodKlasa + "Noc"]) postaviLava(moodKlasa + "Noc");
   if (jeJutro(tekst) && LAVOVI[moodKlasa + "Jutro"]) postaviLava(moodKlasa + "Jutro");
   if (jeSumrak(tekst) && LAVOVI[moodKlasa + "Sumrak"]) postaviLava(moodKlasa + "Sumrak");
-  postaviEfekte(moodKlasa);
+  // postaviEfekte(moodKlasa); // UKLONJENO — stari CSS DOM efekti (16 kapi, 9 pahulja, blesak, magla) zamenjeni canvas engine-om; infinite animacije su kočile scroll
   var stare = document.body.className.match(/mood-\S+/g) || [];
   for (var mi = 0; mi < stare.length; mi++) document.body.classList.remove(stare[mi]);
   document.body.classList.add("mood-" + moodKlasa);
