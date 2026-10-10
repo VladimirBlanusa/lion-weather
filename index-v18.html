@@ -1,0 +1,3299 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5">
+<title>Lion Weather</title>
+<meta name="description" content="Vremenska prognoza sa lavom koji zna šta priča 🦁 — sat, temperatura, 7 dana unapred, sve u zlatu.">
+<link rel="icon" type="image/png" href="https://macaron-sandbox-workspace.oss-accelerate.aliyuncs.com/prod/01a05aef-9b6e-7737-bec4-ae31a3069526/workspace/lav-vreme/favicon.png">
+<link rel="icon" type="image/webp" href="https://macaron-sandbox-workspace.oss-accelerate.aliyuncs.com/prod/01a05aef-9b6e-7737-bec4-ae31a3069526/workspace/lav-vreme/ikonica-zlatna-1024.webp"> <!-- v3.51: zlatni sunčani lav umesto plavog logo-lava -->
+<link rel="apple-touch-icon" href="https://macaron-sandbox-workspace.oss-accelerate.aliyuncs.com/prod/01a05aef-9b6e-7737-bec4-ae31a3069526/workspace/lav-vreme/apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0a0f1a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Lion Weather">
+<meta name="application-name" content="Lion Weather">
+<meta property="og:title" content="Lion Weather">
+<meta property="og:description" content="Vremenska prognoza sa lavom koji zna šta priča 🦁 — sat, temperatura, 7 dana unapred, sve u zlatu.">
+<meta property="og:image" content="https://macaron-sandbox-workspace.oss-accelerate.aliyuncs.com/prod/01a05aef-9b6e-7737-bec4-ae31a3069526/workspace/lav-vreme/og-lav.jpg">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<!-- v3.61: Radar — Leaflet + RainViewer, centrirano na LOK -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
+<style>
+  :root {
+    --bg-mid: #111826;
+    --bg-dark: #0a0f1a;
+    --bg-deep: #050810;
+    --gold: #d4af37;
+    --gold-light: #f0d47c;
+    --text: #f5f1e6;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  /* ——— Tipografija: cifre koje stoje mirno ——— */
+  #sat, #temp, .meta b, .sat-item b, .dan-temp, .sansa-sat, .sansa-dan { font-variant-numeric: tabular-nums; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: radial-gradient(ellipse at 50% 20%, var(--bg-mid) 0%, var(--bg-dark) 65%, var(--bg-deep) 100%);
+    color: var(--text);
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 16px calc(78px + env(safe-area-inset-bottom));
+    overflow-x: hidden;
+  }
+  .top-row {
+    width: 100%;
+    max-width: 420px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  .top-desno {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .lav-top {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--gold);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, .5);
+    filter: brightness(1.18);
+  }
+  #sat {
+    font-size: 44px;
+    font-weight: 500;
+    letter-spacing: 3px;
+    color: #d4af37;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, .65), 0 0 20px rgba(212, 175, 55, .2);
+    line-height: 1;
+  }
+  #datum {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: #d4af37;
+    margin-top: 4px;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, .6), 0 0 12px rgba(212, 175, 55, .3);
+  }
+  .vb-pecat {
+    position: fixed;
+    right: 14px;
+    bottom: calc(14px + env(safe-area-inset-bottom));
+    z-index: 5;
+    padding: 6px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .5px;
+    color: #d4af37;
+    background: rgba(19, 27, 42, .72);
+    border: 1px solid rgba(212, 175, 55, .45);
+    border-radius: 999px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, .5);
+    backdrop-filter: blur(6px);
+  }
+  .card {
+    width: 100%;
+    max-width: 420px;
+    position: relative;
+    transition: background-color 1.2s ease;
+    background: rgba(18, 22, 31, .55);
+    border: 1px solid rgba(255, 255, 255, .08);
+    border-radius: 24px;
+    padding: 22px 18px 18px;
+    box-shadow: inset 0 0 70px rgba(7, 23, 16, .5), 0 22px 60px rgba(0,0,0,.45);
+    text-align: center;
+  }
+  #lav {
+    position: relative;
+    z-index: 2;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--gold);
+    box-shadow: 0 0 0 6px rgba(212,175,55,.15), 0 10px 34px rgba(0,0,0,.5);
+    filter: brightness(1.18);
+    transition: opacity .5s ease;
+  }
+  #lav.fade { opacity: 0; }
+  #lav-wrap { position: relative; display: inline-block; }
+  #efekti { position: absolute; top: -20px; left: -20px; width: calc(100% + 40px); height: calc(100% + 40px); pointer-events: none; }
+  .ef-halo {
+    position: absolute; top: 50%; left: 50%;
+    width: 260px; height: 260px; margin: -130px 0 0 -130px;
+    border-radius: 50%;
+    animation: ef-disi 6s ease-in-out infinite;
+  }
+  .ef-halo-sunce   { background: radial-gradient(closest-side, transparent 52%, rgba(255,196,77,.62) 74%, rgba(255,196,77,0) 100%); }
+  .ef-halo-kisa    { background: radial-gradient(closest-side, transparent 50%, rgba(88,115,142,.85) 72%, rgba(88,115,142,0) 100%); }
+  .ef-halo-oluja   { background: radial-gradient(closest-side, transparent 50%, rgba(88,120,158,.78) 72%, rgba(88,120,158,0) 100%); }
+  .ef-halo-sneg    { background: radial-gradient(closest-side, transparent 50%, rgba(225,238,252,.85) 72%, rgba(225,238,252,0) 100%); }
+  .ef-halo-oblacno { background: radial-gradient(closest-side, transparent 48%, rgba(158,172,182,.8) 70%, rgba(158,172,182,0) 100%); }
+  @keyframes ef-disi {
+    0%, 100% { transform: scale(.94); opacity: .8; }
+    50% { transform: scale(1.07); opacity: 1; }
+  }
+  .ef-kisa-crp {
+    position: absolute; width: 2px; height: 19px; border-radius: 2px;
+    background: linear-gradient(rgba(185,210,232,0), rgba(205,228,250,.95));
+    filter: drop-shadow(0 0 2px rgba(170,205,240,.4));
+    animation: ef-kisapad .9s linear infinite;
+  }
+  @keyframes ef-kisapad {
+    0% { transform: translateY(-24px) rotate(8deg); opacity: 0; }
+    12% { opacity: .95; }
+    80% { opacity: .8; }
+    100% { transform: translateY(300px) rotate(8deg); opacity: 0; }
+  }
+  .ef-pahulja {
+    position: absolute; top: -8%;
+    color: rgba(255,255,255,.96);
+    filter: drop-shadow(0 0 8px rgba(235,242,255,.5));
+    line-height: 1;
+    animation: ef-pahuljopad 6s linear infinite;
+  }
+  .ef-pahulja svg { width: 1em; height: 1em; display: block; }
+  @keyframes ef-pahuljopad {
+    0% { transform: translateY(-16px) rotate(0deg); opacity: 0; }
+    10% { opacity: .95; }
+    50% { transform: translateY(140px) translateX(7px) rotate(190deg); opacity: .95; }
+    90% { opacity: .8; }
+    100% { transform: translateY(280px) translateX(-5px) rotate(360deg); opacity: 0; }
+  }
+  .ef-blesak-zlatni {
+    position: absolute; top: 50%; left: 50%;
+    width: 260px; height: 260px; margin: -130px 0 0 -130px;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(255,250,230,.5) 30%, rgba(255,196,60,.38) 62%, rgba(255,196,60,0) 100%);
+    opacity: 0;
+  }
+  .ef-magla {
+    position: absolute; width: 96px; height: 34px; border-radius: 50%;
+    background: rgba(178,190,200,.8); filter: blur(7px);
+    animation: ef-pluta 5.5s ease-in-out infinite;
+  }
+  /* Oluja: 2-3 brza bleska u nizu pa pauza — pokrece ih grmljavina() */
+  @keyframes bljesak-udar {
+    0% { opacity: 0; } 4% { opacity: .95; } 14% { opacity: .18; }
+    22% { opacity: .88; } 34% { opacity: .12; } 44% { opacity: .5; }
+    62% { opacity: .06; } 100% { opacity: 0; }
+  }
+  .ef-blesak-zlatni.udar, .sc-blesak.udar, .sc-munja.udar {
+    animation: bljesak-udar .75s linear;
+  }
+  @keyframes ef-pluta {
+    0%, 100% { transform: translateX(-4px); opacity: .7; }
+    50% { transform: translateX(4px); opacity: 1; }
+  }
+  /* ——— Kutijica u uglu: Sunce danju, Mesec noću ——— */
+  .ugao-nebo {
+    position: absolute; top: 12px; right: 12px;
+    width: 78px; height: 78px;
+    border-radius: 24px;
+    overflow: hidden;
+    background: radial-gradient(circle at 50% 42%, rgba(255, 195, 80, .62), rgba(216, 148, 58, .46) 62%, rgba(122, 82, 30, .42));
+    border: 1px solid rgba(255, 255, 255, .08);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 2;
+  }
+  .nebo-telo { display: none; }
+  .nebo-sunce {
+    display: block;
+    position: relative;
+    width: 38px; height: 38px; border-radius: 50%;
+    background: radial-gradient(circle at 38% 34%, #fff3c4, #ffd23e 70%, #ffb200);
+    box-shadow: 0 0 28px rgba(255, 220, 110, 1), 0 0 66px rgba(255, 200, 60, .55);
+    animation: ef-disi 6s ease-in-out infinite;
+  }
+  .nebo-sunce::before {
+    content: "";
+    position: absolute; inset: -28px;
+    border-radius: 50%;
+    background: repeating-conic-gradient(from 0deg, rgba(255, 205, 70, .95) 0deg 3.2deg, transparent 3.2deg 18deg);
+    -webkit-mask: radial-gradient(circle, transparent 50%, #000 52%, #000 97%, transparent 99%);
+    mask: radial-gradient(circle, transparent 50%, #000 52%, #000 97%, transparent 99%);
+    animation: nebo-zraci 30s linear infinite;
+  }
+  @keyframes nebo-zraci { to { transform: rotate(360deg); } }
+  .je-noc .nebo-sunce { display: none; }
+  .je-noc .nebo-mesec { display: block; }
+
+  /* ——— Oblak u kocki: mini scena po vremenu ——— */
+  .nebo-oblak {
+    position: relative;
+    width: 42px; height: 15px;
+    border-radius: 9px;
+    background: #f3ead8;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .35);
+    animation: nebo-oblak-dera 7s ease-in-out infinite;
+  }
+  .nebo-oblak::before, .nebo-oblak::after {
+    content: ""; position: absolute; border-radius: 50%; background: #f3ead8;
+  }
+  .nebo-oblak::before { width: 20px; height: 20px; left: 6px; top: -12px; }
+  .nebo-oblak::after { width: 15px; height: 15px; right: 7px; top: -9px; }
+  @keyframes nebo-oblak-dera {
+    0%, 100% { transform: translateX(-3px); }
+    50% { transform: translateX(3px); }
+  }
+  .je-noc .nebo-oblak { filter: brightness(.72) saturate(.7); }
+  .nebo-pad {
+    display: none;
+    position: absolute; left: 50%; top: 20px; margin-left: -1.5px;
+    width: 3px; height: 6px; border-radius: 2px;
+    background: rgba(160, 200, 240, .9);
+    box-shadow: -12px 3px 0 rgba(160, 200, 240, .65), 12px 5px 0 rgba(160, 200, 240, .65);
+    animation: nebo-pad-pad 1.6s linear infinite;
+  }
+  @keyframes nebo-pad-pad {
+    0% { transform: translateY(0); opacity: 0; }
+    15% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { transform: translateY(13px); opacity: 0; }
+  }
+  .nebo-munja {
+    display: none;
+    position: absolute; left: 50%; top: 19px; margin-left: -6px;
+    width: 12px; height: 17px;
+    background: #ffe27a;
+    clip-path: polygon(62% 0, 8% 56%, 42% 56%, 20% 100%, 92% 38%, 50% 38%, 88% 0);
+    opacity: 0;
+    animation: nebo-munja-blit 4.5s ease-out infinite;
+  }
+  @keyframes nebo-munja-blit {
+    0%, 84%, 100% { opacity: 0; }
+    86% { opacity: 1; }
+    88% { opacity: .15; }
+    90% { opacity: 1; }
+    92% { opacity: 0; }
+  }
+  .mood-kisa .nebo-pad { display: block; }
+  .mood-oluja .nebo-pad { display: block; }
+  .mood-sneg .nebo-pad {
+    display: block; height: 3px; border-radius: 50%;
+    background: rgba(255, 255, 255, .95);
+    box-shadow: -12px 3px 0 rgba(255, 255, 255, .8), 12px 5px 0 rgba(255, 255, 255, .8);
+    animation-duration: 2.4s;
+  }
+  .mood-oluja .nebo-munja { display: block; }
+  .mood-oblacno .nebo-sunce, .mood-kisa .nebo-sunce, .mood-sneg .nebo-sunce, .mood-oluja .nebo-sunce, .mood-magla .nebo-sunce { display: none; }
+  .mood-oblacno .nebo-oblak, .mood-kisa .nebo-oblak, .mood-sneg .nebo-oblak, .mood-oluja .nebo-oblak, .mood-magla .nebo-oblak { display: block; }
+  /* Vlad: ćošak = samo Mesec (mesečeve mene) — danju sve vreme ide kroz kvadrat oko lava */
+  body:not(.je-noc) .ugao-nebo { display: none; }
+  body.je-noc .nebo-sunce, body.je-noc .nebo-oblak { display: none; }
+  .mood-oblacno .ugao-nebo, .mood-kisa .ugao-nebo, .mood-sneg .ugao-nebo, .mood-oluja .ugao-nebo, .mood-magla .ugao-nebo {
+    background: radial-gradient(circle at 50% 42%, rgba(205, 215, 232, .20), rgba(205, 215, 232, .06) 72%, rgba(255, 255, 255, .04));
+  }
+  .je-noc .ugao-nebo {
+    background: radial-gradient(circle at 50% 42%, rgba(240, 228, 200, .15), rgba(186, 200, 240, .06) 70%, rgba(255, 255, 255, .04));
+  }
+  .nebo-mesec {
+    width: 44px; height: 44px; border-radius: 50%;
+    transform: rotate(-5deg);
+    animation: ef-disi 6s ease-in-out infinite;
+    cursor: pointer; outline: none; -webkit-tap-highlight-color: transparent;
+    pointer-events: auto; position: relative; z-index: 10;
+  }
+  .nebo-mesec svg { display: block; width: 100%; height: 100%;
+    filter: drop-shadow(0 0 5px rgba(245, 232, 200, .45)); }
+  /* ——— Krupan Mesec: tap na mesec otvara zum ——— */
+  .mesec-zum { position: fixed; inset: 0; z-index: 55; display: flex; align-items: center; justify-content: center;
+    background: radial-gradient(circle at 50% 38%, rgba(10,15,26,.92), rgba(5,8,14,.97) 78%);
+    opacity: 0; visibility: hidden; transition: opacity .32s ease, visibility .32s; }
+  .mesec-zum.otvoren { opacity: 1; visibility: visible; }
+  .mesec-zum-unutra { text-align: center; padding: 30px 20px; transform: scale(.94); transition: transform .32s ease; }
+  .mesec-zum.otvoren .mesec-zum-unutra { transform: scale(1); }
+  .mesec-zum svg { width: min(280px, 70vw); height: min(280px, 70vw); filter: drop-shadow(0 0 24px rgba(245,232,200,.35)); }
+  .mesec-zum h3 { margin: 18px 0 6px; font-size: 15px; color: var(--gold); letter-spacing: .3em; text-transform: uppercase; font-weight: 600; }
+  .mesec-zum p { margin: 0; font-size: 13px; color: rgba(245,241,230,.7); }
+  .mesec-zum .mesec-zatvori { position: fixed; top: 16px; right: 18px; font-size: 28px; color: rgba(245,241,230,.6); cursor: pointer; line-height: 1; }
+  /* ——— Radar: Leaflet + RainViewer (Vlad 8.10, v3.61) — centrirano na LOK ——— */
+  .radar-zum { position: fixed; inset: 0; z-index: 60; display: flex; flex-direction: column;
+    background: radial-gradient(circle at 50% 30%, rgba(20,28,44,.96), rgba(5,8,16,.98) 80%);
+    opacity: 0; visibility: hidden; transition: opacity .32s ease, visibility .32s; }
+  .radar-zum.otvoren { opacity: 1; visibility: visible; }
+  .radar-glava { display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 18px; flex-shrink: 0; }
+  .radar-glava h3 { margin: 0; font-size: 14px; color: var(--gold); letter-spacing: .25em;
+    text-transform: uppercase; font-weight: 600; }
+  .radar-glava h3 b { color: var(--text); font-weight: 500; letter-spacing: .04em; text-transform: none; }
+  .radar-zatvori { font-size: 28px; color: rgba(245,241,230,.6); cursor: pointer; line-height: 1;
+    background: none; border: none; padding: 0 4px; }
+  .radar-zatvori:hover { color: var(--gold); }
+  #radar-mapa { flex: 1; min-height: 0; width: 100%; background: #0a0f1a; }
+  .radar-dno { display: flex; align-items: center; gap: 14px; padding: 12px 18px; flex-shrink: 0;
+    background: rgba(10,15,26,.92); border-top: 1px solid rgba(212,175,55,.18); }
+  #radar-play { width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0; cursor: pointer;
+    background: rgba(212,175,55,.18); border: 1px solid rgba(212,175,55,.55);
+    color: var(--gold-light); font-size: 18px; display: flex; align-items: center; justify-content: center; }
+  #radar-play:active { transform: scale(.94); }
+  #radar-traka { flex: 1; height: 6px; background: rgba(245,241,230,.12); border-radius: 3px;
+    position: relative; cursor: pointer; }
+  #radar-traka .pun { position: absolute; left: 0; top: 0; height: 100%; background: var(--gold);
+    border-radius: 3px; width: 0; transition: width .15s linear; }
+  #radar-traka .kvoci { position: absolute; top: 50%; transform: translate(-50%, -50%);
+    width: 14px; height: 14px; border-radius: 50%; background: var(--gold-light);
+    border: 2px solid #0a0f1a; left: 0; transition: left .15s linear; }
+  #radar-vreme { font-size: 12px; color: rgba(245,241,230,.75); min-width: 88px; text-align: right;
+    font-variant-numeric: tabular-nums; }
+  .radar-greska { padding: 40px 24px; text-align: center; color: rgba(245,241,230,.7); font-size: 14px; }
+  /* Leaflet kontrole u zlatnom tonu */
+  .leaflet-container { background: #0a0f1a !important; font-family: inherit; }
+  .leaflet-control-zoom a { background: rgba(18,24,38,.9) !important; color: var(--gold-light) !important;
+    border-color: rgba(212,175,55,.35) !important; }
+  .leaflet-control-zoom a:hover { background: rgba(212,175,55,.18) !important; }
+  .leaflet-control-attribution { background: rgba(10,15,26,.7) !important; color: rgba(245,241,230,.5) !important; }
+  .leaflet-control-attribution a { color: rgba(212,175,55,.7) !important; }
+  /* ——— Galerija lavova: muzej svih lavova — klik na ikonicu gore desno (Vlad 3.9) ——— */
+  .lav-top { cursor: pointer; transition: transform .25s ease, box-shadow .25s ease; }
+  .lav-top:hover { transform: scale(1.06); }
+  .galerija { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center;
+    background: radial-gradient(circle at 50% 38%, rgba(56, 42, 20, .93), rgba(22, 16, 7, .97) 78%);
+    opacity: 0; visibility: hidden; transition: opacity .32s ease, visibility .32s; }
+  .galerija.otvorena { opacity: 1; visibility: visible; }
+  .galerija-unutra { width: min(680px, 92vw); max-height: 86vh; overflow-y: auto; text-align: center; padding: 26px 18px 34px;
+    transform: scale(.96); transition: transform .32s ease; scrollbar-width: thin; scrollbar-color: rgba(216,181,106,.4) transparent; }
+  .galerija.otvorena .galerija-unutra { transform: scale(1); }
+  .galerija-unutra::-webkit-scrollbar { width: 6px; }
+  .galerija-unutra::-webkit-scrollbar-thumb { background: rgba(216,181,106,.35); border-radius: 3px; }
+  .galerija h3 { margin: 0 0 20px; font-size: 13px; letter-spacing: .4em; text-transform: uppercase; color: var(--gold); font-weight: 600; }
+  .galerija-lepeza { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 20px 14px; }
+  .galerija-stavka { background: none; border: none; padding: 0; cursor: pointer; }
+  .galerija-stavka img { width: 84px; height: 84px; border-radius: 50%; object-fit: cover; display: block; margin: 0 auto;
+    box-shadow: 0 0 0 2px rgba(216, 181, 106, .5), 0 0 22px rgba(216, 181, 106, .16);
+    transition: transform .25s ease, box-shadow .25s ease; }
+  .galerija-stavka:hover img { transform: scale(1.07); box-shadow: 0 0 0 2px var(--gold), 0 0 30px rgba(216, 181, 106, .38); }
+  .galerija-stavka span { display: block; margin-top: 8px; font-size: 12px; color: rgba(243, 234, 216, .8); letter-spacing: .03em; }
+  .galerija-krupno { display: none; }
+  .galerija-krupno img { width: min(240px, 58vw); height: min(240px, 58vw); border-radius: 50%; object-fit: cover;
+    box-shadow: 0 0 0 3px var(--gold), 0 0 46px rgba(216, 181, 106, .25); }
+  .galerija-krupno .potpis { margin-top: 16px; font-size: 15px; color: #f3ead8; letter-spacing: .06em; }
+  .galerija-krupno .hint { margin-top: 10px; font-size: 12px; color: rgba(243, 234, 216, .55); }
+  .galerija-zatvori { position: absolute; top: 16px; right: 20px; background: none; border: none; color: rgba(243, 234, 216, .65);
+    font-size: 30px; line-height: 1; cursor: pointer; padding: 4px 8px; }
+  .galerija-zatvori:hover { color: #f3ead8; }
+  .temp-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 16px;
+  }
+  #temp { font-size: 64px; font-weight: 400; line-height: 1; letter-spacing: -1px; color: var(--text); }
+  .temp-unit { font-size: 28px; font-weight: 500; color: var(--gold-light); }
+  #desc {
+    margin-top: 6px;
+    font-size: 16px;
+    line-height: 1.35;
+    color: rgba(245, 241, 230, .82);
+    min-height: 22px;
+  }
+  #mood {
+    margin-top: 10px;
+    font-size: 14px;
+    font-style: italic;
+    color: var(--gold-light);
+    text-shadow: 0 1px 12px rgba(0, 0, 0, .65);
+    min-height: 18px;
+  }
+  #kisa-paznja {
+    margin-top: 8px;
+    font-size: 13px;
+    color: #cfe0f2;
+    text-shadow: 0 1px 10px rgba(0, 0, 0, .6);
+    display: none;
+  }
+  /* v3.70 Grupa 9: Vremenska upozorenja — severity pozadina + uzvičnik */
+  .upozorenje {
+    margin-top: 10px;
+    padding: 11px 14px;
+    border-radius: 12px;
+    font-size: 13px;
+    display: none;
+    align-items: center;
+    gap: 11px;
+    border-left: 5px solid rgba(0, 0, 0, .35);
+    font-weight: 700;
+    line-height: 1.35;
+    color: #f5f1e6;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, .35);
+  }
+  /* severity: crvena po jačini — duboka / narandžasto-crvena / terakota */
+  .upozorenje.cisto { background: linear-gradient(180deg, #b53a2a, #7a1f15); }
+  .upozorenje.umereno { background: linear-gradient(180deg, #cb4335, #8a281c); }
+  .upozorenje.blago { background: linear-gradient(180deg, #c8634a, #8a3528); }
+  .upoz-ikona {
+    font-size: 18px; flex-shrink: 0;
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, .22);
+  }
+  .upoz-naslov { color: #f0d77a; font-weight: 800; }
+  .meta {
+    margin-top: 16px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    row-gap: 6px;
+    flex-wrap: wrap;
+    font-size: 13px;
+    color: rgba(245, 241, 230, .92);
+  }
+  .meta-prelom { flex-basis: 100%; height: 0; }
+  #grad { font-weight: 600; color: var(--text); }
+  .meta span b { color: var(--text); font-weight: 600; }
+  .meta-detalji { margin-top: 8px; font-size: 12px; color: rgba(245, 241, 230, .75); }
+  .panel {
+    width: 100%;
+    max-width: 420px;
+    margin-top: 12px;
+    background: rgba(255, 255, 255, .045);
+    border: 1px solid rgba(255, 255, 255, .08);
+    border-radius: 16px;
+    padding: 14px 16px;
+  }
+  .panel h3 {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold-light);
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+  .models-grid { display: grid; grid-template-columns: auto 1fr 1fr 1fr; gap: 0; font-size: 13px; }
+  .models-grid > div { padding: 6px 4px; border-bottom: 1px solid rgba(212,175,55,.08); }
+  .models-grid > div:nth-last-child(-n+4) { border-bottom: none; }
+  .models-h { text-align: center; font-weight: 600; color: var(--gold); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; }
+  .models-l { color: rgba(245, 241, 230, .82); font-size: 12px; }
+  .models-grid > div:not(.models-h):not(.models-l) { text-align: center; color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
+  /* ——— Modeli — izvori: v3.22 vraćeni u standardno plavo staklo, isti sistem kao i ostali paneli ——— */
+  /* ——— Pozornica prati nebo: dan diše, noć tone ——— */
+  body.mood-sunce   { background: radial-gradient(ellipse at 50% 20%, #1d5aa8 0%, #103a75 60%, #081c3a 100%); }
+  body.mood-oblacno { background: radial-gradient(ellipse at 50% 20%, #35506e 0%, #1f3350 60%, #0d1626 100%); }
+  body.mood-magla   { background: radial-gradient(ellipse at 50% 20%, #4a5568 0%, #2c3543 60%, #12161e 100%); }
+  body.mood-kisa    { background: radial-gradient(ellipse at 50% 20%, #1e4a7a 0%, #12335c 60%, #061527 100%); }
+  body.mood-sneg    { background: radial-gradient(ellipse at 50% 20%, #3a6aa8 0%, #224678 60%, #0b1c33 100%); }
+  body.mood-oluja   { background: radial-gradient(ellipse at 50% 20%, #52658a 0%, #31415f 60%, #17243c 100%); }
+  body.mood-noc     { background: radial-gradient(ellipse at 50% 20%, #101630 0%, #0a0e20 65%, #040610 100%); }
+  /* Noć: duboke verzije istih tona */
+  body.je-noc.mood-sunce   { background: radial-gradient(ellipse at 50% 20%, #142c46 0%, #0b1828 65%, #050b14 100%); }
+  body.je-noc.mood-oblacno { background: radial-gradient(ellipse at 50% 20%, #1a222e 0%, #10151e 65%, #070a0e 100%); }
+  body.je-noc.mood-magla   { background: radial-gradient(ellipse at 50% 20%, #23272c 0%, #15181c 65%, #090b0d 100%); }
+  body.je-noc.mood-kisa    { background: radial-gradient(ellipse at 50% 20%, #10233c 0%, #0a1626 65%, #040810 100%); }
+  body.je-noc.mood-sneg    { background: radial-gradient(ellipse at 50% 20%, #1c2c42 0%, #101a2a 65%, #060a12 100%); }
+  body.je-noc.mood-oluja   { background: radial-gradient(ellipse at 50% 20%, #10121e 0%, #080a12 65%, #030408 100%); }
+  /* Zora i sumrak: nebo prati izlazak i zalazak sunca */
+  body.mood-sunce.je-jutro  { background: radial-gradient(ellipse at 50% 20%, #f6cf8e 0%, #7ba3d6 45%, #1d3f70 100%); }
+  body.mood-sunce.je-sumrak { background: radial-gradient(ellipse at 50% 20%, #e0955a 0%, #7a4666 45%, #172743 100%); }
+  /* ——— Vremenski mood: KVADRAT oko lava se menja sa vremenom ——— */
+  #scena {
+    position: absolute; inset: 0;
+    border-radius: inherit;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .card > *:not(#scena):not(.ugao-nebo):not(#lok-radar) { position: relative; z-index: 1; }
+  /* Sunce diše na celoj kartici — zlatno svetlo od lava preko kvadrata */
+  .mood-sunce #scena::before {
+    content: ""; position: absolute; inset: 0;
+    background: radial-gradient(circle at 50% 26%, rgba(255,216,120,.15), rgba(255,216,120,.05) 55%, transparent 78%);
+    animation: ef-disi 6s ease-in-out infinite;
+  }
+  .mood-sunce   .card { background: linear-gradient(180deg, rgba(72, 148, 220, .6), rgba(22, 62, 132, .72)); }
+  .mood-oblacno .card { background-color: rgba(120, 135, 155, .62); }
+  .mood-magla   .card { background-color: rgba(185, 190, 196, .58); }
+  .mood-kisa    .card { background-color: rgba(28, 78, 148, .7); }
+  .mood-sneg    .card { background-color: rgba(170, 200, 235, .6); }
+  .mood-oluja   .card { background-color: rgba(52, 63, 92, .8); }
+  .mood-noc     .card { background-color: rgba(16, 22, 48, .78); }
+  /* Noćne varijante neba kad je mrak */
+  .je-noc.mood-oblacno .card { background-color: rgba(45, 52, 66, .72); }
+  .je-noc.mood-magla   .card { background-color: rgba(95, 100, 108, .62); }
+  .je-noc.mood-kisa    .card { background-color: rgba(22, 30, 55, .75); }
+  .je-noc.mood-sneg    .card { background-color: rgba(70, 85, 110, .65); }
+  .je-noc.mood-oluja   .card { background-color: rgba(10, 12, 22, .88); }
+  /* Zora i sumrak: kartica topla na ivici dana */
+  body.mood-sunce.je-jutro .card  { background: linear-gradient(180deg, rgba(128, 158, 204, .55), rgba(26, 50, 92, .8)); }
+  body.mood-sunce.je-sumrak .card { background: linear-gradient(180deg, rgba(166, 104, 80, .6), rgba(48, 34, 62, .84)); }
+    /* ——— Zlatna slova za SVE vremenske uslove — konzistentan premium izgled ——— */
+  .mood-magla #temp, .mood-oblacno #temp, .mood-sunce #temp, .mood-kisa #temp, .mood-sneg #temp, .mood-oluja #temp, .mood-noc #temp,
+  .mood-magla #grad, .mood-oblacno #grad, .mood-sunce #grad, .mood-kisa #grad, .mood-sneg #grad, .mood-oluja #grad, .mood-noc #grad,
+  .mood-magla .meta span b, .mood-oblacno .meta span b, .mood-sunce .meta span b, .mood-kisa .meta span b, .mood-sneg .meta span b, .mood-oluja .meta span b, .mood-noc .meta span b {
+    color: var(--gold);
+    text-shadow: 0 2px 14px rgba(0,0,0,.62);
+  }
+  .mood-magla #mood, .mood-oblacno #mood, .mood-sunce #mood, .mood-kisa #mood, .mood-sneg #mood, .mood-oluja #mood, .mood-noc #mood {
+    color: var(--gold);
+    text-shadow: 0 2px 14px rgba(0,0,0,.7);
+  }
+  .mood-magla #kisa-paznja, .mood-oblacno #kisa-paznja, .mood-sunce #kisa-paznja, .mood-kisa #kisa-paznja, .mood-sneg #kisa-paznja, .mood-oluja #kisa-paznja, .mood-noc #kisa-paznja {
+    color: var(--gold);
+    text-shadow: 0 2px 12px rgba(0,0,0,.55);
+  }
+  .mood-magla #desc, .mood-oblacno #desc, .mood-sunce #desc, .mood-kisa #desc, .mood-sneg #desc, .mood-oluja #desc, .mood-noc #desc,
+  .mood-magla .meta, .mood-oblacno .meta, .mood-sunce .meta, .mood-kisa .meta, .mood-sneg .meta, .mood-oluja .meta, .mood-noc .meta,
+  .mood-magla .meta-detalji, .mood-oblacno .meta-detalji, .mood-sunce .meta-detalji, .mood-kisa .meta-detalji, .mood-sneg .meta-detalji, .mood-oluja .meta-detalji, .mood-noc .meta-detalji {
+    color: var(--gold);
+    text-shadow: 0 2px 12px rgba(0,0,0,.55);
+  }
+  /* ——— Scena u kvadratu: kapi, pahulje, blesak, oblaci, zvezde ——— */
+  .sc-kapa {
+    position: absolute; width: 8px; height: 24px; background: transparent;
+    animation: sc-kisa-pad 2.6s linear infinite;
+  }
+  .sc-kapa svg { display: block; width: 100%; height: 100%; }
+  @keyframes sc-kisa-pad {
+    0% { transform: translateY(-24px); opacity: 0; }
+    12% { opacity: .9; }
+    100% { transform: translateY(400px); opacity: 0; }
+  }
+  /* Kiša na staklu: kap sleti, zastane, pa se sliva — tanak trag se gasi za njom */
+  .sc-kap {
+    position: absolute;
+    width: 9px; height: 12px;
+    border-radius: 50% 50% 55% 55% / 62% 62% 45% 45%;
+    background: radial-gradient(circle at 30% 25%, rgba(255,255,255,.98) 0 8%, rgba(210,230,250,.75) 34%, rgba(170,205,240,.45) 68%, rgba(170,205,240,0) 100%);
+    box-shadow: inset 0 0 3px rgba(255,255,255,.6), 0 0 6px rgba(190,220,250,.22);
+    opacity: 0;
+    animation: sc-kap-zivot-a 9s linear infinite;
+  }
+  .sc-kap::after {
+    content: ""; position: absolute; left: 20%; bottom: 88%;
+    width: 62%; height: 42px;
+    background: linear-gradient(to bottom, rgba(190,215,240,0), rgba(200,225,250,.12) 55%, rgba(205,228,250,.5));
+    border-radius: 3px;
+    filter: blur(.6px);
+  }
+  .sc-kap.levo { animation-name: sc-kap-zivot-b; }
+  @keyframes sc-kap-zivot-a {
+    0%   { transform: translate(0px, -6px) scale(.5); opacity: 0; }
+    5%   { transform: translate(0px, 0px) scale(1.2); opacity: 1; }
+    8%   { transform: translate(0px, 3px) scale(1); opacity: .95; }
+    9%   { transform: translate(0px, 3px) scale(1); opacity: .95; }
+    22%  { transform: translate(2px, 130px) scale(1); opacity: .95; }
+    23%  { transform: translate(2px, 135px) scale(1); opacity: .95; }
+    38%  { transform: translate(-1px, 310px) scale(1); opacity: .92; }
+    39%  { transform: translate(-1px, 316px) scale(1); opacity: .92; }
+    54%  { transform: translate(3px, 490px) scale(1); opacity: .88; }
+    55%  { transform: translate(3px, 497px) scale(1); opacity: .88; }
+    70%  { transform: translate(0px, 570px) scale(.97); opacity: .55; }
+    100% { transform: translate(0px, 660px) scale(.9); opacity: 0; }
+  }
+  @keyframes sc-kap-zivot-b {
+    0%   { transform: translate(0px, -6px) scale(.5); opacity: 0; }
+    5%   { transform: translate(0px, 0px) scale(1.2); opacity: 1; }
+    8%   { transform: translate(0px, 3px) scale(1); opacity: .95; }
+    9%   { transform: translate(0px, 3px) scale(1); opacity: .95; }
+    22%  { transform: translate(-2px, 130px) scale(1); opacity: .95; }
+    23%  { transform: translate(-2px, 135px) scale(1); opacity: .95; }
+    38%  { transform: translate(1px, 310px) scale(1); opacity: .92; }
+    39%  { transform: translate(1px, 316px) scale(1); opacity: .92; }
+    54%  { transform: translate(-3px, 490px) scale(1); opacity: .88; }
+    55%  { transform: translate(-3px, 497px) scale(1); opacity: .88; }
+    70%  { transform: translate(0px, 570px) scale(.97); opacity: .55; }
+    100% { transform: translate(0px, 660px) scale(.9); opacity: 0; }
+  }
+  .sc-pahulja {
+    position: absolute; width: 8px; height: 8px; border-radius: 50%;
+    background: rgba(255,255,255,.95); box-shadow: 0 0 8px rgba(255,255,255,.78);
+    animation: sc-sneg-pad 5s linear infinite;
+  }
+  @keyframes sc-sneg-pad {
+    0% { transform: translateY(-20px); opacity: 0; }
+    10% { opacity: .95; }
+    100% { transform: translateY(400px); opacity: 0; }
+  }
+  .sc-blesak {
+    position: absolute; inset: 0;
+    background: rgba(255,204,96,.22);
+    opacity: 0;
+    z-index: 3;
+  }
+  /* Munja-kosa: razgranata munja koju grmljavina() crta za svaki udar */
+  .sc-munja {
+    position: absolute; top: 3%; width: 140px; height: 220px;
+    opacity: 0; pointer-events: none;
+    z-index: 3;
+  }
+  .sc-munja svg { width: 100%; height: 100%; overflow: visible; }
+  /* Živo nebo: oblaci tiho pulsiraju zlatno između udara */
+  .sc-pulse {
+    position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse at 50% 0%, rgba(255,190,60,.14), rgba(255,190,60,0) 65%);
+    animation: sc-nebo-dise 5.6s ease-in-out infinite;
+    z-index: 1;
+  }
+  @keyframes sc-nebo-dise {
+    0%, 100% { opacity: .3; }
+    50% { opacity: 1; }
+  }
+  .sc-oblak {
+    position: absolute; width: 130px; height: 44px; border-radius: 50%;
+    background: rgba(178,190,200,.55); filter: blur(10px);
+    animation: sc-pluta 7s ease-in-out infinite;
+  }
+  @keyframes sc-pluta {
+    0%, 100% { transform: translateX(-10px); opacity: .6; }
+    50% { transform: translateX(10px); opacity: .95; }
+  }
+  .sc-zvezda {
+    position: absolute; width: 3px; height: 3px; border-radius: 50%;
+    background: #ffe9a8;
+    box-shadow: 0 0 3px rgba(255, 222, 130, .95), 0 0 7px rgba(255, 210, 100, .8), 0 0 12px rgba(240, 195, 90, .35);
+    animation: sc-trepti 3s ease-in-out infinite;
+  }
+  @keyframes sc-trepti {
+    0%, 100% { opacity: .25; }
+    50% { opacity: 1; }
+  }
+  .ef-halo-magla { background: radial-gradient(closest-side, transparent 48%, rgba(200,204,208,.75) 70%, rgba(200,204,208,0) 100%); }
+  .ef-halo-noc   { background: radial-gradient(closest-side, transparent 48%, rgba(210,220,255,.42) 72%, rgba(210,220,255,0) 100%); }
+  .ef-zrak {
+    position: absolute; top: 50%; left: 50%;
+    width: 300px; height: 300px; margin: -150px 0 0 -150px;
+    border-radius: 50%;
+    background: repeating-conic-gradient(from 0deg, rgba(255,216,120,0) 0deg 14.3deg, rgba(255,216,120,.5) 14.65deg 15.35deg, rgba(255,216,120,0) 15.7deg 30deg);
+    -webkit-mask-image: radial-gradient(circle closest-side, transparent 76%, #000 86%, #000 96%, transparent 100%);
+    mask-image: radial-gradient(circle closest-side, transparent 76%, #000 86%, #000 96%, transparent 100%);
+    animation: ef-zrak-vrti 26s linear infinite;
+  }
+  /* Odsjaj: bele iskrice između zlatnih iglica — sunce treperi zlato-beo */
+  .ef-zrak-beli {
+    position: absolute; top: 50%; left: 50%;
+    width: 300px; height: 300px; margin: -150px 0 0 -150px;
+    border-radius: 50%;
+    background: repeating-conic-gradient(from 0deg, rgba(255,250,235,0) 0deg 0.1deg, rgba(255,250,235,.68) 0.35deg 0.85deg, rgba(255,250,235,0) 1.2deg 30deg);
+    -webkit-mask-image: radial-gradient(circle closest-side, transparent 79%, #000 84%, #000 88%, transparent 92%);
+    mask-image: radial-gradient(circle closest-side, transparent 79%, #000 84%, #000 88%, transparent 92%);
+    animation: ef-zrak-vrti 26s linear infinite;
+  }
+  /* ——— Oblaci oko lava: beli, sivi, snežni, tamni — prirodno nebo u istom rukopisu ——— */
+  /* Vlad 3.0: organski SVG oblaci — pufnaste mase, talasasta gornja i donja ivica, bez pill baze */
+  .ef-oblak {
+    position: absolute; height: auto; aspect-ratio: 200 / 124;
+    margin-top: -54px;
+    opacity: .97;
+    animation: ef-oblak-pluta 9s ease-in-out infinite;
+    --ob-g: #f6efdd; --ob-z: #e3d7bd; --ob-h: #fdf8ec; --ob-s: rgba(7, 23, 16, .14);
+  }
+  .ef-oblak svg { display: block; width: 100%; height: 100%; filter: brightness(.93) saturate(.97) drop-shadow(0 10px 12px var(--ob-s)); }
+  .ef-oblak-siv   { --ob-g: #c9d4e1; --ob-z: #9aa9bd; --ob-h: #e0e8f1; --ob-s: rgba(7, 23, 16, .2); }
+  .ef-oblak-sneg  { --ob-g: #eaf2fb; --ob-z: #a5c0e2; --ob-h: #ffffff; --ob-s: rgba(7, 23, 16, .16); }
+  .ef-oblak-taman { --ob-g: #5e6a87; --ob-z: #475264; --ob-h: #9aa6c0; --ob-s: rgba(7, 23, 16, .28); opacity: .9; }
+  /* v3.53: parallax slojevi — pozadina sporo plovi + tamna/zamućena; prednji brže + svetao/oštar */
+  .obl-paralaks-pozadina {
+    animation: ef-oblak-pluta 18s ease-in-out infinite;
+    filter: blur(2.5px) brightness(.78) saturate(.85) drop-shadow(0 8px 10px var(--ob-s));
+    opacity: .8;
+  }
+  .obl-paralaks-prednji {
+    animation: ef-oblak-pluta 9s ease-in-out infinite;
+    filter: brightness(1.03) saturate(1.02) drop-shadow(0 10px 12px var(--ob-s));
+    opacity: .96;
+  }
+  .je-noc .ef-oblak svg, .je-noc .sc-kulisa svg { filter: brightness(.75) saturate(.8) drop-shadow(0 10px 12px var(--ob-s)); }
+  /* Vlad: oblaci u sumraku prate toplu svetlost — ne hladno dnevno */
+  .je-sumrak .ef-oblak svg, .je-sumrak .sc-kulisa svg { filter: sepia(.3) saturate(.85) contrast(1.04) brightness(.95) drop-shadow(0 10px 12px var(--ob-s)); }
+  /* Vlad: oblaci u zori prate sveze zlatno-plavo svetlo izlaska sunca */
+  .je-jutro .ef-oblak svg, .je-jutro .sc-kulisa svg { filter: sepia(.14) saturate(.88) contrast(1.07) brightness(.96) drop-shadow(0 10px 12px var(--ob-s)); }
+  /* Vlad: oblacne ikonice u sat karticama prate fazu dana — ista svetlost kao glavni oblaci; velicina 18px netaknuta */
+  .sat-item.faza-jutro .sat-emoji { filter: sepia(.14) saturate(.85) brightness(1.04); }
+  .sat-item.faza-sumrak .sat-emoji { filter: sepia(.28) saturate(.82) brightness(1); }
+  .sat-item.faza-noc .sat-emoji { filter: brightness(.75) saturate(.8); }
+  /* Vlad 3.0: oblačna kulisa — deo većeg neba ulazi iz donjeg desnog ugla */
+  .sc-kulisa {
+    position: absolute; right: -26px; bottom: 30%; width: 172px;
+    height: auto; aspect-ratio: 200 / 124;
+    opacity: .5; filter: blur(1px);
+    animation: ef-oblak-pluta 13s ease-in-out infinite;
+    --ob-g: #f6efdd; --ob-z: #e3d7bd; --ob-h: #fdf8ec;
+  }
+  .sc-kulisa svg { display: block; width: 100%; height: 100%; }
+  .mood-kisa .sc-kulisa  { --ob-g: #c9d4e1; --ob-z: #9aa9bd; --ob-h: #e0e8f1; }
+  .mood-oluja .sc-kulisa { --ob-g: #5e6a87; --ob-z: #475264; --ob-h: #9aa6c0; opacity: .68; }
+  .mood-sneg .sc-kulisa  { --ob-g: #e7f0fb; --ob-z: #a5c0e2; --ob-h: #fdfefe; opacity: .5; }
+  /* ——— Canvas oblaci — zamenjuju SVG crtice ——— */
+  #obl-canvas {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+  #kisa-canvas {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 2;
+  }
+  #magla-canvas {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 1;
+  }
+  #sneg-canvas {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 2;
+  }
+  #zvezde-canvas {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+  #sunce-canvas {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+  @keyframes ef-zrak-vrti {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  /* ——— Sati traka: neutralno staklo ——— */
+  .panel.sati h3 { color: var(--gold-light); }
+  .panel.sati .sat-item { color: rgba(245, 241, 230, .82); }
+  .panel.sati .sat-item b { color: var(--text); }
+  .panel.sati .sat-item img { border-color: rgba(255, 255, 255, .12); }
+  /* ——— Po danima: neutralno staklo ——— */
+  .dan-emoji, .sat-emoji { display: inline-flex; align-items: center; vertical-align: middle; line-height: 0; }
+  .sat-emoji svg { width: 18px; height: 18px; }
+  .dan-emoji svg { width: 22px; height: 22px; }
+  .dan-emoji { flex: 0 0 28px; flex-direction: column; justify-content: center; gap: 3px; }
+  .sansa-sat { font-size: 11px; font-weight: 600; color: rgba(165, 195, 235, .95); line-height: 1; }
+  .sansa-dan { display: block; font-size: 11px; font-weight: 600; color: rgba(165, 195, 235, .95); line-height: 1; }
+  .sati-traka {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 14px 0 4px;
+    scrollbar-width: none;
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .sati-traka::-webkit-scrollbar { display: none; }
+  /* Na računaru: vitka zlatna traka za listanje sati (telefon ostaje bez nje) */
+  @media (hover: hover) and (pointer: fine) {
+    .sati-traka { scrollbar-width: thin; scrollbar-color: rgba(212, 175, 55, .45) transparent; }
+    .sati-traka::-webkit-scrollbar { display: block; height: 6px; }
+    .sati-traka::-webkit-scrollbar-track { background: transparent; }
+    .sati-traka::-webkit-scrollbar-thumb { background: rgba(212, 175, 55, .35); border-radius: 3px; }
+    .sati-traka::-webkit-scrollbar-thumb:hover { background: rgba(212, 175, 55, .55); }
+  }
+  .sat-item {
+    min-width: 52px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: rgba(245, 241, 230, .82);
+    scroll-snap-align: start;
+    padding: 4px 2px;
+    border-radius: 12px;
+  }
+  .sat-item img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid rgba(255, 255, 255, .12);
+    filter: brightness(1.18);
+  }
+  .sat-item b { color: var(--text); font-size: 14px; }
+  /* ——— v3.68 Grupa 7: Minutna kiša — bar chart + pametni rezime ——— */
+  .kisa-minutno-panel { }
+  .kisa-rezime {
+    font-size: 13px;
+    color: rgba(245, 241, 230, .82);
+    margin-top: 6px;
+    line-height: 1.4;
+  }
+  .kisa-minutno-traka {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    height: 52px;
+    margin-top: 10px;
+  }
+  .kisa-bar {
+    flex: 1;
+    min-width: 0;
+    background: linear-gradient(180deg, rgba(120, 185, 240, .9), rgba(60, 130, 205, .55));
+    border-radius: 3px 3px 0 0;
+    min-height: 3px;
+    transition: height .35s ease;
+  }
+  .kisa-bar.nula { background: rgba(255, 255, 255, .07); min-height: 2px; }
+  .kisa-minutno-vremena {
+    display: flex;
+    gap: 4px;
+    margin-top: 4px;
+    font-size: 10px;
+    color: rgba(245, 241, 230, .5);
+  }
+  .kisa-minutno-vreme { flex: 1; text-align: center; }
+
+  /* ——— v3.69 Grupa 10: Kvalitet vazduha — EU AQI indeks + polutanti ——— */
+  .vazduh-glavni { display: flex; align-items: center; gap: 14px; }
+  .vazduh-broj {
+    width: 58px; height: 58px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px; font-weight: 700; color: #fff;
+    background: linear-gradient(180deg, #5a6275, #3a3d4a); transition: background .4s ease;
+    flex-shrink: 0; font-variant-numeric: tabular-nums;
+    box-shadow: 0 0 0 2px rgba(212, 175, 55, .22), 0 4px 14px rgba(0, 0, 0, .35);
+  }
+  .vazduh-opis { flex: 1; min-width: 0; }
+  .vazduh-ime { font-size: 16px; font-weight: 600; color: var(--text); }
+  .vazduh-savet { font-size: 12px; color: rgba(245, 241, 230, .65); margin-top: 2px; line-height: 1.35; }
+  .vazduh-stubici { display: flex; align-items: flex-end; gap: 6px; height: 70px; margin-top: 12px; }
+  .vazduh-stub { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; }
+  .vazduh-stub .bar { width: 100%; border-radius: 3px 3px 0 0; min-height: 4px; transition: height .35s ease; box-shadow: 0 2px 6px rgba(0,0,0,.25); }
+  .vazduh-stub .val { font-size: 11px; color: var(--text); font-weight: 600; margin-top: 3px; font-variant-numeric: tabular-nums; }
+  .vazduh-stub .ime { font-size: 9px; color: rgba(245, 241, 230, .5); text-transform: uppercase; letter-spacing: .04em; }
+
+  .dan-red {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 9px 0;
+    border-bottom: 1px solid rgba(212, 175, 55, .08);
+    font-size: 13px;
+    color: rgba(245, 241, 230, .82);
+    cursor: pointer;
+    transition: background .2s ease;
+  }
+  .dan-red:hover { background: rgba(212, 175, 55, .05); }
+  .dan-red.dan-izabran { background: rgba(212, 175, 55, .09); border-radius: 8px; padding: 9px 10px; }
+  .dan-red:last-child { border-bottom: none; }
+  .dan-red img {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid rgba(255, 255, 255, .12);
+    filter: brightness(1.18);
+  }
+  .dan-ime { width: 84px; text-align: left; color: var(--text); font-weight: 600; }
+  .dan-opis { flex: 1; min-width: 0; text-align: left; font-size: 12px; line-height: 1.35; color: rgba(245, 241, 230, .82); }
+  .dan-temp { flex: 0 0 auto; min-width: 64px; text-align: right; white-space: nowrap; line-height: 1.25; color: var(--text); font-weight: 600; }
+  .lok-red {
+    display: flex;
+    gap: 8px;
+  }
+  .lok-red input {
+    flex: 1;
+    min-width: 0;
+    background: rgba(18, 22, 31, .6);
+    border: 1px solid rgba(212, 175, 55, .35);
+    border-radius: 10px;
+    color: var(--text);
+    font-size: 14px;
+    padding: 10px 12px;
+    outline: none;
+  }
+  .lok-red input::placeholder { color: rgba(245, 241, 230, .45); }
+  .lok-red button {
+    background: rgba(212, 175, 55, .16);
+    border: 1px solid rgba(212, 175, 55, .45);
+    border-radius: 10px;
+    color: var(--gold-light);
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 12px;
+    cursor: pointer;
+  }
+  #lok-gps { font-size: 16px; padding: 10px 12px; display: inline-flex; align-items: center; justify-content: center; }
+  /* ——— Radar dugme: gore-levo na karti (simetrično sa .ugao-nebo gore-desno) — premešteno 8.10, v3.65b ——— */
+  #lok-radar {
+    position: absolute;
+    left: 14px;
+    top: 14px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 50%, #0c131e 0%, #050810 100%);
+    border: 1.5px solid rgba(212,175,55,.85);
+    cursor: pointer;
+    z-index: 5;
+    overflow: hidden;
+    padding: 0;
+    box-shadow: 0 4px 16px rgba(0,0,0,.45), inset 0 0 12px rgba(0,0,0,.6);
+    transition: transform .25s ease, box-shadow .25s ease;
+  }
+  #lok-radar:hover { transform: scale(1.08); box-shadow: 0 0 18px rgba(212,175,55,.45), inset 0 0 12px rgba(0,0,0,.6); }
+  #lok-radar:active { transform: scale(.94); }
+  /* Koncentrični krugovi — radar scope */
+  #lok-radar::before, #lok-radar::after {
+    content: ""; position: absolute; border-radius: 50%;
+    border: 1px solid rgba(212,175,55,.22); pointer-events: none;
+  }
+  #lok-radar::before { width: 64%; height: 64%; top: 18%; left: 18%; }
+  #lok-radar::after { width: 32%; height: 32%; top: 34%; left: 34%; }
+  /* Rotirajući snop — konični gradijent koji ostavlja trag */
+  #lok-radar .radar-snop {
+    position: absolute; inset: 0; border-radius: 50%;
+    background: conic-gradient(from 0deg,
+      rgba(120, 220, 130, 0) 0deg,
+      rgba(120, 220, 130, 0) 250deg,
+      rgba(120, 220, 130, .15) 305deg,
+      rgba(120, 220, 130, .55) 350deg,
+      rgba(120, 220, 130, .95) 360deg);
+    animation: radar-snop 3s linear infinite;
+  }
+  @keyframes radar-snop { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  /* Krst u sredini */
+  #lok-radar .radar-krst { position: absolute; inset: 0; pointer-events: none; }
+  #lok-radar .radar-krst::before, #lok-radar .radar-krst::after {
+    content: ""; position: absolute; background: rgba(212,175,55,.22);
+  }
+  #lok-radar .radar-krst::before { left: 50%; top: 6px; bottom: 6px; width: 1px; transform: translateX(-50%); }
+  #lok-radar .radar-krst::after { top: 50%; left: 6px; right: 6px; height: 1px; transform: translateY(-50%); }
+  /* Središnja tačka */
+  #lok-radar .radar-tacka {
+    position: absolute; top: 50%; left: 50%; width: 4px; height: 4px; border-radius: 50%;
+    background: var(--gold-light); transform: translate(-50%, -50%);
+    box-shadow: 0 0 4px rgba(240,212,124,.7);
+  }
+  @media (max-width: 360px) { #lok-radar { width: 42px; height: 42px; } }
+  @media (prefers-reduced-motion: reduce) { #lok-radar .radar-snop { animation: none; } }
+  #lok-rez { margin-top: 8px; display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: rgba(245, 241, 230, .82); }
+  .lok-rez-btn {
+    text-align: left;
+    background: rgba(18, 22, 31, .6);
+    border: 1px solid rgba(212, 175, 55, .25);
+    border-radius: 10px;
+    color: var(--text);
+    font-size: 13px;
+    padding: 9px 12px;
+    cursor: pointer;
+  }
+  .lok-rez-btn:active { background: rgba(212, 175, 55, .18); }
+  .foot {
+    font-size: 11px;
+    color: rgba(245, 241, 230, .75);
+    text-align: center;
+    margin-top: 14px;
+    letter-spacing: 1px;
+  }
+  .foot-crveni {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .foot-crveni .foot-glava {
+    color: #e8a49a;
+    letter-spacing: 2px;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+  .foot-crveni span { color: rgba(245, 241, 230, .55); }
+  .err {
+    color: #ffb0a0;
+    font-size: 13px;
+    margin-top: 10px;
+    display: none;
+  }
+  /* ——— v3.67 Grupa 6: Offline bedž + Retry dugme ——— */
+  .offline-bedz {
+    display: none;
+    margin-top: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .3px;
+    color: #0c131e;
+    background: var(--gold-light);
+    padding: 2px 8px;
+    border-radius: 8px;
+    white-space: nowrap;
+    width: fit-content;
+    box-shadow: 0 2px 8px rgba(0,0,0,.3);
+  }
+  .offline-bedz.prikazi { display: block; }
+  .retry-btn {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--gold-light);
+    background: rgba(212, 175, 55, .14);
+    border: 1px solid rgba(212, 175, 55, .45);
+    border-radius: 8px;
+    cursor: pointer;
+    vertical-align: middle;
+    transition: background .2s ease, transform .15s ease;
+  }
+  .retry-btn:hover { background: rgba(212, 175, 55, .26); }
+  .retry-btn:active { transform: scale(.96); }
+  .loading { color: var(--gold-light); font-size: 14px; margin-top: 10px; }
+  /* ——— v3.66: Loader — indeterminate zlatna traka umesto "Lav se budi…" teksta ——— */
+  #loader {
+    margin: 12px auto 0;
+    width: 140px;
+    height: 3px;
+    background: rgba(212, 175, 55, .14);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+  }
+  #loader::after {
+    content: "";
+    position: absolute;
+    top: 0; left: -35%;
+    width: 35%; height: 100%;
+    background: linear-gradient(90deg, transparent, var(--gold-light) 50%, transparent);
+    border-radius: 2px;
+    animation: loader-klizaj 1.4s ease-in-out infinite;
+  }
+  @keyframes loader-klizaj { 0% { left: -35%; } 100% { left: 100%; } }
+  @media (prefers-reduced-motion: reduce) { #loader::after { animation: none; } }
+  /* ——— v3.66: "Sada" marker na satnoj traci — zlatni pečat na trenutnom satu ——— */
+  .sat-sada {
+    position: relative;
+    border-radius: 12px;
+    background: rgba(212, 175, 55, .14);
+    box-shadow: inset 0 0 0 1px rgba(212, 175, 55, .38);
+  }
+  .sat-sada img { border-color: rgba(212, 175, 55, .5); }
+  .sat-sada-oznaka {
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .5px;
+    color: #0c131e;
+    background: var(--gold-light);
+    padding: 1px 5px;
+    border-radius: 6px;
+    white-space: nowrap;
+    z-index: 2;
+    text-transform: uppercase;
+  }
+</style>
+</head>
+<body class="mood-oblacno">
+  <div class="top-row">
+    <div>
+      <div id="sat">--:--</div>
+      <div id="datum">-/-/-</div>
+      <div id="offline-bedz" class="offline-bedz">Bez mreže · keš</div>
+    </div>
+    <div class="top-desno">
+      <img id="lav-top" class="lav-top" src="https://oss-macaron-ai.macaron.im/image/text_to_image/6ac3d08be1c9684dbf1fdfbf.webp" alt="Vremenski lav">
+    </div>
+  </div>
+
+  <div class="card">
+    <div id="scena"></div>
+    <div class="ugao-nebo"><span class="nebo-telo nebo-sunce"></span><span class="nebo-telo nebo-mesec"></span><span class="nebo-telo nebo-oblak"><span class="nebo-pad"></span><span class="nebo-munja"></span></span></div>
+    <div id="lav-wrap">
+      <img id="lav" src="https://oss-macaron-ai.macaron.im/image/text_to_image/6ac3d08be1c9684dbf1fdfbf.webp" alt="Lav — vremensko raspoloženje" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20210%20210%22%3E%3Ctext%20x=%22105%22%20y=%22140%22%20font-size=%22100%22%20text-anchor=%22middle%22%3E%F0%9F%A6%81%3C%2Ftext%3E%3C%2Fsvg%3E';">
+      <div id="efekti"></div>
+    </div>
+    <div class="temp-row">
+      <span id="temp">–</span>
+      <span class="temp-unit">°C</span>
+    </div>
+    <div id="desc">Provera vremena…</div>
+    <div id="upozorenje" class="upozorenje" style="display:none"></div>
+    <div id="mood"></div>
+    <div id="loader" aria-hidden="true"></div>
+    <div id="kisa-paznja"></div>
+    <div class="meta">
+      <span id="grad">Stara Pazova</span>
+      <span> vetar: <b id="wind">–</b> km/h <b id="wind-dir"></b></span>
+      <span> kiša: <b id="rain">–</b> mm</span>
+      <span id="sansa-red" style="display:none"> šansa: <b id="sansa">–</b>%</span>
+      <span class="meta-prelom"></span>
+      <span> izlazak: <b id="izlazak">–</b></span>
+      <span> zalazak: <b id="zalazak">–</b></span>
+      <span> mesec: <svg class="moon" width="18" height="18" viewBox="-50 -50 100 100" style="vertical-align:-3px" aria-hidden="true"><circle cx="0" cy="0" r="44" fill="#2a2a3e" stroke="#3a3a5e" stroke-width="2"/><path id="moon-lit" d="" fill="#f5ecd0"/></svg> <b id="mesec">–</b></span>
+    </div>
+    <div class="meta meta-detalji">
+      <span> osećaj: <b id="osecaj">–</b>°</span>
+      <span> vlažnost: <b id="vlaznost">–</b>%</span>
+      <span> pritisak: <b id="pritisak">–</b> hPa</span>
+      <span> UV: <b id="uv">–</b></span>
+    </div>
+    <div id="msg" class="loading">Učitavam prognozu…</div>
+    <div id="err" class="err"></div>
+    <button id="lok-radar" type="button" title="Radar — kretanje oblaka" aria-label="Radar — kretanje oblaka">
+      <span class="radar-snop"></span>
+      <span class="radar-krst"></span>
+      <span class="radar-tacka"></span>
+    </button>
+  </div>
+
+  <div class="panel sati">
+    <h3 id="sati-naslov">Po satima</h3>
+    <div id="sati-traka" class="sati-traka"></div>
+  </div>
+
+  <div class="panel kisa-minutno" id="kisa-minutno-panel">
+    <h3>Sledeća 2 sata — kiša</h3>
+    <div id="kisa-minutno-rezime" class="kisa-rezime"></div>
+    <div id="kisa-minutno-traka" class="kisa-minutno-traka"></div>
+    <div id="kisa-minutno-vremena" class="kisa-minutno-vremena"></div>
+  </div>
+
+  <div class="panel vazduh" id="vazduh-panel">
+    <h3>Kvalitet vazduha — EU indeks</h3>
+    <div class="vazduh-glavni">
+      <div class="vazduh-broj" id="vazduh-broj">–</div>
+      <div class="vazduh-opis">
+        <div class="vazduh-ime" id="vazduh-ime">Učitavam…</div>
+        <div class="vazduh-savet" id="vazduh-savet"></div>
+      </div>
+    </div>
+    <div id="vazduh-stubici" class="vazduh-stubici"></div>
+  </div>
+
+  <div class="panel dani">
+    <h3>Po danima — 7 dana</h3>
+    <div id="dani-lista"></div>
+  </div>
+
+  <div class="panel models">
+    <h3>Modeli — uporedno</h3>
+    <div class="models-grid">
+      <div></div>
+      <div class="models-h">ECMWF</div>
+      <div class="models-h">GFS</div>
+      <div class="models-h">ICON</div>
+      <div class="models-l">Temp</div>
+      <div id="m-ecmwf-temp">–</div>
+      <div id="m-gfs-temp">–</div>
+      <div id="m-icon-temp">–</div>
+      <div class="models-l">Kiša</div>
+      <div id="m-ecmwf-kisa">–</div>
+      <div id="m-gfs-kisa">–</div>
+      <div id="m-icon-kisa">–</div>
+      <div class="models-l">Vetar</div>
+      <div id="m-ecmwf-vetar">–</div>
+      <div id="m-gfs-vetar">–</div>
+      <div id="m-icon-vetar">–</div>
+    </div>
+  </div>
+
+  <div class="panel lok">
+    <h3>Lokacija — bilo gde</h3>
+    <div class="lok-red">
+      <input id="lok-unos" placeholder="Traži grad (Beograd, Kotor, New York…)" autocomplete="off">
+      <button id="lok-trazi" type="button">Traži</button>
+      <button id="lok-gps" type="button" title="Moja lokacija"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="16" height="16" aria-hidden="true"><path d="M12 2.1c-3.9 0-7.1 3.1-7.1 7 0 5 7.1 12.8 7.1 12.8s7.1-7.8 7.1-12.8c0-3.9-3.2-7-7.1-7z" fill="#d4af37" stroke="#9c7f26" stroke-width="0.9"/><circle cx="12" cy="9.1" r="2.55" fill="#131b2a"/></svg></button>
+    </div>
+    <div id="lok-rez"></div>
+  </div>
+
+  <div class="vb-pecat">V.B. &amp; Macaron</div>
+
+  <div class="foot">Lion Weather · Open-Meteo</div>
+  <div class="foot foot-crveni">
+    <div class="foot-glava">IZVORI</div>
+    <span>Vremenski modeli: ECMWF · GFS · ICON</span>
+    <span>Podaci: Open-Meteo API</span>
+    <span>Hosting: GitHub Pages</span>
+  </div>
+
+<script>
+// Open-Meteo — besplatan, bez API ključa
+// Lokacija: pamti se u localStorage, default Stara Pazova
+var LOK_KEY = "lav-vreme-lokacija";
+var LOK = { lat: 44.9931, lon: 20.1669, ime: "Stara Pazova" };
+try {
+  var sacuvano = JSON.parse(localStorage.getItem(LOK_KEY));
+  if (sacuvano && typeof sacuvano.lat === "number" && typeof sacuvano.lon === "number" && sacuvano.ime) {
+    LOK = sacuvano;
+  }
+} catch (e) {}
+
+function postaviGradUI(ime) {
+  document.getElementById("grad").textContent = ime;
+  document.title = "Lion Weather";
+}
+postaviGradUI(LOK.ime);
+
+var LAVOVI = {
+  sunce:   "https://oss-macaron-ai.macaron.im/image/chat_image/ca4f56fb-a7ce-4642-b069-1c299d6264ce.webp",
+  kisa:    "https://oss-macaron-ai.macaron.im/image/chat_image/2cff9af9-ca33-474a-8e70-3fce3f44eb50.webp",
+  oluja:   "https://oss-macaron-ai.macaron.im/image/chat_image/ba9905b2-87fc-4c8f-8da7-05f782362636.webp",
+  oblacno: "https://oss-macaron-ai.macaron.im/image/chat_image/90cae59e-e7c8-444f-bd72-5c12d7d0de8a.webp",
+  sneg:    "https://oss-macaron-ai.macaron.im/image/chat_image/4ddff560-c883-4882-8164-19d8fe578adc.webp",
+  magla:   "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac601d1a512cea1a59b6fc3.webp",
+  kisaNoc:    "https://oss-macaron-ai.macaron.im/image/chat_image/569f944d-d905-4b06-9e0d-223970bdc4e1.webp",
+  snegNoc:    "https://oss-macaron-ai.macaron.im/image/chat_image/ae2fbb17-7c68-44de-906f-e1be04e2e156.webp",
+  olujaNoc:   "https://oss-macaron-ai.macaron.im/image/chat_image/49e12163-4f2f-49fb-987a-12f8abe07bd5.webp",
+  oblacnoNoc: "https://oss-macaron-ai.macaron.im/image/chat_image/7abf8a8f-4675-4673-b65b-772a9166a85b.webp",
+  maglaNoc:   "https://oss-macaron-ai.macaron.im/image/chat_image/3121adae-92ba-48cc-b5f3-aba7e20c0248.webp",
+  noc:     "https://oss-macaron-ai.macaron.im/image/chat_image/ae9e074d-8494-4a38-b275-4eca14cb76a6.webp",
+  nocPun:  "https://oss-macaron-ai.macaron.im/image/chat_image/fd798ca0-0565-430b-a119-191c7de41f33.webp",
+  jutro:   "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac5dd8fa512cea1a59b3ed3.webp",
+  sumrak:  "https://oss-macaron-user.macaron.im/photo/cd4f94e2-d5ca-4d93-80d2-d68f3738c282.jpeg",
+  kisaNoc:    "https://oss-macaron-ai.macaron.im/image/chat_image/c53afbf7-3352-4331-b9a7-247d0519d736.webp",
+  snegNoc:    "https://oss-macaron-ai.macaron.im/image/chat_image/af36507a-a112-445c-a09e-6b6514bc4df2.webp",
+  olujaNoc:   "https://oss-macaron-ai.macaron.im/image/chat_image/49e12163-4f2f-49fb-987a-12f8abe07bd5.webp",
+  oblacnoNoc: "https://oss-macaron-ai.macaron.im/image/chat_image/1bfd613b-d7d7-4ab9-a75f-6ffdaaee8b1e.webp",
+  maglaNoc:   "https://oss-macaron-ai.macaron.im/image/chat_image/3121adae-92ba-48cc-b5f3-aba7e20c0248.webp",
+  kisaJutro:    "https://oss-macaron-ai.macaron.im/image/chat_image/5ed031c8-6517-4382-9b2c-6e5975a4b3b0.webp",
+  snegJutro:    "https://oss-macaron-ai.macaron.im/image/chat_image/7d94e245-06da-40b5-9722-90d8b466a2c0.webp",
+  olujaJutro:   "https://oss-macaron-ai.macaron.im/image/chat_image/4f3fe302-8ea9-44ca-8c57-603f2d2d4b1d.webp",
+  oblacnoJutro: "https://oss-macaron-ai.macaron.im/image/chat_image/6b2a0b71-a6ba-4327-8eaa-d4222f305a73.webp",
+  maglaJutro:   "https://oss-macaron-ai.macaron.im/image/chat_image/4edbd822-67f7-4583-aa2f-5d4098ebe4c7.webp",
+  kisaSumrak:    "https://oss-macaron-ai.macaron.im/image/chat_image/b468fb0d-63ae-43c9-8254-2b96a7927071.webp",
+  snegSumrak:    "https://oss-macaron-ai.macaron.im/image/chat_image/6185e113-0246-468b-9ea7-0d4de70ccb7f.webp",
+  olujaSumrak:   "https://oss-macaron-ai.macaron.im/image/chat_image/c19d7e1d-112a-4691-90cb-8a813f402207.webp",
+  oblacnoSumrak: "https://oss-macaron-ai.macaron.im/image/chat_image/86d4a317-3d6f-4656-83ba-778eecc914bd.webp",
+  maglaSumrak:   "https://oss-macaron-ai.macaron.im/image/chat_image/e726fb79-fbc7-4c7a-8c81-f45ab04531e0.webp"
+};
+
+// ——— Galerija lavova: svi lavovi koje smo ikad napravili — i oni iz fioke (Vlad 3.9) ———
+var FIOKA_DZEBRA = "https://macaron-sandbox-workspace.oss-accelerate.aliyuncs.com/prod/01a05aef-9b6e-7737-bec4-ae31a3069526/workspace/lav-vreme/img-dzebra.jpg";
+var GAL_NIZ = ["sunce","kisa","sneg","oluja","oblacno","magla","noc","kisaNoc","snegNoc","olujaNoc","oblacnoNoc","maglaNoc","nocPun","dzebra","jutro","kisaJutro","snegJutro","olujaJutro","oblacnoJutro","maglaJutro","sumrak","kisaSumrak","snegSumrak","olujaSumrak","oblacnoSumrak","maglaSumrak"]; // v3.51: plava "Ikonica — ravna" napolje iz galerije — ne prati priču
+var GAL_IMENA = { sunce:"Sunčani dan", kisa:"Kiša", sneg:"Sneg", oluja:"Oluja", oblacno:"Oblačno", magla:"Magla", noc:"Vedra noć", kisaNoc:"Kiša — noć", snegNoc:"Sneg — noć", olujaNoc:"Oluja — noć", oblacnoNoc:"Oblačno — noć", maglaNoc:"Magla — noć", nocPun:"Pun mesec", dzebra:"Џебра Д Лајон", jutro:"Zora", kisaJutro:"Kiša — zora", snegJutro:"Sneg — zora", olujaJutro:"Oluja — zora", oblacnoJutro:"Oblačno — zora", maglaJutro:"Magla — zora", sumrak:"Sumrak", kisaSumrak:"Kiša — sumrak", snegSumrak:"Sneg — sumrak", olujaSumrak:"Oluja — sumrak", oblacnoSumrak:"Oblačno — sumrak", maglaSumrak:"Magla — sumrak" };
+function GAL_URL(k) { return k === "dzebra" ? FIOKA_DZEBRA : LAVOVI[k]; }
+function lavDana() { var d = Math.floor(Date.now() / 86400000); return GAL_NIZ[d % GAL_NIZ.length]; }
+function otvoriGaleriju() {
+  var lepeza = document.getElementById("galerija-lepeza");
+  lepeza.innerHTML = "";
+  GAL_NIZ.forEach(function(k) {
+    var b = document.createElement("button");
+    b.className = "galerija-stavka"; b.type = "button";
+    b.innerHTML = '<img src="' + GAL_URL(k) + '" alt="' + GAL_IMENA[k] + '" loading="lazy"><span>' + GAL_IMENA[k] + '</span>';
+    b.addEventListener("click", function(ev) { ev.stopPropagation(); prikaziKrupno(k); });
+    lepeza.appendChild(b);
+  });
+  document.getElementById("galerija-krupno").style.display = "none";
+  lepeza.style.display = "grid";
+  document.getElementById("galerija").classList.add("otvorena");
+}
+function prikaziKrupno(k) {
+  document.getElementById("galerija-krupno-img").src = GAL_URL(k);
+  document.getElementById("galerija-krupno-potpis").textContent = GAL_IMENA[k];
+  document.getElementById("galerija-lepeza").style.display = "none";
+  document.getElementById("galerija-krupno").style.display = "block";
+}
+function zatvoriGaleriju() { document.getElementById("galerija").classList.remove("otvorena"); }
+document.addEventListener("DOMContentLoaded", function() {
+  document.getElementById("lav-top").addEventListener("click", otvoriGaleriju);
+  document.getElementById("galerija-zatvori").addEventListener("click", zatvoriGaleriju);
+  document.getElementById("galerija").addEventListener("click", function(ev) { if (ev.target === this) zatvoriGaleriju(); });
+  document.getElementById("galerija-krupno").addEventListener("click", function() {
+    this.style.display = "none";
+    document.getElementById("galerija-lepeza").style.display = "grid";
+  });
+});
+
+var WCODE = {
+  0:  ["Vedro",                 "sunce",  "Vreme je za sunčanje 😎", "☀️"],
+  1:  ["Pretežno vedro",         "sunce",  "Malo sunca, malo hlada — taman 😁", "🌤️"],
+  2:  ["Delimično oblačno",      "oblacno","Oblak tu, sunce tamo — dogovoriće se već", "⛅"],
+  3:  ["Oblačno",                "oblacno","Sunce je uzelo slobodno do daljnjeg", "☁️"],
+  45: ["Magla",                  "magla",  "Ne vidim ni do brkova", "🌫️"],
+  48: ["Magla s mrazom",         "magla",  "Magla i mraz — dan za jazbinu", "🌫️"],
+  51: ["Slaba kiša",             "kisa",   "Ja bih poneo kišobran, a ti odluči šta ćeš", "🌦️"],
+  53: ["Lagana kiša",            "kisa",   "Kap po kap — dan ide polako", "🌦️"],
+  55: ["Jaka kiša",              "kisa",   "Pada i ne misli da stane", "🌧️"],
+  56: ["Slaba ledena kiša",      "kisa",   "Pada i ledi — gledaj gde staješ", "🌧️"],
+  57: ["Ledena kiša",            "kisa",   "Kiša koja ledi — bolje u jazbini", "🌧️"],
+  61: ["Slaba kiša",             "kisa",   "Slaba kiša — kapuljača reši sve", "🌦️"],
+  63: ["Kiša",                   "kisa",   "Kiša k'o kiša — dan ide dalje", "🌧️"],
+  65: ["Jaka kiša",              "kisa",   "Pada kao da nema sutra", "🌧️"],
+  66: ["Slaba kiša sa snegom",   "sneg",   "Ni kiša ni sneg — a opet oboje", "🌨️"],
+  67: ["Kiša sa snegom",         "sneg",   "Nebo ne može da se odluči", "🌨️"],
+  71: ["Slab sneg",              "sneg",   "Više najava nego sneg", "🌨️"],
+  73: ["Sneg",                   "sneg",   "Dan k'o razglednica — beli se svuda", "🌨️"],
+  75: ["Jak sneg",               "sneg",   "Ko će sutra da čisti sneg 🤦", "❄️"],
+  77: ["Sneg u zrnima",          "sneg",   "Sitna zrna — bode do brkova", "🌨️"],
+  80: ["Slab pljusak",           "kisa",   "Slabiji pljusak — dobar znak za brzi korak", "🌦️"],
+  81: ["Pljusak",                "kisa",   "Lije k'o iz kabla — ali kratko", "🌧️"],
+  82: ["Jak pljusak",            "kisa",   "Nebo se otvorilo", "⛈️"],
+  85: ["Slabi snežni pljuskovi", "sneg",   "Padne pa stane — snežni ritam", "🌨️"],
+  86: ["Snežni pljuskovi",       "sneg",   "Nebo tresne snegom", "❄️"],
+  95: ["Grmljavinska oluja",     "oluja",  "Grom k'o iz topa", "⛈️"],
+  96: ["Oluja s gradom",         "oluja",  "Oluja je punog sadržaja — grom i led", "⛈️"],
+  99: ["Jaka oluja s gradom",    "oluja",  "Sedi gde si — čekaj da prođe", "⛈️"]
+};
+// ——— Doba dana u porukama: noć, zora i sumrak nose svoje rečenice (Vlad: poruka mora da isprati fazu) ———
+var FAZA_PORUKE = {
+  kisa:    { noc: "Noćna kiša — k'o uspavanka za Lavove 🌧️",
+             jutro: "Kiša prati zoru — dan kreće vlažan 🌧️",
+             sumrak: "Kiša u sumrak — ulice blistaju u kapima 🌧️" },
+  sneg:    { noc: "Snežna noć — sve spava pod belim ćilimom ❄️",
+             jutro: "Sneg je stigao pre zore — sve je netaknuto ❄️",
+             sumrak: "Snežni sumrak — grad se tiho uvlači u belo ❄️" },
+  oblacno: { noc: "Oblaci kriju zvezde — Lav pazi u mraku 🌌",
+             jutro: "Zora pod oblacima — dan se budi bez buke 🌥️",
+             sumrak: "Sumrak pod oblacima — nebo se sklapa k'o knjiga ☁️" },
+  oluja:   { noc: "Oluja u noći — grom svira duboku pesmu ⛈️",
+             jutro: "Gromovi iz zore — Lav se budi pre alarma ⛈️",
+             sumrak: "Oluja potamni sumrak — munje prave šou ⛈️" },
+  magla:   { noc: "Magla u noći — svetlost pliva kroz mleko 🌫️",
+             jutro: "Magla sa zore — svet se budi polako 🌫️",
+             sumrak: "Sumrak u magli — fenjeri lebde sami 🌫️" }
+};
+// ——— Naše zlatne ikone: nacrtane u kodu, identične na svakom uređaju (zamenjuju sistemske emoji) ———
+var IKONE = {
+  "☀️": '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="4.6" fill="#ffc933"/><g stroke="#ffc933" stroke-width="1.9" stroke-linecap="round"><path d="M12 2.1v2.6"/><path d="M12 19.3v2.6"/><path d="M2.1 12h2.6"/><path d="M19.3 12h2.6"/><path d="M5 5l1.9 1.9"/><path d="M17.1 17.1L19 19"/><path d="M19 5l-1.9 1.9"/><path d="M6.9 17.1L5 19"/></g></svg>',
+  "🌤️": '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="7.8" cy="7.2" r="3.3" fill="#ffc933"/><g stroke="#ffc933" stroke-width="1.7" stroke-linecap="round"><path d="M7.8 1.6v1.8"/><path d="M2.2 7.2h1.8"/><path d="M3.5 2.9l1.3 1.3"/></g><g fill="#f3ead8"><circle cx="11.8" cy="14.8" r="3.4"/><circle cx="16.2" cy="13.6" r="4.3"/><rect x="8.4" y="14.6" width="12.4" height="5" rx="2.5"/></g></svg>',
+  "⛅": '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="3.8" fill="#ffc933"/><g fill="#f3ead8"><circle cx="12.4" cy="15" r="3.8"/><circle cx="16.6" cy="13.6" r="4.7"/><rect x="8.6" y="14.8" width="12.6" height="5.2" rx="2.6"/></g></svg>',
+  "☁️": '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g fill="#f3ead8"><circle cx="9.4" cy="12.4" r="4.3"/><circle cx="15" cy="11.2" r="5.1"/><rect x="5.4" y="12.2" width="13.6" height="5.4" rx="2.7"/></g></svg>',
+  "🌫️": '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g fill="#f3ead8"><circle cx="9.2" cy="9.2" r="3.5"/><circle cx="14.2" cy="8.2" r="4.2"/><rect x="5.6" y="9" width="12" height="4.6" rx="2.3"/></g><g stroke="#f3ead8" stroke-width="1.8" stroke-linecap="round"><path d="M5.6 16.6h12.8"/><path d="M8 19.6h8"/></g></svg>',
+  "🌦️": '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g fill="#f3ead8"><circle cx="9.2" cy="9.2" r="3.6"/><circle cx="14.6" cy="8.4" r="4.4"/><rect x="5.4" y="9" width="12.6" height="4.8" rx="2.4"/></g><g stroke="#cfe0f2" stroke-width="1.9" stroke-linecap="round"><path d="M9 15.4l-1.1 3.2"/><path d="M14.6 15.4l-1.1 3.2"/></g></svg>',
+  "🌧️": '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g fill="#f3ead8"><circle cx="9" cy="8.4" r="3.4"/><circle cx="14.4" cy="7.6" r="4.2"/><rect x="5.2" y="8.2" width="12.6" height="4.6" rx="2.3"/></g><g stroke="#cfe0f2" stroke-width="1.8" stroke-linecap="round"><path d="M8 14.2l-1.2 3.4"/><path d="M12 14.2l-1.2 3.4"/><path d="M16 14.2l-1.2 3.4"/><path d="M9.8 18.8l-.8 2.2"/><path d="M14.6 18.8l-.8 2.2"/></g></svg>',
+  "🌨️": '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g fill="#f3ead8"><circle cx="9" cy="8.6" r="3.4"/><circle cx="14.4" cy="7.8" r="4.2"/><rect x="5.2" y="8.4" width="12.6" height="4.6" rx="2.3"/></g><g stroke="#cfe0f2" stroke-width="1.8" stroke-linecap="round"><path d="M8.6 14.6l-.9 2.6"/></g><g fill="#cfe0f2"><circle cx="12.4" cy="17" r="1.5"/><circle cx="16.4" cy="16.4" r="1.5"/></g></svg>',
+  "❄️": '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g stroke="#cfe0f2" stroke-width="1.7" stroke-linecap="round"><path d="M12 2.8v18.4"/><path d="M3.9 7.5l16.2 9"/><path d="M20.1 7.5L3.9 16.5"/></g><circle cx="12" cy="12" r="1.6" fill="#cfe0f2"/></svg>',
+  "⛈️": '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g fill="#f3ead8"><circle cx="9" cy="8.6" r="3.4"/><circle cx="14.4" cy="7.8" r="4.2"/><rect x="5.2" y="8.4" width="12.6" height="4.6" rx="2.3"/></g><path d="M12.8 13.6l-3.6 5h2.6l-1.3 4 4.6-5.4h-2.6z" fill="#ffc933"/></svg>'
+};
+var MOOD_LAT = { sunce: "sunce", kisa: "kiša", oluja: "oluja", oblacno: "oblačno", sneg: "sneg" };
+var DANI_SR = ["Nedelja", "Ponedeljak", "Utorak", "Sreda", "Četvrtak", "Petak", "Subota"];
+var DANI_SR_KRATKO = ["ned", "pon", "uto", "sre", "čet", "pet", "sub"];
+
+// Sat i datum — lokalni čas telefona
+var MES = ["januar","februar","mart","april","maj","jun","jul","avgust","septembar","oktobar","novembar","decembar"];
+function sati(){
+  var d = new Date();
+  var h = d.getHours(), m = d.getMinutes();
+  document.getElementById("sat").textContent = (h<10?"0":"")+h+":"+(m<10?"0":"")+m;
+  document.getElementById("datum").textContent = DANI_SR[d.getDay()]+", "+d.getDate()+". "+MES[d.getMonth()]+" "+d.getFullYear()+".";
+}
+sati();
+setInterval(sati, 1000);
+
+function postaviLava(vrsta) {
+  var img = document.getElementById("lav");
+  if (img.getAttribute("src") !== LAVOVI[vrsta]) {
+    img.classList.add("fade");
+    setTimeout(function(){
+      img.src = LAVOVI[vrsta];
+      img.onload = function(){ img.classList.remove("fade"); };
+      setTimeout(function(){ img.classList.remove("fade"); }, 400);
+    }, 250);
+  }
+}
+
+function postaviEfekte(vrsta) {
+  var wrap = document.getElementById("efekti");
+  if (!wrap) return;
+  wrap.innerHTML = "";
+  var h = document.createElement("div");
+  h.className = "ef-halo ef-halo-" + vrsta;
+  wrap.appendChild(h);
+  if (vrsta === "sunce") {
+    var z = document.createElement("div");
+    z.className = "ef-zrak";
+    wrap.appendChild(z);
+    var zb = document.createElement("div");
+    zb.className = "ef-zrak-beli";
+    wrap.appendChild(zb);
+  }
+  var i, s;
+  if (vrsta === "kisa") {
+    for (i = 0; i < 16; i++) {
+      s = document.createElement("span");
+      s.className = "ef-kisa-crp";
+      s.style.left = (-4 + Math.floor(Math.random() * 102)) + "%";
+      s.style.top = "-12%";
+      s.style.animationDelay = (Math.random() * 1.3).toFixed(2) + "s";
+      s.style.animationDuration = (0.6 + Math.random() * 0.5).toFixed(2) + "s";
+      wrap.appendChild(s);
+    }
+  } else if (vrsta === "sneg") {
+    for (i = 0; i < 9; i++) {
+      s = document.createElement("span");
+      s.className = "ef-pahulja";
+      s.innerHTML = IKONE["\u2744\ufe0f"];
+      s.style.left = Math.floor(Math.random() * 100) + "%";
+      s.style.top = "-4%";
+      s.style.fontSize = (11 + Math.floor(Math.random() * 12)) + "px";
+      s.style.animationDelay = (Math.random() * 4.2).toFixed(2) + "s";
+      s.style.animationDuration = (4.5 + Math.random() * 3.5).toFixed(2) + "s";
+      wrap.appendChild(s);
+    }
+  } else if (vrsta === "oluja") {
+    s = document.createElement("div");
+    s.className = "ef-blesak-zlatni";
+    wrap.appendChild(s);
+    for (i = 0; i < 16; i++) {
+      s = document.createElement("span");
+      s.className = "ef-kisa-crp";
+      s.style.left = (-4 + Math.floor(Math.random() * 102)) + "%";
+      s.style.top = "-12%";
+      s.style.animationDelay = (Math.random() * 1.3).toFixed(2) + "s";
+      s.style.animationDuration = (0.6 + Math.random() * 0.5).toFixed(2) + "s";
+      wrap.appendChild(s);
+    }
+  } else if (vrsta === "oblacno") {
+  } else if (vrsta === "magla") {
+    var POZE = [[-10, 14], [72, 6], [0, 80]];
+    for (i = 0; i < POZE.length; i++) {
+      s = document.createElement("span");
+      s.className = "ef-magla";
+      s.style.left = POZE[i][0] + "%";
+      s.style.top = POZE[i][1] + "%";
+      s.style.animationDelay = (i * 0.9).toFixed(2) + "s";
+      wrap.appendChild(s);
+    }
+  }
+}
+
+// ——— Probni režim: ?faza=jutro|sumrak|noc forsira doba dana, ?efekt= vreme ———
+var PROBA = new URLSearchParams(window.location.search);
+var PROBA_UKLJUCEN = PROBA.get("proba") === "1"; // zaštitni param — bez ?proba=1 faza/efekt se ignorisu u produkciji
+var PROBA_FAZA = PROBA_UKLJUCEN ? (PROBA.get("faza") || "").toLowerCase() : "";
+var PROBA_EFEKT = PROBA_UKLJUCEN ? (PROBA.get("efekt") || "").toLowerCase() : "";
+var PROBA_MKISA = PROBA_UKLJUCEN ? (PROBA.get("mkisa") || "").toLowerCase() : "";
+
+// Da li je noć (posle zalaska / pre izlaska sunca)
+function jeNoc(tekst) {
+  if (PROBA_FAZA === "noc") return true;
+  if (PROBA_FAZA === "jutro" || PROBA_FAZA === "sumrak") return false;
+  if (!tekst.daily || !tekst.daily.sunrise || !tekst.daily.sunset) return false;
+  var t = tekst.current.time;
+  return (t < tekst.daily.sunrise[0]) || (t >= tekst.daily.sunset[0]);
+}
+
+// Minuti u danu iz ISO vremena ("2026-10-07T06:44" → 404)
+function minuDana(iso) {
+  return (+iso.slice(11, 13)) * 60 + (+iso.slice(14, 16));
+}
+
+// Zora: od izlaska sunca pa 2 sata — jutro diše zlatom
+function jeJutro(tekst) {
+  if (PROBA_FAZA === "jutro") return true;
+  if (PROBA_FAZA === "sumrak" || PROBA_FAZA === "noc") return false;
+  if (!tekst.daily || !tekst.daily.sunrise) return false;
+  var t = minuDana(tekst.current.time), i = minuDana(tekst.daily.sunrise[0]);
+  return (t >= i) && (t < i + 120);
+}
+
+// Sumrak: 2 sata pred zalazak sunca
+function jeSumrak(tekst) {
+  if (PROBA_FAZA === "sumrak") return true;
+  if (PROBA_FAZA === "jutro" || PROBA_FAZA === "noc") return false;
+  if (!tekst.daily || !tekst.daily.sunset) return false;
+  var t = minuDana(tekst.current.time), z = minuDana(tekst.daily.sunset[0]);
+  return (t >= z - 120) && (t < z);
+}
+
+// Faza meseca: sinodicki ciklus 29.53059 dana, ref. mladi mesec 2000-01-06 18:14 UTC
+function fazaMeseca(datum) {
+  var ref = Date.UTC(2000, 0, 6, 18, 14), ciklus = 29.530588853;
+  var dani = (new Date(datum).getTime() - ref) / 86400000;
+  var p = (dani % ciklus) / ciklus;
+  if (p < 0) p += 1;
+  return p;
+}
+function imeMeseca(p) {
+  var IMENA = ["Mlad mesec","Mladi srp","Prva četvrt","Rastući ogrbljeni","Pun mesec","Opadajući ogrbljeni","Poslednja četvrt","Stari srp"];
+  return IMENA[Math.round(p * 8) % 8];
+}
+function moonPath(R, p) {
+  var ugao = 2 * Math.PI * p, cosU = Math.cos(ugao);
+  var rx = Math.max(0.01, R * Math.abs(cosU));
+  var waxing = p < 0.5, crescent = cosU > 0;
+  var outerSweep = waxing ? 1 : 0;
+  var termSweep = waxing ? (crescent ? 1 : 0) : (crescent ? 0 : 1);
+  return "M 0," + (-R) + " A " + R + "," + R + " 0 0 " + outerSweep + " 0," + R +
+         " A " + rx + "," + R + " 0 0 " + termSweep + " 0," + (-R) + " Z";
+}
+
+// Faza za dati sat kartice: jutro/sumrak/noc po izlasku i zalasku — sat traka pravi priču kao glavna scena
+function fazaSata(iso, sunrise0, sunset0) {
+  if (!sunrise0 || !sunset0) return null;
+  var t = minuDana(iso), r = minuDana(sunrise0), z = minuDana(sunset0);
+  if (t >= r && t < r + 120) return "Jutro";
+  if (t >= z - 120 && t < z) return "Sumrak";
+  if (t < r || t >= z) return "Noc";
+  return null;
+}
+
+// Mesečeve mene: faza 0 = nov mesec, 0.5 = pun mesec
+function mesecFaza() {
+  var sinodska = 29.530588853;                        // dužina ciklusa u danima
+  var ref = Date.UTC(2000, 0, 6, 18, 14) / 86400000;  // poznat nov mesec: 6.1.2000.
+  var f = ((Date.now() / 86400000 - ref) / sinodska) % 1;
+  if (f < 0) f += 1;
+  return f;
+}
+
+// Pun mesec: noći oko pune (±1.5 dana ciklusa) nose lava pod punim mesecom
+function jePunMesec() {
+  var f = mesecFaza();
+  return Math.abs(f - 0.5) < 0.05;
+}
+
+// Smer vetra: stepeni → skraćenica (16-wind rose, srpski)
+function pravacVetra(deg) {
+  if (deg == null || isNaN(deg)) return "";
+  var P = ["S", "SSI", "SI", "ISI", "I", "IJI", "JI", "JJI", "J", "JJZ", "JZ", "ZJZ", "Z", "ZSZ", "SZ", "SSZ"];
+  return P[Math.round(deg / 22.5) % 16];
+}
+
+// Kutijica u uglu: tekstura punog Meseca + tamni deo prati pravu fazu
+function podesiMesec() {
+  var el = document.querySelector(".nebo-mesec");
+  if (!el) return;
+  var f = mesecFaza();
+  var mt = parseFloat(new URLSearchParams(location.search).get("mfaza"));
+  if (!isNaN(mt) && mt >= 0 && mt <= 1) f = mt;
+  var IMENA_FAZA = ["Mlad mesec","Mladi srp","Prva četvrt","Rastući ogrbljeni","Pun mesec","Opadajući ogrbljeni","Poslednja četvrt","Stari srp"];
+  var idxFaze = Math.round(f * 8) % 8;
+  el.setAttribute("data-faza", IMENA_FAZA[idxFaze]);
+  el.title = IMENA_FAZA[idxFaze];
+  var TXT = "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac7c941b13ed015324cee6b.webp";
+  var R = 17, cx = 20, cy = 20;
+  var rx = Math.cos(2 * Math.PI * f) * R;
+  var tamniPut = "";
+  if (Math.abs(f - 0.5) < 0.02) {
+    // pun mesec - nema tamnog dela
+  } else if (Math.abs(rx) > R - 0.4) {
+    // nov mesec - sve tamno
+    tamniPut = '<circle cx="' + cx + '" cy="' + cy + '" r="' + R + '" fill="rgba(10,15,26,.9)"/>';
+  } else {
+    var vosak = f < 0.5;
+    var mali = f < 0.25 || f > 0.75;
+    var p = "M " + cx + "," + (cy - R);
+    if (vosak) {
+      p += " A " + R + "," + R + " 0 0 0 " + cx + "," + (cy + R);
+      p += " A " + Math.abs(rx).toFixed(1) + "," + R + " 0 0 " + (mali ? 1 : 0) + " " + cx + "," + (cy - R);
+    } else {
+      p += " A " + R + "," + R + " 0 0 1 " + cx + "," + (cy + R);
+      p += " A " + Math.abs(rx).toFixed(1) + "," + R + " 0 0 " + (mali ? 0 : 1) + " " + cx + "," + (cy - R);
+    }
+    p += " Z";
+    tamniPut = '<path d="' + p + '" fill="rgba(10,15,26,.9)"/>';
+  }
+  el.innerHTML = '<svg viewBox="0 0 40 40">' +
+    '<defs><clipPath id="mesec-clip"><circle cx="' + cx + '" cy="' + cy + '" r="' + R + '"/></clipPath></defs>' +
+    '<image href="' + TXT + '" x="' + (cx - R) + '" y="' + (cy - R) + '" width="' + (2 * R) + '" height="' + (2 * R) + '" preserveAspectRatio="xMidYMid slice" clip-path="url(#mesec-clip)"/>' +
+    tamniPut +
+    '<circle cx="' + cx + '" cy="' + cy + '" r="' + R + '" fill="none" stroke="rgba(247,239,218,.45)" stroke-width="1.4"/>' +
+    '</svg>';
+}
+
+// v3.56: Krupan Mesec za zum — svež SVG, veci radius, unikatni id-jevi (bez kopiranja iz malog)
+function mesecKrupniSVG() {
+  var f = mesecFaza();
+  var mt = parseFloat(new URLSearchParams(location.search).get("mfaza"));
+  if (!isNaN(mt) && mt >= 0 && mt <= 1) f = mt;
+  var IMENA_FAZA = ["Mlad mesec","Mladi srp","Prva četvrt","Rastući ogrbljeni","Pun mesec","Opadajući ogrbljeni","Poslednja četvrt","Stari srp"];
+  var idxFaze = Math.round(f * 8) % 8;
+  var TXT = "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac7c941b13ed015324cee6b.webp";
+  var R = 85, cx = 100, cy = 100;
+  var rx = Math.cos(2 * Math.PI * f) * R;
+  var tamniPut = "";
+  if (Math.abs(f - 0.5) < 0.02) {
+    // pun mesec - nema tamnog dela
+  } else if (Math.abs(rx) > R - 2) {
+    tamniPut = '<circle cx="' + cx + '" cy="' + cy + '" r="' + R + '" fill="rgba(10,15,26,.9)"/>';
+  } else {
+    var vosak = f < 0.5;
+    var mali = f < 0.25 || f > 0.75;
+    var p = "M " + cx + "," + (cy - R);
+    if (vosak) {
+      p += " A " + R + "," + R + " 0 0 0 " + cx + "," + (cy + R);
+      p += " A " + Math.abs(rx).toFixed(1) + "," + R + " 0 0 " + (mali ? 1 : 0) + " " + cx + "," + (cy - R);
+    } else {
+      p += " A " + R + "," + R + " 0 0 1 " + cx + "," + (cy + R);
+      p += " A " + Math.abs(rx).toFixed(1) + "," + R + " 0 0 " + (mali ? 0 : 1) + " " + cx + "," + (cy - R);
+    }
+    p += " Z";
+    tamniPut = '<path d="' + p + '" fill="rgba(10,15,26,.9)"/>';
+  }
+  var svg = '<svg viewBox="0 0 200 200">' +
+    '<defs><clipPath id="mesec-zum-clip"><circle cx="' + cx + '" cy="' + cy + '" r="' + R + '"/></clipPath></defs>' +
+    '<image href="' + TXT + '" x="' + (cx - R) + '" y="' + (cy - R) + '" width="' + (2 * R) + '" height="' + (2 * R) + '" preserveAspectRatio="xMidYMid slice" clip-path="url(#mesec-zum-clip)"/>' +
+    tamniPut +
+    '<circle cx="' + cx + '" cy="' + cy + '" r="' + R + '" fill="none" stroke="rgba(247,239,218,.45)" stroke-width="1.4"/>' +
+    '</svg>';
+  return { svg: svg, ime: IMENA_FAZA[idxFaze], procenat: Math.round((1 - Math.cos(2 * Math.PI * f)) / 2 * 100) };
+}
+
+// Scena u kvadratu oko lava — cela pozornica se menja sa vremenom
+// Vlad 3.0: organska oblak-silueta — pufnaste mase, talasasta donja ivica (referenca: Vladovi meki kumulusi)
+var OB_SED = [3, 7, 11, 17, 23, 29, 41]; // v3.53: random seed-ovi za raznolike siluete
+var OB_UID = 0;
+// v3.53: višeslojni oblak — dve preklopljene mase, jači gradijent (tamni vrh → svetao donji rub), feTurbulence tekstura, radialni highlight (svetlo odozdo)
+function oblakSVG(seed){
+  OB_UID++; var u="ob"+OB_UID; var sd = (seed===undefined) ? OB_SED[OB_UID % OB_SED.length] : seed;
+  // dve pufnaste mase preklopljene: glavna (levo) + sporedna (desno, manja, više)
+  return '<svg viewBox="0 0 220 130" preserveAspectRatio="none"><defs>' +
+    '<linearGradient id="'+u+'g" x1="0" y1="0" x2="0" y2="1">' +
+    '<stop offset="0%" style="stop-color:var(--ob-z)"/>' +        // tamni vrh (senka)
+    '<stop offset="35%" style="stop-color:var(--ob-g)"/>' +        // srednji ton
+    '<stop offset="75%" style="stop-color:var(--ob-h)"/>' +        // svetao rub
+    '<stop offset="100%" style="stop-color:var(--ob-h)"/></linearGradient>' +
+    '<radialGradient id="'+u+'l" cx="38%" cy="78%" r="42%">' +      // svetlo odozdo (referenca: atmospheric illumination)
+    '<stop offset="0%" style="stop-color:var(--ob-h);stop-opacity:.55"/>' +
+    '<stop offset="100%" style="stop-color:var(--ob-h);stop-opacity:0"/></radialGradient>' +
+    '<filter id="'+u+'f" x="-14%" y="-14%" width="128%" height="130%">' +
+    '<feTurbulence type="fractalNoise" baseFrequency="0.011 0.018" numOctaves="3" seed="'+sd+'" result="noise"/>' +
+    '<feDisplacementMap in="SourceGraphic" in2="noise" scale="6" xChannelSelector="R" yChannelSelector="G" result="shape"/>' +
+    '<feGaussianBlur stdDeviation="0.5"/></filter></defs>' +
+    '<g filter="url(#'+u+'f)">' +
+    '<path fill="url(#'+u+'g)" d="M28,102C16,100 8,88 14,72C6,56 20,40 38,44C42,22 68,12 84,26C94,8 124,10 134,26C146,12 176,18 176,40C196,44 204,68 188,80C200,88 194,102 178,100C160,110 150,100 134,104C118,114 104,102 88,106C72,116 58,104 44,106C36,108 30,106 28,102Z"/>' +
+    '<path fill="url(#'+u+'g)" d="M96,112C84,112 76,100 82,86C76,72 90,58 108,62C112,44 138,38 150,52C160,40 186,46 184,66C200,70 204,92 188,100C198,108 188,118 174,114C158,122 148,112 132,114C116,122 102,112 96,112Z" opacity=".88"/>' +
+    '<path fill="url(#'+u+'l)" d="M40,70C38,52 60,42 78,48C66,54 54,62 48,76C46,75 42,72 40,70Z" opacity=".7"/>' +
+    '</g></svg>';
+}
+var KAP_SVG = '<svg viewBox="0 0 8 16" preserveAspectRatio="none"><path d="M4,0.5 C4,3 7,8 7,12 A3.5,3.5 0 1,1 1,12 C1,8 4,3 4,0.5 Z" fill="rgba(205,226,248,.92)"/></svg>';
+
+// ═══════════════════════════════════════════════════════════
+// CANVAS OBLACI — volumenski, slojeviti, sa parallax dubinom
+// Referenca: Vladove slike stvarnih oblaka
+//   — hladni plavo-sivi kišni oblaci (#c9d4e1, #9aa9bd)
+//   — sumrak: donje ivice ružičasto-lila, gornji u indigo senci
+//   — baršunasto-mekana tekstura, svetlo odozdo
+// ═══════════════════════════════════════════════════════════
+var OBL_PALETA = {
+  // hladni kišni oblaci — Vlad ref. slika 1; potamnjeni vrh za separaciju
+  kisa:  { vrh: '#2a3142', mid: '#6a7a92', don: '#c9d4e1', svet: '#e8eef4', alfa: .88 },
+  oluja: { vrh: '#161c2e', mid: '#3a4258', don: '#6e7a96', svet: '#9aa6c0', alfa: .90 },
+  sneg:  { vrh: '#4a5a75', mid: '#8aa0c2', don: '#dde9f5', svet: '#ffffff', alfa: .84 },
+  oblacno:{ vrh: '#5a6a7e', mid: '#9aa7b8', don: '#d8e0ea', svet: '#eef2f6', alfa: .80 },
+  // sumrak — Vlad ref. slika 2: donje ivice ružičasto-lila
+  sumrak:{ vrh: '#1e1838', mid: '#564852', don: '#c89878', svet: '#f0d0b8', alfa: .82 },
+  // noćni oblaci — prigušeno
+  noc:   { vrh: '#080c18', mid: '#1d2840', don: '#4a5670', svet: '#5a6680', alfa: .74 }
+};
+
+var OBL_GEN = 0;     // generacija — kad se scena menja, stari loop stane
+var OBL_RAF = null;  // requestAnimationFrame ID
+
+function oblaciCanvas(vrsta, fazaDana) {
+  OBL_GEN++;
+  var gen = OBL_GEN;
+
+  var sc = document.getElementById("scena");
+  if (!sc) return;
+
+  // ukloni stari canvas ako postoji
+  var stari = sc.querySelector("#obl-canvas");
+  if (stari) stari.remove();
+
+  // ako nema oblaka (noc bez oblaka, ili sunce) — ne crtaj
+  if (vrsta !== "kisa" && vrsta !== "oluja" && vrsta !== "sneg" && vrsta !== "oblacno" && vrsta !== "magla") {
+    if (OBL_RAF) { cancelAnimationFrame(OBL_RAF); OBL_RAF = null; }
+    return;
+  }
+
+  var cv = document.createElement("canvas");
+  cv.id = "obl-canvas";
+  sc.insertBefore(cv, sc.firstChild);
+  var ctx = cv.getContext("2d");
+
+  // odredi paletu
+  var pKey = vrsta;
+  if (fazaDana === "sumrak") pKey = "sumrak";
+  else if (fazaDana === "noc") pKey = "noc";
+  else if (fazaDana === "jutro") pKey = vrsta; // jutro koristi osnovnu paletu sa toplim nijansama
+  var P = OBL_PALETA[pKey] || OBL_PALETA.oblacno;
+
+  // ——— helper: pretvori hex u rgb komponente ———
+  function hexR(h) {
+    h = h.replace('#','');
+    return [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)];
+  }
+  var cVrh = hexR(P.vrh), cMid = hexR(P.mid), cDon = hexR(P.don), cSvet = hexR(P.svet);
+
+  // ——— resize ———
+  var W = 0, H = 0, DPR = 1;
+  function resize() {
+    var r = sc.getBoundingClientRect();
+    W = r.width; H = r.height;
+    DPR = Math.min(window.devicePixelRatio || 1, 1.5);
+    cv.width = Math.max(1, Math.floor(W * DPR));
+    cv.height = Math.max(1, Math.floor(H * DPR));
+    cv.style.width = W + "px";
+    cv.style.height = H + "px";
+  }
+  resize();
+
+  // ——— value-noise za organske oblike ———
+  // jednostavan hash-noise; dovoljno za oblake, ne za detalje
+  function hash(x, y) {
+    var n = Math.sin(x * 127.1 + y * 311.7) * 43758.5453;
+    return n - Math.floor(n);
+  }
+  function vnoise(x, y) {
+    var xi = Math.floor(x), yi = Math.floor(y);
+    var xf = x - xi, yf = y - yi;
+    var a = hash(xi, yi), b = hash(xi+1, yi);
+    var c = hash(xi, yi+1), d = hash(xi+1, yi+1);
+    var ux = xf*xf*(3-2*xf), uy = yf*yf*(3-2*yf);
+    return a*(1-ux)*(1-uy) + b*ux*(1-uy) + c*(1-ux)*uy + d*ux*uy;
+  }
+  // fraktalni noise — više oktava za bogatiju teksturu
+  function fbm(x, y) {
+    var v = 0, amp = .5, fr = 1;
+    for (var o = 0; o < 2; o++) { // 2 oktave (bilo 4) → 2× manje noise poziva
+      v += amp * vnoise(x * fr, y * fr);
+      fr *= 2; amp *= .5;
+    }
+    return v;
+  }
+
+  // ——— slojevi oblaka ———
+  // svaki sloj: x pozicija, brzina, visina, skaliranje, alfa, seed, broj pufnova
+  var slojevi = [];
+
+  function napraviSloj(cfg) {
+    var pufnovi = [];
+    var n = cfg.n;
+    for (var i = 0; i < n; i++) {
+      pufnovi.push({
+        x: (i / n) * 1.3 + Math.random() * .2,   // raspoređeno + jitter
+        y: cfg.yBase + (Math.random() - .5) * cfg.yRazmak,
+        r: cfg.rMin + Math.random() * cfg.rRazmak,
+        phase: Math.random() * Math.PI * 2,
+        wobble: .15 + Math.random() * .2,         // koliko pulsira
+        seed: Math.random() * 100
+      });
+    }
+    return {
+      pufnovi: pufnovi,
+      brzina: cfg.brzina,
+      skala: cfg.skala,
+      alfa: cfg.alfa,
+      blur: cfg.blur,
+      yCilj: cfg.yBase
+    };
+  }
+
+  function initSlojeve() {
+    slojevi = [];
+    // pozadina: veliki, zamućeni, tamni, sporo — alfa niža nadoknađuje odsustvo blur-a
+    slojevi.push(napraviSloj({
+      n: 4, brzina: .0018, skala: 2.0, alfa: .4, blur: 0,
+      yBase: .15, yRazmak: .12, rMin: .24, rRazmak: .15
+    }));
+    // sredina: umerena veličina, umerena brzina
+    slojevi.push(napraviSloj({
+      n: 5, brzina: .0036, skala: 1.35, alfa: .6, blur: 0,
+      yBase: .28, yRazmak: .15, rMin: .16, rRazmak: .12
+    }));
+    // prednji: manji, oštriji, brži
+    slojevi.push(napraviSloj({
+      n: 6, brzina: .006, skala: .9, alfa: .78, blur: 0,
+      yBase: .45, yRazmak: .18, rMin: .12, rRazmak: .1
+    }));
+    // magla ima samo dva široka sloja
+    if (vrsta === "magla") {
+      slojevi = [];
+      slojevi.push(napraviSloj({
+        n: 3, brzina: .0012, skala: 2.7, alfa: .35, blur: 0,
+        yBase: .3, yRazmak: .2, rMin: .32, rRazmak: .15
+      }));
+      slojevi.push(napraviSloj({
+        n: 4, brzina: .0024, skala: 1.9, alfa: .45, blur: 0,
+        yBase: .55, yRazmak: .15, rMin: .22, rRazmak: .12
+      }));
+    }
+  }
+  initSlojeve();
+
+  // keširani gradijent po bojama — pravi se jednom po sceni, ne 60× po frame
+  var gradKes = null;
+  function napraviGradijent() {
+    var g = ctx.createLinearGradient(0, -1, 0, 1);
+    g.addColorStop(0,    "rgba(" + cVrh[0] + "," + cVrh[1] + "," + cVrh[2] + ",1)");
+    g.addColorStop(.3,   "rgba(" + cMid[0] + "," + cMid[1] + "," + cMid[2] + ",1)");
+    g.addColorStop(.75,  "rgba(" + cDon[0] + "," + cDon[1] + "," + cDon[2] + ",1)");
+    g.addColorStop(1,    "rgba(" + cSvet[0] + "," + cSvet[1] + "," + cSvet[2] + ",1)");
+    return g;
+  }
+  napraviGradijent();
+
+  // ——— nacrtaj jedan pufnast oblak na datoj poziciji ———
+  // koristi fbm noise za organski oblik sa svetlom odozdo
+  function nacrtajPuf(ctx2, px, py, poluprecnik, alfa, seed, t) {
+    var r = Math.max(2, poluprecnik);
+    var N = 18; // smanjeno sa 28 → brže, oblik i dalje mekan
+    ctx2.save();
+    ctx2.translate(px, py);
+    ctx2.globalAlpha = alfa; // alfa na celom pufnu — ne po blobu u gradijentu
+
+    // nacrtaj nekoliko preklopljenih "blobova" sa fbm perturbacijom
+    // svaki blob ima gradijent: vrh (tamno) → donja ivica (svetlo)
+    var blobovi = 4;
+    for (var b = 0; b < blobovi; b++) {
+      var bx = (b - 1) * r * .45;
+      var by = (b - 1) * r * .15 * (b % 2 ? -1 : 1);
+      var br = r * (0.7 + b * .12);
+
+      // perturbacija oblika pomoću noise
+      ctx2.beginPath();
+      for (var a = 0; a <= N; a++) {
+        var ang = (a / N) * Math.PI * 2;
+        var nx = Math.cos(ang) * br;
+        var ny = Math.sin(ang) * br * .62; // spljošteno — šire nego visoko
+        // noise perturbacija radije — organski oblik
+        var n = fbm(nx * .02 + seed, ny * .02 + seed + t * .3);
+        var rr = br * (0.65 + n * 0.5);
+        var fx = bx + Math.cos(ang) * rr;
+        var fy = by + Math.sin(ang) * rr * .62;
+        if (a === 0) ctx2.moveTo(fx, fy);
+        else ctx2.lineTo(fx, fy);
+      }
+      ctx2.closePath();
+
+      // keširani gradijent (pravi se jednom) — alfa je na globalAlpha, ne u gradijentu
+      ctx2.fillStyle = gradKes;
+      ctx2.fill();
+    }
+    ctx2.globalAlpha = 1;
+    ctx2.restore();
+  }
+
+  // ——— animacijski loop ———
+  var t = 0;
+  function loop() {
+    if (gen !== OBL_GEN) return; // scena je promenjena — stani
+    if (!SCENA_VIDANA) { requestAnimationFrame(loop); return; }
+    t += 1;
+
+    // clear
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    ctx.scale(DPR, DPR);
+
+    for (var si = 0; si < slojevi.length; si++) {
+      var sloj = slojevi[si];
+      ctx.filter = "none"; // uklonjen blur filter (skup) — mekoća se dobija alfa + radijus
+      for (var pi = 0; pi < sloj.pufnovi.length; pi++) {
+        var pf = sloj.pufnovi[pi];
+        // pomeraj X — sporo plutanje
+        pf.x += sloj.brzina;
+        if (pf.x > 1.3) pf.x = -.3; // wrap around
+        // wobble — blago pulsiranje oblika
+        var wobbleR = 1 + Math.sin(t * .01 + pf.phase) * pf.wobble * .3;
+        var px = pf.x * W;
+        var py = pf.y * H + Math.sin(t * .008 + pf.phase) * 8; // blago vertikalno plutanje
+        var r = pf.r * Math.min(W, H) * sloj.skala * wobbleR;
+        nacrtajPuf(ctx, px, py, r, sloj.alfa, pf.seed, t * .01);
+      }
+    }
+    ctx.filter = "none";
+
+    OBL_RAF = requestAnimationFrame(loop);
+  }
+  loop();
+
+  // resize na promeni prozora
+  var toResize = null;
+  window.addEventListener("resize", function() {
+    if (gen !== OBL_GEN) return;
+    clearTimeout(toResize);
+    toResize = setTimeout(resize, 200);
+  });
+}
+
+// ——— Canvas kiša engine — tanke kapi pod uglom, parallax dubina ———
+var KISA_GEN = 0;
+function kisaCanvas(vrsta, fazaDana) {
+  KISA_GEN++;
+  var gen = KISA_GEN;
+  var sc = document.getElementById("scena");
+  if (!sc) return;
+  var stari = sc.querySelector("#kisa-canvas");
+  if (stari) stari.remove();
+  var cv = document.createElement("canvas");
+  cv.id = "kisa-canvas";
+  sc.appendChild(cv);
+  var ctx = cv.getContext("2d");
+  var W = 0, H = 0, DPR = 1;
+  function resize() {
+    var r = sc.getBoundingClientRect();
+    W = r.width; H = r.height;
+    DPR = Math.min(window.devicePixelRatio || 1, 1.5);
+    cv.width = Math.max(1, Math.floor(W * DPR));
+    cv.height = Math.max(1, Math.floor(H * DPR));
+    cv.style.width = W + "px";
+    cv.style.height = H + "px";
+  }
+  resize();
+  var vetarUgao = vrsta === "oluja" ? 0.35 : (vrsta === "maglovita" ? 0.12 : 0.18);
+  var brzinaBaza = vrsta === "oluja" ? 14 : (vrsta === "maglovita" ? 7 : 9);
+  var brojKapi = vrsta === "oluja" ? 180 : (vrsta === "maglovita" ? 160 : 120);
+  var boja = vrsta === "oluja" ? "180,205,245" : (vrsta === "maglovita" ? "230,245,255" : "195,220,250");
+  // faze dana menjaju nijansu kiše
+  if (fazaDana === "noc") boja = "120,140,175";
+  else if (fazaDana === "sumrak") boja = "230,180,140";
+  else if (fazaDana === "jutro") boja = "240,200,175";
+  var kapi = [];
+  for (var i = 0; i < brojKapi; i++) {
+    var dubina = Math.random();
+    kapi.push({
+      x: Math.random() * W, y: Math.random() * H,
+      duz: 8 + dubina * 14,
+      brz: brzinaBaza * (0.6 + dubina * 0.8),
+      alfa: vrsta === "maglovita" ? (0.5 + dubina * 0.5) : (0.3 + dubina * 0.5),
+      deb: vrsta === "maglovita" ? (1.3 + dubina * 1.3) : (0.8 + dubina * 1.2)
+    });
+  }
+  function loop() {
+    if (gen !== KISA_GEN) return;
+    if (!SCENA_VIDANA) { requestAnimationFrame(loop); return; }
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    ctx.scale(DPR, DPR);
+    var dx = Math.sin(vetarUgao), dy = Math.cos(vetarUgao);
+    for (var i = 0; i < kapi.length; i++) {
+      var k = kapi[i];
+      k.x += dx * k.brz;
+      k.y += dy * k.brz;
+      if (k.y > H + 20) { k.y = -20; k.x = Math.random() * W; }
+      if (k.x > W + 20) k.x = -20;
+      ctx.strokeStyle = "rgba(" + boja + "," + k.alfa + ")";
+      ctx.lineWidth = k.deb;
+      ctx.beginPath();
+      ctx.moveTo(k.x, k.y);
+      ctx.lineTo(k.x + dx * k.duz, k.y + dy * k.duz);
+      ctx.stroke();
+    }
+    requestAnimationFrame(loop);
+  }
+  loop();
+  var toR = null;
+  window.addEventListener("resize", function() {
+    if (gen !== KISA_GEN) return;
+    clearTimeout(toR);
+    toR = setTimeout(resize, 200);
+  });
+}
+
+// ——— Canvas magla engine — gusta prizemna magla, 3 talasasta sloja sa blur ———
+var MAGLA_GEN = 0;
+function maglaCanvas(vrsta, fazaDana) {
+  MAGLA_GEN++;
+  var gen = MAGLA_GEN;
+  var sc = document.getElementById("scena");
+  if (!sc) return;
+  var stari = sc.querySelector("#magla-canvas");
+  if (stari) stari.remove();
+  var cv = document.createElement("canvas");
+  cv.id = "magla-canvas";
+  sc.appendChild(cv);
+  var ctx = cv.getContext("2d");
+  var W = 0, H = 0, DPR = 1;
+  function resize() {
+    var r = sc.getBoundingClientRect();
+    W = r.width; H = r.height;
+    DPR = Math.min(window.devicePixelRatio || 1, 1.5);
+    cv.width = Math.max(1, Math.floor(W * DPR));
+    cv.height = Math.max(1, Math.floor(H * DPR));
+    cv.style.width = W + "px";
+    cv.style.height = H + "px";
+  }
+  resize();
+  // boja magle po fazi dana
+  var boja = "210,215,222"; // dan — hladno bela
+  if (fazaDana === "noc") boja = "75,80,92";
+  else if (fazaDana === "sumrak") boja = "180,168,156";
+  else if (fazaDana === "jutro") boja = "228,214,198";
+  // 3 sloja maglenih talasa pri dnu — svaki gušci i nizi
+  var slojevi = [
+    { brzina: 0.0009, yBase: 0.42, amplituda: 22, alfa: 0.30, phase: 0.0, period: 0.011 },
+    { brzina: 0.0014, yBase: 0.58, amplituda: 18, alfa: 0.42, phase: 1.7, period: 0.014 },
+    { brzina: 0.0020, yBase: 0.74, amplituda: 16, alfa: 0.55, phase: 3.3, period: 0.017 }
+  ];
+  function loop() {
+    if (gen !== MAGLA_GEN) return;
+    if (!SCENA_VIDANA) { requestAnimationFrame(loop); return; }
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    ctx.scale(DPR, DPR);
+    var t = performance.now();
+    ctx.filter = "blur(5px)";
+    for (var i = 0; i < slojevi.length; i++) {
+      var s = slojevi[i];
+      ctx.beginPath();
+      ctx.moveTo(0, H);
+      for (var x = 0; x <= W; x += 12) {
+        var y = s.yBase * H
+              + Math.sin((x + t * s.brzina) * s.period + s.phase) * s.amplituda
+              + Math.sin((x + t * s.brzina * 1.7) * s.period * 2.1 + s.phase) * s.amplituda * 0.4;
+        ctx.lineTo(x, y);
+      }
+      ctx.lineTo(W, H);
+      ctx.closePath();
+      var gornja = Math.max(0, (s.yBase - 0.12) * H);
+      var grd = ctx.createLinearGradient(0, gornja, 0, H);
+      grd.addColorStop(0, "rgba(" + boja + ",0)");
+      grd.addColorStop(0.25, "rgba(" + boja + "," + (s.alfa * 0.4).toFixed(2) + ")");
+      grd.addColorStop(1, "rgba(" + boja + "," + s.alfa.toFixed(2) + ")");
+      ctx.fillStyle = grd;
+      ctx.fill();
+    }
+    ctx.filter = "none";
+    requestAnimationFrame(loop);
+  }
+  loop();
+  var toR2 = null;
+  window.addEventListener("resize", function() {
+    if (gen !== MAGLA_GEN) return;
+    clearTimeout(toR2);
+    toR2 = setTimeout(resize, 200);
+  });
+}
+
+// ——— Canvas sneg engine — prave razgranate pahulje (6 krakova), parallax, vrtlozenje, rotacija ———
+var SNEG_GEN = 0;
+function snegCanvas(vrsta, fazaDana) {
+  SNEG_GEN++;
+  var gen = SNEG_GEN;
+  var sc = document.getElementById("scena");
+  if (!sc) return;
+  var stari = sc.querySelector("#sneg-canvas");
+  if (stari) stari.remove();
+  var cv = document.createElement("canvas");
+  cv.id = "sneg-canvas";
+  sc.appendChild(cv);
+  var ctx = cv.getContext("2d");
+  var W = 0, H = 0, DPR = 1;
+  function resize() {
+    var r = sc.getBoundingClientRect();
+    W = r.width; H = r.height;
+    DPR = Math.min(window.devicePixelRatio || 1, 1.5);
+    cv.width = Math.max(1, Math.floor(W * DPR));
+    cv.height = Math.max(1, Math.floor(H * DPR));
+    cv.style.width = W + "px";
+    cv.style.height = H + "px";
+  }
+  resize();
+  // boja pahulja po fazi
+  var boja;
+  if (fazaDana === "noc") boja = "205,222,255";
+  else if (fazaDana === "sumrak") boja = "255,240,222";
+  else if (fazaDana === "jutro") boja = "255,248,235";
+  else boja = "255,255,255";
+  // 80 pahulja — parallax dubina, veca = brza i svetlija
+  var pahulje = [];
+  for (var i = 0; i < 80; i++) {
+    var dubina = Math.random();
+    pahulje.push({
+      x: Math.random() * W, y: Math.random() * H,
+      r: 1 + dubina * 5.5,            // 1–6.5px
+      brz: 0.5 + dubina * 1.6,        // padanje
+      drift: (Math.random() - .5) * .4, // horizontalno talasanje
+      alfa: 0.4 + dubina * 0.6,
+      rot: Math.random() * Math.PI * 2,
+      rotBrz: (Math.random() - .5) * 0.015,
+      phase: Math.random() * Math.PI * 2,
+      razgranata: dubina > 0.55       // vece pahulje su razgranate
+    });
+  }
+  function nacrtajPahulju(px, py, p) {
+    ctx.save();
+    ctx.translate(px, py);
+    ctx.rotate(p.rot);
+    if (p.razgranata) {
+      // razgranata pahulja — 6 krakova sa granama
+      ctx.strokeStyle = "rgba(" + boja + "," + p.alfa + ")";
+      ctx.lineWidth = Math.max(0.6, p.r * 0.16);
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      for (var k = 0; k < 6; k++) {
+        ctx.rotate(Math.PI / 3);
+        ctx.moveTo(0, 0);
+        ctx.lineTo(0, p.r);
+        // grane na sredini i pri vrhu
+        ctx.moveTo(0, p.r * 0.5);
+        ctx.lineTo(p.r * 0.32, p.r * 0.7);
+        ctx.moveTo(0, p.r * 0.5);
+        ctx.lineTo(-p.r * 0.32, p.r * 0.7);
+        ctx.moveTo(0, p.r * 0.78);
+        ctx.lineTo(p.r * 0.2, p.r * 0.9);
+        ctx.moveTo(0, p.r * 0.78);
+        ctx.lineTo(-p.r * 0.2, p.r * 0.9);
+      }
+      ctx.stroke();
+    } else {
+      // jednostavna tacka sa sjajem
+      ctx.fillStyle = "rgba(" + boja + "," + p.alfa + ")";
+      ctx.beginPath();
+      ctx.arc(0, 0, Math.max(0.5, p.r), 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+  function loop() {
+    if (gen !== SNEG_GEN) return;
+    if (!SCENA_VIDANA) { requestAnimationFrame(loop); return; }
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    ctx.scale(DPR, DPR);
+    var t = performance.now() * 0.001;
+    for (var i = 0; i < pahulje.length; i++) {
+      var p = pahulje[i];
+      p.y += p.brz;
+      p.x += p.drift + Math.sin(t + p.phase) * 0.35; // lagano talasanje
+      p.rot += p.rotBrz;
+      if (p.y > H + 12) { p.y = -12; p.x = Math.random() * W; }
+      if (p.x > W + 12) p.x = -12;
+      if (p.x < -12) p.x = W + 12;
+      nacrtajPahulju(p.x, p.y, p);
+    }
+    requestAnimationFrame(loop);
+  }
+  loop();
+  var toR3 = null;
+  window.addEventListener("resize", function() {
+    if (gen !== SNEG_GEN) return;
+    clearTimeout(toR3);
+    toR3 = setTimeout(resize, 200);
+  });
+}
+
+// ——— Canvas zvezde engine — treperenje, parallax dubina, sjaj za vece zvezde ———
+var ZVEZDE_GEN = 0;
+function zvezdeCanvas(vrsta, fazaDana) {
+  ZVEZDE_GEN++;
+  var gen = ZVEZDE_GEN;
+  var sc = document.getElementById("scena");
+  if (!sc) return;
+  var stari = sc.querySelector("#zvezde-canvas");
+  if (stari) stari.remove();
+  var cv = document.createElement("canvas");
+  cv.id = "zvezde-canvas";
+  sc.appendChild(cv);
+  var ctx = cv.getContext("2d");
+  var W = 0, H = 0, DPR = 1;
+  function resize() {
+    var r = sc.getBoundingClientRect();
+    W = r.width; H = r.height;
+    DPR = Math.min(window.devicePixelRatio || 1, 1.5);
+    cv.width = Math.max(1, Math.floor(W * DPR));
+    cv.height = Math.max(1, Math.floor(H * DPR));
+    cv.style.width = W + "px";
+    cv.style.height = H + "px";
+  }
+  resize();
+  // 60 zvezda — parallax dubina, gornji deo neba
+  var zvezde = [];
+  for (var i = 0; i < 60; i++) {
+    var dubina = Math.random();
+    zvezde.push({
+      x: Math.random() * W,
+      y: Math.random() * H * 0.78,           // gornji deo neba
+      r: 0.6 + dubina * 2.4,                   // 0.6–3px
+      alfaBaza: 0.35 + dubina * 0.65,
+      phase: Math.random() * Math.PI * 2,
+      brzTreptanja: 0.4 + Math.random() * 1.6, // razlicit tempo treperenja
+      sjaj: dubina > 0.7                       // vece zvezde imaju sjaj
+    });
+  }
+  function loop() {
+    if (gen !== ZVEZDE_GEN) return;
+    if (!SCENA_VIDANA) { requestAnimationFrame(loop); return; }
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    ctx.scale(DPR, DPR);
+    var t = performance.now() * 0.001;
+    for (var i = 0; i < zvezde.length; i++) {
+      var z = zvezde[i];
+      // treperenje — sinusoida po fazi
+      var treptaj = 0.5 + 0.5 * Math.sin(t * z.brzTreptanja + z.phase);
+      var alfa = z.alfaBaza * (0.35 + 0.65 * treptaj);
+      // krstasta zvezdica — 4 zraka (romb) + sjajan beli centar
+      ctx.save();
+      ctx.translate(z.x, z.y);
+      // zraci — vertikalni i horizontalni romb
+      ctx.fillStyle = "rgba(255,233,168," + alfa.toFixed(3) + ")";
+      ctx.beginPath();
+      ctx.moveTo(0, -z.r * 2.6);
+      ctx.lineTo(z.r * 0.28, 0);
+      ctx.lineTo(0, z.r * 2.6);
+      ctx.lineTo(-z.r * 0.28, 0);
+      ctx.closePath();
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(-z.r * 2.6, 0);
+      ctx.lineTo(0, z.r * 0.28);
+      ctx.lineTo(z.r * 2.6, 0);
+      ctx.lineTo(0, -z.r * 0.28);
+      ctx.closePath();
+      ctx.fill();
+      // dijagonalni zraci (tanji) — samo za vece zvezde
+      if (z.sjaj) {
+        ctx.save();
+        ctx.rotate(Math.PI / 4);
+        ctx.fillStyle = "rgba(255,225,150," + (alfa * 0.7).toFixed(3) + ")";
+        ctx.beginPath();
+        ctx.moveTo(0, -z.r * 1.8);
+        ctx.lineTo(z.r * 0.18, 0);
+        ctx.lineTo(0, z.r * 1.8);
+        ctx.lineTo(-z.r * 0.18, 0);
+        ctx.closePath();
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(-z.r * 1.8, 0);
+        ctx.lineTo(0, z.r * 0.18);
+        ctx.lineTo(z.r * 1.8, 0);
+        ctx.lineTo(0, -z.r * 0.18);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+      // sjajan beli centar
+      ctx.fillStyle = "rgba(255,255,255," + Math.min(1, alfa * 1.4).toFixed(3) + ")";
+      ctx.beginPath();
+      ctx.arc(0, 0, Math.max(0.3, z.r * 0.5), 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+    requestAnimationFrame(loop);
+  }
+  loop();
+  var toR4 = null;
+  window.addEventListener("resize", function() {
+    if (gen !== ZVEZDE_GEN) return;
+    clearTimeout(toR4);
+    toR4 = setTimeout(resize, 200);
+  });
+}
+
+// ——— Canvas sunce engine — krug sunca + zraci (rotacija) + sjaj, boje po fazi dana ———
+var SUNCE_GEN = 0;
+function sunceCanvas(vrsta, fazaDana) {
+  SUNCE_GEN++;
+  var gen = SUNCE_GEN;
+  var sc = document.getElementById("scena");
+  if (!sc) return;
+  var stari = sc.querySelector("#sunce-canvas");
+  if (stari) stari.remove();
+  var cv = document.createElement("canvas");
+  cv.id = "sunce-canvas";
+  sc.appendChild(cv);
+  var ctx = cv.getContext("2d");
+  var W = 0, H = 0, DPR = 1;
+  function resize() {
+    var r = sc.getBoundingClientRect();
+    W = r.width; H = r.height;
+    DPR = Math.min(window.devicePixelRatio || 1, 1.5);
+    cv.width = Math.max(1, Math.floor(W * DPR));
+    cv.height = Math.max(1, Math.floor(H * DPR));
+    cv.style.width = W + "px";
+    cv.style.height = H + "px";
+  }
+  resize();
+  // boje po fazi dana
+  var bojaCentar, bojaZrak, bojaSjaj;
+  if (fazaDana === "sumrak") { bojaCentar = "255,150,80"; bojaZrak = "255,120,60"; bojaSjaj = "255,130,60"; }
+  else if (fazaDana === "jutro") { bojaCentar = "255,198,120"; bojaZrak = "255,180,100"; bojaSjaj = "255,190,110"; }
+  else { bojaCentar = "255,224,140"; bojaZrak = "255,208,120"; bojaSjaj = "255,216,120"; }
+  function loop() {
+    if (gen !== SUNCE_GEN) return;
+    if (!SCENA_VIDANA) { requestAnimationFrame(loop); return; }
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    ctx.scale(DPR, DPR);
+    var t = performance.now() * 0.001;
+    // sunce centrirano na lav centru — lav u srcu sunca (krakovi zrače iz lava)
+    var suncex = W * 0.5;
+    var lav = document.getElementById("lav");
+    var suncey;
+    if (lav) {
+      var lavR = lav.getBoundingClientRect();
+      var scR = sc.getBoundingClientRect();
+      suncey = (lavR.top + lavR.height / 2) - scR.top;
+    } else {
+      suncey = H * 0.22;
+    }
+    var R = Math.max(8, Math.min(W, H) * 0.15);  // poluprecnik sunca (veći — lav u srcu)
+    var puls = 0.82 + 0.18 * Math.sin(t * 0.7);  // pulsiranje
+    // sjaj oko sunca — radial gradient (toplo zlatno-narandžasto svetlo)
+    var sjajR = R * 7 * puls;
+    var grd = ctx.createRadialGradient(suncex, suncey, 0, suncex, suncey, sjajR);
+    grd.addColorStop(0, "rgba(" + bojaSjaj + "," + (0.42 * puls).toFixed(3) + ")");
+    grd.addColorStop(0.25, "rgba(" + bojaSjaj + "," + (0.18 * puls).toFixed(3) + ")");
+    grd.addColorStop(1, "rgba(" + bojaSjaj + ",0)");
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, W, H);
+    // zraci — 12 zrakova sa shadowBlur (pravi zrak svetla), sporo rotacija
+    var ugao = t * 0.018;
+    var brojZraka = 12;
+    var dugPuls = 1 + 0.15 * Math.sin(t * 0.5);  // pulsiranje dužine krakova
+    // oreol krakovi (širok, bled, mekan sjaj oko linije)
+    ctx.save();
+    ctx.translate(suncex, suncey);
+    ctx.rotate(ugao);
+    ctx.strokeStyle = "rgba(" + bojaZrak + "," + (0.22 * puls).toFixed(3) + ")";
+    ctx.lineWidth = 14;
+    ctx.lineCap = "round";
+    ctx.shadowBlur = R * 0.5;
+    ctx.shadowColor = "rgba(" + bojaZrak + "," + (0.5 * puls).toFixed(3) + ")";
+    for (var i = 0; i < brojZraka; i++) {
+      ctx.rotate((Math.PI * 2) / brojZraka);
+      ctx.beginPath();
+      ctx.moveTo(R * 1.1, 0);
+      ctx.lineTo(R * 3.0 * dugPuls, 0);
+      ctx.stroke();
+    }
+    ctx.restore();
+    // sjajna jezgra krakova (deblji, sjajniji)
+    ctx.save();
+    ctx.translate(suncex, suncey);
+    ctx.rotate(ugao);
+    ctx.strokeStyle = "rgba(" + bojaZrak + "," + (0.85 * puls).toFixed(3) + ")";
+    ctx.lineWidth = 5.5;
+    ctx.lineCap = "round";
+    ctx.shadowBlur = R * 0.3;
+    ctx.shadowColor = "rgba(" + bojaZrak + "," + (0.75 * puls).toFixed(3) + ")";
+    for (var i = 0; i < brojZraka; i++) {
+      ctx.rotate((Math.PI * 2) / brojZraka);
+      ctx.beginPath();
+      ctx.moveTo(R * 1.15, 0);
+      ctx.lineTo(R * 2.8 * dugPuls, 0);
+      ctx.stroke();
+    }
+    ctx.restore();
+    // krug sunca
+    ctx.fillStyle = "rgba(" + bojaCentar + "," + (0.95 * puls).toFixed(3) + ")";
+    ctx.beginPath();
+    ctx.arc(suncex, suncey, R, 0, Math.PI * 2);
+    ctx.fill();
+    // sjajno jezgro
+    ctx.fillStyle = "rgba(255,250,235," + (0.55 * puls).toFixed(3) + ")";
+    ctx.beginPath();
+    ctx.arc(suncex, suncey, R * 0.58, 0, Math.PI * 2);
+    ctx.fill();
+    requestAnimationFrame(loop);
+  }
+  loop();
+  var toR5 = null;
+  window.addEventListener("resize", function() {
+    if (gen !== SUNCE_GEN) return;
+    clearTimeout(toR5);
+    toR5 = setTimeout(resize, 200);
+  });
+}
+
+// ——— Pauzira canvas kada hero (.card) izađe iz ekrana — štedi CPU tokom skrola ———
+var SCENA_VIDANA = true;
+(function() {
+  var card = document.querySelector(".card");
+  if (card && "IntersectionObserver" in window) {
+    new IntersectionObserver(function(entries) {
+      for (var i = 0; i < entries.length; i++) SCENA_VIDANA = entries[i].isIntersecting;
+    }, { threshold: 0.01 }).observe(card);
+  }
+})();
+
+function postaviScenu(vrsta) {
+  var sc = document.getElementById("scena");
+  if (!sc) return;
+  sc.innerHTML = "";
+  GRM_GEN++; // nova scena → stara grmljavina se gasi
+  var i, s;
+
+  // odredi fazu dana iz body klasa (postavlja se pre postaviScenu u prikaziVreme)
+  var faza = "dan";
+  if (document.body.classList.contains("je-noc")) faza = "noc";
+  else if (document.body.classList.contains("je-sumrak")) faza = "sumrak";
+  else if (document.body.classList.contains("je-jutro")) faza = "jutro";
+
+  // ——— Canvas oblaci za sve vremenske tipove sa oblacima ———
+  oblaciCanvas(vrsta, faza);
+
+  if (vrsta === "kisa" || vrsta === "oluja") {
+    kisaCanvas(vrsta, faza);
+    // sc-kap (stare CSS kapi) uklonjeno — kisaCanvas crta pravu kišu
+    if (vrsta === "oluja") {
+      var b = document.createElement("div");
+      b.className = "sc-blesak";
+      sc.appendChild(b);
+      var m = document.createElement("div");
+      m.className = "sc-munja";
+      m.innerHTML = "<svg viewBox=\"0 0 140 220\"></svg>";
+      sc.appendChild(m);
+      var p = document.createElement("div");
+      p.className = "sc-pulse";
+      sc.appendChild(p);
+      pokreniGrmljavinu();
+    }
+  } else if (vrsta === "sneg") {
+    snegCanvas(vrsta, faza);
+  } else if (vrsta === "magla") {
+    maglaCanvas(vrsta, faza);
+    // Kombinacija: magla + kiša (maglovita kiša) — test ?proba=1&efekt=magla&kisa=1
+    if (typeof PROBA !== "undefined" && PROBA.get("kisa") === "1") {
+      kisaCanvas("maglovita", faza);
+    }
+  } else if (vrsta === "sunce") {
+    sunceCanvas(vrsta, faza);
+  } else if (vrsta === "noc") {
+    zvezdeCanvas(vrsta, faza);
+  }
+}
+
+// ——— Oluja: ritam grmljavine — munja-kosa + 2-3 bleska u nizu, pa pauza ———
+var GRM_GEN = 0;
+
+// Munja-kosa: razgranata munja, svaki udar je novi oblik
+function crtaMunju(m) {
+  if (!m) return;
+  var tacke = [], x = 18 + Math.random() * 104, y = 0, i;
+  for (i = 0; i <= 8; i++) {
+    tacke.push([x, y]);
+    x += Math.random() * 34 - 17;
+    y += 27.5;
+  }
+  var put = "M" + tacke.map(function(t) { return t[0].toFixed(0) + " " + t[1].toFixed(0); }).join(" L");
+  function krak(od) {
+    var t = tacke[od], kx = t[0], ky = t[1];
+    var smer = Math.random() < .5 ? -1 : 1;
+    var r = " M" + kx.toFixed(0) + " " + ky.toFixed(0), j;
+    for (j = 1; j <= 3; j++) {
+      kx += smer * (12 + Math.random() * 16);
+      ky += 14 + Math.random() * 12;
+      r += " L" + kx.toFixed(0) + " " + ky.toFixed(0);
+    }
+    return r;
+  }
+  put += krak(2 + Math.floor(Math.random() * 3)) + krak(5 + Math.floor(Math.random() * 2));
+  m.innerHTML = "<svg viewBox=\"0 0 140 220\" xmlns=\"http://www.w3.org/2000/svg\">" +
+    "<path d=\"" + put + "\" fill=\"none\" stroke=\"rgba(255,190,50,.5)\" stroke-width=\"13\"" +
+    " stroke-linecap=\"round\" stroke-linejoin=\"round\" filter=\"drop-shadow(0 0 10px rgba(255,190,50,.95))\"/>" +
+    "<path d=\"" + put + "\" fill=\"none\" stroke=\"#ffc933\" stroke-width=\"5.5\"" +
+    " stroke-linecap=\"round\" stroke-linejoin=\"round\" filter=\"drop-shadow(0 0 6px rgba(255,201,51,1))\"/>" +
+    "<path d=\"" + put + "\" fill=\"none\" stroke=\"#fff9e0\" stroke-width=\"2\"" +
+    " stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>";
+  m.style.left = (4 + Math.random() * 72) + "%";
+}
+
+// Jedan udar groma: crta novu munju, pali blesk, pa čeka sledeći
+function grmCiklus(gen) {
+  if (gen !== GRM_GEN || !document.body.classList.contains("mood-oluja")) return;
+  var blesk = document.querySelector(".sc-blesak");
+  var munja = document.querySelector(".sc-munja");
+  var ef = document.querySelector(".ef-blesak-zlatni");
+  crtaMunju(munja);
+  [blesk, munja, ef].forEach(function(el) {
+    if (el) { el.classList.remove("udar"); void el.offsetWidth; el.classList.add("udar"); }
+  });
+  setTimeout(function() { grmCiklus(gen); }, 6000 + Math.random() * 8000);
+}
+
+function pokreniGrmljavinu() {
+  var gen = GRM_GEN;
+  setTimeout(function() { grmCiklus(gen); }, 700 + Math.random() * 1800);
+}
+
+// Traka po satima — 24 sata od trenutnog sata; sadaSat označava "Sada" pečat
+function renderSate(h, trenutno, sunrise0, sunset0, sadaSat) {
+  var traka = document.getElementById("sati-traka");
+  traka.innerHTML = "";
+  if (!h || !h.time) return;
+  var idx = h.time.indexOf(trenutno.slice(0, 13) + ":00");
+  if (idx < 0) idx = 0;
+  var kraj = Math.min(idx + 24, h.time.length);
+  var sadaIdx = -1;
+  if (sadaSat) {
+    sadaIdx = h.time.indexOf(sadaSat.slice(0, 13) + ":00");
+    if (sadaIdx < 0) sadaIdx = -1;
+  }
+  for (var i = idx; i < kraj; i++) {
+    var info = WCODE[h.weather_code[i]] || ["", "oblacno", ""];
+    // Vlad: sat kartice prate fazu dana — lav i oblak menjaju svetlost kao glavna scena
+    var f = fazaSata(h.time[i], sunrise0, sunset0);
+    var lavKey = info[1];
+    if (f === "Jutro" || f === "Sumrak") { if (LAVOVI[info[1] + f]) lavKey = info[1] + f; }
+    else if (f === "Noc") { lavKey = LAVOVI[info[1] + "Noc"] ? info[1] + "Noc" : "noc"; }
+    var jeSada = (i === sadaIdx);
+    var d = document.createElement("div");
+    d.className = "sat-item" + (f ? " faza-" + f.toLowerCase() : "") + (jeSada ? " sat-sada" : "");
+    d.innerHTML = (jeSada ? "<span class=\"sat-sada-oznaka\">Sada</span>" : "") +
+                  "<span>" + h.time[i].slice(11, 13) + "h</span>" +
+                  "<img src=\"" + LAVOVI[lavKey] + "\" alt=\"\">" +
+                  "<span class=\"sat-emoji\">" + (IKONE[info[3]] || info[3] || "") + "</span>" +
+                  "<b>" + Math.round(h.temperature_2m[i]) + "°</b>" +
+                  ((h.precipitation_probability && h.precipitation_probability[i] >= 30) ? "<span class=\"sansa-sat\">" + Math.round(h.precipitation_probability[i]) + "%</span>" : "");
+    traka.appendChild(d);
+  }
+}
+
+// ——— Klik na dan: traka gore prelazi na taj dan (Vlad: rasklop u listi je bruka, traka diše tiše) ———
+var IZBRANI_DAN = -1;
+var POSLEDNJI_TEKST = null;
+
+function renderSateZaDan(tekst, danIdx) {
+  var h = tekst.hourly, d = tekst.daily;
+  var datumStr = d.time[danIdx];
+  var novi = { time: [], weather_code: [], temperature_2m: [], precipitation_probability: [] };
+  for (var j = 0; j < h.time.length; j++) {
+    if (h.time[j].slice(0, 10) === datumStr) {
+      novi.time.push(h.time[j]);
+      novi.weather_code.push(h.weather_code[j]);
+      novi.temperature_2m.push(h.temperature_2m[j]);
+      if (h.precipitation_probability) novi.precipitation_probability.push(h.precipitation_probability[j]);
+    }
+  }
+  renderSate(novi, novi.time[0] ? novi.time[0] : "", d.sunrise && d.sunrise[danIdx], d.sunset && d.sunset[danIdx], tekst.current && tekst.current.time);
+}
+
+function postaviTraku() {
+  var naslov = document.getElementById("sati-naslov");
+  if (!POSLEDNJI_TEKST) return;
+  var d = POSLEDNJI_TEKST.daily;
+  if (IZBRANI_DAN >= 0 && d && IZBRANI_DAN < d.time.length) {
+    renderSateZaDan(POSLEDNJI_TEKST, IZBRANI_DAN);
+    var dt = new Date(d.time[IZBRANI_DAN] + "T12:00:00");
+    naslov.textContent = "Po satima — " + DANI_SR[dt.getDay()].toLowerCase();
+  } else {
+    renderSate(POSLEDNJI_TEKST.hourly, POSLEDNJI_TEKST.current.time, d && d.sunrise && d.sunrise[0], d && d.sunset && d.sunset[0], POSLEDNJI_TEKST.current.time);
+    naslov.textContent = "Po satima";
+  }
+}
+
+// 7 dana — dan, lav, opis, min/max
+function renderDana(d) {
+  var lista = document.getElementById("dani-lista");
+  lista.innerHTML = "";
+  if (!d || !d.time) return;
+  for (var i = 0; i < d.time.length && i < 7; i++) {
+    var info = WCODE[d.weather_code[i]] || ["", "oblacno", ""];
+    var dt = new Date(d.time[i] + "T12:00:00");
+    var datum = dt.getDate() + "." + (dt.getMonth() + 1) + ".";
+    var ime = i === 0 ? "Danas" : DANI_SR_KRATKO[dt.getDay()] + " " + datum;
+    var red = document.createElement("div");
+    red.className = "dan-red" + (i === IZBRANI_DAN ? " dan-izabran" : "");
+    red.onclick = (function(idx) { return function() {
+      IZBRANI_DAN = (IZBRANI_DAN === idx || idx === 0) ? -1 : idx;
+      renderDana(POSLEDNJI_TEKST.daily);
+      postaviTraku();
+    }; })(i);
+    var sansa = (d.precipitation_probability_max && d.precipitation_probability_max[i] >= 30) ? Math.round(d.precipitation_probability_max[i]) : 0;
+    red.innerHTML = "<span class=\"dan-ime\">" + ime + "</span>" +
+      "<img src=\"" + LAVOVI[info[1]] + "\" alt=\"\">" +
+      "<span class=\"dan-emoji\">" + (IKONE[info[3]] || info[3] || "") + (sansa ? "<span class=\"sansa-dan\">" + sansa + "%</span>" : "") + "</span>" +
+      "<span class=\"dan-opis\">" + info[0] + "</span>" +
+      "<span class=\"dan-temp\">" + Math.round(d.temperature_2m_max[i]) + "° / " + Math.round(d.temperature_2m_min[i]) + "°</span>";
+    lista.appendChild(red);
+  }
+}
+
+// ——— Upozorenje na kišu: lav gleda dva sata unapred ———
+function proveriKisu(tekst) {
+  var el = document.getElementById("kisa-paznja");
+  if (!el) return;
+  el.style.display = "none";
+  if (!tekst || !tekst.current || !tekst.hourly || !tekst.hourly.time || !tekst.hourly.precipitation_probability) return;
+  var k = tekst.current.weather_code;
+  var VEC_PADA = (k >= 51 && k <= 67) || (k >= 80 && k <= 82) || (k >= 95);
+  if (VEC_PADA) return;
+  var si = tekst.hourly.time.indexOf(tekst.current.time.slice(0, 13) + ":00");
+  if (si < 0) return;
+  var kad = ["kroz sat", "za dva sata"];
+  for (var p = 1; p <= 2; p++) {
+    var s = tekst.hourly.precipitation_probability[si + p];
+    if (s !== undefined && s >= 50) {
+      el.textContent = "Lav kaže: kiša stiže " + kad[p - 1] + " — ponesi kišobran ☔";
+      el.style.display = "block";
+      return;
+    }
+  }
+}
+
+// ——— v3.68 Grupa 7: Minutna kiša — 15-minutni bar chart + pametni rezime ———
+function renderKisaMinutno(m) {
+  var panel = document.getElementById("kisa-minutno-panel");
+  if (!m || !m.time || !m.precipitation) { panel.style.display = "none"; return; }
+  panel.style.display = "";
+  var p = m.precipitation, times = m.time;
+  var maxP = 0;
+  for (var i = 0; i < p.length; i++) if (p[i] > maxP) maxP = p[i];
+  var traka = document.getElementById("kisa-minutno-traka");
+  var vremena = document.getElementById("kisa-minutno-vremena");
+  var rezime = document.getElementById("kisa-minutno-rezime");
+  if (maxP < 0.05) {
+    // Suvo — samo rezime, sakrij bar chart i vremena
+    rezime.textContent = "Suvo naredna 2 sata \u2600\uFE0F";
+    rezime.style.color = "rgba(245, 241, 230, .82)";
+    traka.style.display = "none";
+    vremena.style.display = "none";
+    return;
+  }
+  // Ima kiše — prikaži bar chart i vremena
+  traka.style.display = "";
+  vremena.style.display = "";
+  var maxScale = Math.max(maxP, 0.5);
+  var prvi = -1, poslednji = -1;
+  for (var a = 0; a < p.length; a++) { if (p[a] >= 0.05) { prvi = a; break; } }
+  for (var b = p.length - 1; b >= 0; b--) { if (p[b] >= 0.05) { poslednji = b; break; } }
+  var pocetakMin = prvi * 15;
+  var kraj = new Date(times[poslednji]);
+  var krajH = kraj.getHours(), krajM = kraj.getMinutes();
+  var intenzitet = maxP < 0.5 ? "slaba" : (maxP < 2 ? "umerena" : "jaka");
+  var pocetak = prvi === 0 ? "Ki\u0161a pada sad" : "Ki\u0161a za " + pocetakMin + " min";
+  rezime.innerHTML = pocetak + " \u00b7 " + intenzitet + " \u00b7 do " + (krajH<10?"0":"") + krajH + ":" + (krajM<10?"0":"") + krajM;
+  rezime.style.color = "rgba(165, 195, 235, .95)";
+  traka.innerHTML = "";
+  for (var k = 0; k < p.length; k++) {
+    var bar = document.createElement("div");
+    bar.className = "kisa-bar" + (p[k] < 0.05 ? " nula" : "");
+    bar.style.height = Math.max((p[k] / maxScale) * 100, 3) + "%";
+    bar.title = times[k].slice(11, 16) + " \u00b7 " + p[k].toFixed(2) + " mm";
+    traka.appendChild(bar);
+  }
+  vremena.innerHTML = "";
+  for (var v = 0; v < p.length; v++) {
+    var span = document.createElement("span");
+    span.className = "kisa-minutno-vreme";
+    span.textContent = (v % 4 === 0 || v === p.length - 1) ? times[v].slice(11, 16) : "";
+    vremena.appendChild(span);
+  }
+}
+
+// v3.70 Grupa 9: Vremenska upozorenja — analiza current + daily[0], prikaz po ozbiljnosti
+function obradiUpozorenja(tekst) {
+  var el = document.getElementById("upozorenje");
+  if (!el) return;
+  el.style.display = "none";
+  el.className = "upozorenje";
+  // ?upoz= test parametar — forsiraj konkretno upozorenje radi testiranja
+  var PROBA_UPOZ = new URLSearchParams(location.search).get("upoz");
+  if (PROBA_UPOZ) {
+    var TEST = {
+      oluja: { nivo: "cisto", ikona: "⛈️", tekst: "Oluja danas — grom i grad, sedi gde si" },
+      vetar: { nivo: "umereno", ikona: "💨", tekst: "Jak vetar — test, čuvaj stvari" },
+      talas: { nivo: "cisto", ikona: "🌡️", tekst: "Toplotni talas — test, pijte vodu" },
+      kisa: { nivo: "umereno", ikona: "🌧️", tekst: "Jaka kiša danas — ponesi kišobran" },
+      mraz: { nivo: "blago", ikona: "❄️", tekst: "Mraz — čuvaj biljke" },
+      magla: { nivo: "blago", ikona: "🌫️", tekst: "Magla — vozite pažljivo" },
+      led: { nivo: "cisto", ikona: "🧊", tekst: "Led i ledena kiša — test, ceste klizave" },
+      sneg: { nivo: "umereno", ikona: "❄️", tekst: "Jak sneg — test, čistite sneg" },
+      mecava: { nivo: "cisto", ikona: "🌨️", tekst: "Mećava — test, sneg i vetar" },
+      hladnoca: { nivo: "umereno", ikona: "🥶", tekst: "Ekstremna hladnoća — test, toplo se obucite" }
+    };
+    var t = TEST[PROBA_UPOZ];
+    if (t) {
+      el.className = "upozorenje " + t.nivo;
+      var dd = t.tekst.split(" — ");
+      el.innerHTML = '<span class="upoz-ikona">' + t.ikona + '</span><span><span class="upoz-naslov">' + dd[0] + '</span>' + (dd[1] ? ' — ' + dd[1] : '') + '</span>';
+      el.style.display = "flex";
+    }
+    return;
+  }
+  if (!tekst || !tekst.daily) return;
+
+  var d = tekst.daily;
+  var danKod = d.weather_code ? d.weather_code[0] : 0;
+  var danVetarMax = d.wind_speed_10m_max ? d.wind_speed_10m_max[0] : 0;
+  var danTmin = d.temperature_2m_min ? d.temperature_2m_min[0] : 99;
+  var danTmax = d.temperature_2m_max ? d.temperature_2m_max[0] : 0;
+  var danKisaSansa = d.precipitation_probability_max ? d.precipitation_probability_max[0] : 0;
+  var curKod = tekst.current ? tekst.current.weather_code : 0;
+
+  // Sortirano po ozbiljnosti — opasno (crveno) prvo
+  var danJeSneg = (danKod >= 71 && danKod <= 77) || (danKod >= 85 && danKod <= 86) || (curKod >= 71 && curKod <= 77) || (curKod >= 85 && curKod <= 86);
+  var upoz = null;
+  if ((danKod >= 95 && danKod <= 99) || (curKod >= 95 && curKod <= 99)) {
+    upoz = { nivo: "cisto", ikona: "⛈️", tekst: "Oluja danas — grom i grad, sedi gde si" };
+  } else if (danJeSneg && danVetarMax >= 50) {
+    upoz = { nivo: "cisto", ikona: "🌨️", tekst: "Mećava danas — sneg i jak vetar, ostanite unutra" };
+  } else if ((danKod >= 56 && danKod <= 57) || (danKod >= 66 && danKod <= 67) || (curKod >= 56 && curKod <= 57) || (curKod >= 66 && curKod <= 67)) {
+    upoz = { nivo: "cisto", ikona: "🧊", tekst: "Led i ledena kiša — ceste klizave, vozite pažljivo" };
+  } else if (danTmax >= 33) {
+    upoz = { nivo: "cisto", ikona: "🌡️", tekst: "Toplotni talas — do " + Math.round(danTmax) + "°, pijte vodu" };
+  } else if (danKod === 75 || danKod === 86 || curKod === 75 || curKod === 86) {
+    upoz = { nivo: "umereno", ikona: "❄️", tekst: "Jak sneg danas — očekujte nanose" };
+  } else if (danTmin <= -10) {
+    upoz = { nivo: "umereno", ikona: "🥶", tekst: "Ekstremna hladnoća — do " + Math.round(danTmin) + "°, toplo se obucite" };
+  } else if (danVetarMax >= 50) {
+    upoz = { nivo: "umereno", ikona: "💨", tekst: "Jak vetar — do " + Math.round(danVetarMax) + " km/h, čuvaj stvari" };
+  } else if (danKisaSansa >= 85) {
+    upoz = { nivo: "umereno", ikona: "🌧️", tekst: "Jaka kiša danas — ponesi kišobran" };
+  } else if (danTmin < 1) {
+    upoz = { nivo: "blago", ikona: "❄️", tekst: "Mraz — čuvaj biljke" };
+  } else if ((danKod >= 45 && danKod <= 48) || (curKod >= 45 && curKod <= 48)) {
+    upoz = { nivo: "blago", ikona: "🌫️", tekst: "Magla — vozite pažljivo" };
+  }
+
+  if (upoz) {
+    el.className = "upozorenje " + upoz.nivo;
+    var dd = upoz.tekst.split(" — ");
+    el.innerHTML = '<span class="upoz-ikona">' + upoz.ikona + '</span><span><span class="upoz-naslov">' + dd[0] + '</span>' + (dd[1] ? ' — ' + dd[1] : '') + '</span>';
+    el.style.display = "flex";
+  }
+}
+
+// v3.69 Grupa 10: Kvalitet vazduha — EU AQI + polutanti stubići
+function obradiVazduh(j) {
+  var p = document.getElementById("vazduh-panel");
+  if (!p) return;
+  if (!j || !j.current) { var vi0 = document.getElementById("vazduh-ime"); if (vi0) vi0.textContent = "Nedostupno"; return; }
+  var c = j.current;
+  var aqi = c.european_aqi;
+  if (aqi == null) { var vi1 = document.getElementById("vazduh-ime"); if (vi1) vi1.textContent = "Nedostupno"; return; }
+
+  var KAT = [
+    [20, "Dobar", "linear-gradient(180deg, #8fbf8a, #4a7a52)", "Vazduh je čist — slobodno napolje"],
+    [40, "Umeren", "linear-gradient(180deg, #e8c873, #b8893a)", "Kvalitet je prihvatljiv"],
+    [60, "Loš za osetljive", "linear-gradient(180deg, #e8a35a, #b56a30)", "Osetljive grupe neka paze"],
+    [80, "Loš", "linear-gradient(180deg, #c8634a, #8a3528)", "Smanjite napore napolju"],
+    [100, "Veoma loš", "linear-gradient(180deg, #8a4a6e, #4a2840)", "Bolje ostati unutra"],
+    [Infinity, "Ekstremno loš", "linear-gradient(180deg, #5a2832, #2e1418)", "Izbegavajte boravak napolju"]
+  ];
+  var ime = "–", boja = "linear-gradient(180deg, #5a6275, #3a3d4a)", savet = "";
+  for (var i = 0; i < KAT.length; i++) {
+    if (aqi <= KAT[i][0]) { ime = KAT[i][1]; boja = KAT[i][2]; savet = KAT[i][3]; break; }
+  }
+
+  document.getElementById("vazduh-broj").textContent = Math.round(aqi);
+  document.getElementById("vazduh-broj").style.background = boja;
+  document.getElementById("vazduh-ime").textContent = ime;
+  document.getElementById("vazduh-savet").textContent = savet;
+
+  var POL = [
+    ["PM2.5", c.pm2_5, c.european_aqi_pm2_5],
+    ["PM10", c.pm10, c.european_aqi_pm10],
+    ["O3", c.ozone, c.european_aqi_o3],
+    ["NO2", c.nitrogen_dioxide, c.european_aqi_no2],
+    ["SO2", c.sulphur_dioxide, c.european_aqi_so2]
+  ];
+  var html = "";
+  for (var k = 0; k < POL.length; k++) {
+    var n = POL[k];
+    var subAqi = n[2];
+    var subBoja = "linear-gradient(180deg, #5a6275, #3a3d4a)";
+    if (subAqi != null) {
+      for (var m = 0; m < KAT.length; m++) {
+        if (subAqi <= KAT[m][0]) { subBoja = KAT[m][2]; break; }
+      }
+    }
+    var visina = subAqi != null ? Math.max(10, Math.min(70, subAqi / 100 * 70)) : 10;
+    var valTxt = n[1] != null ? Math.round(n[1]) : "–";
+    html += '<div class="vazduh-stub">' +
+      '<div class="bar" style="height:' + visina + 'px;background:' + subBoja + '"></div>' +
+      '<div class="val">' + valTxt + '</div>' +
+      '<div class="ime">' + n[0] + '</div>' +
+      '</div>';
+  }
+  document.getElementById("vazduh-stubici").innerHTML = html;
+}
+
+function obradi(tekst) {
+  POSLEDNJI_TEKST = tekst;
+  var t = Math.round(tekst.current.temperature_2m);
+  var kod = tekst.current.weather_code;
+  // Probni režim: ?efekt= obara i prikaz, lava i rečenicu na forsirano vreme
+  var PROBA_KOD = ({ sunce: 0, oblacno: 3, kisa: 63, sneg: 73, oluja: 95, magla: 45, noc: 0 })[PROBA_EFEKT];
+  if (PROBA_KOD !== undefined) kod = PROBA_KOD;
+  var v = Math.round(tekst.current.wind_speed_10m);
+  var k = (tekst.current.precipitation || 0);
+  var info = WCODE[kod] || ["Nepoznato", "oblacno", "Lav je zbunjen 🤔"];
+
+  document.getElementById("temp").textContent = t;
+  document.getElementById("desc").textContent = info[0];
+  var poruka = info[2];
+  if (kod === 0) {
+    if (t >= 25) poruka = "Vreme je za sunčanje 😎";
+    else if (t >= 12) poruka = "Sunčano i prijatno — dan za šetnju 😌";
+    else poruka = "Vedro, ali zima ❄️";
+  }
+  document.getElementById("mood").textContent = poruka;
+  document.getElementById("wind").textContent = v;
+  document.getElementById("rain").textContent = k;
+  // v3.64: Dodatni meteorološki podaci — osećaj, vlažnost, pritisak, UV, smer vetra
+  document.getElementById("wind-dir").textContent = pravacVetra(tekst.current.wind_direction_10m);
+  document.getElementById("osecaj").textContent = Math.round(tekst.current.apparent_temperature);
+  document.getElementById("vlaznost").textContent = tekst.current.relative_humidity_2m;
+  document.getElementById("pritisak").textContent = Math.round(tekst.current.surface_pressure);
+  document.getElementById("uv").textContent = (tekst.current.uv_index || 0).toFixed(1);
+  var sansa = null;
+  if (tekst.hourly && tekst.hourly.precipitation_probability && tekst.hourly.time) {
+    var si = tekst.hourly.time.indexOf(tekst.current.time.slice(0, 13) + ":00");
+    if (si >= 0) sansa = tekst.hourly.precipitation_probability[si];
+  }
+  var sr = document.getElementById("sansa-red");
+  if (sr) {
+    if (sansa !== null && sansa >= 30) {
+      document.getElementById("sansa").textContent = sansa;
+      sr.style.display = "";
+    } else { sr.style.display = "none"; }
+  }
+  proveriKisu(tekst);
+  obradiUpozorenja(tekst);
+  postaviLava(info[1]);
+  var moodKlasa = (kod === 45 || kod === 48) ? "magla" : info[1];
+  // Probni režim: ?efekt= forsira raspoloženje (sunce, oblacno, kisa, sneg, oluja, magla)
+  if (["sunce", "oblacno", "kisa", "sneg", "oluja", "magla", "noc"].indexOf(PROBA_EFEKT) >= 0) moodKlasa = PROBA_EFEKT;
+  // Noć: vedro/pretežno vedro noću → mesečina umesto sunca
+  if (jeNoc(tekst) && moodKlasa === "sunce") moodKlasa = "noc";
+  // Doba dana: i kiša, sneg, oblačno, oluja i magla imaju svoje noćne, zorne i sumračne rečenice
+  var fazaPor = jeNoc(tekst) ? "noc" : (jeJutro(tekst) ? "jutro" : (jeSumrak(tekst) ? "sumrak" : "dan"));
+  if (fazaPor !== "dan" && FAZA_PORUKE[moodKlasa] && FAZA_PORUKE[moodKlasa][fazaPor]) document.getElementById("mood").textContent = FAZA_PORUKE[moodKlasa][fazaPor];
+  if (moodKlasa === "noc") document.getElementById("mood").textContent = "Vreme je za mesečinu 🌙";
+  if (moodKlasa === "noc") postaviLava(jePunMesec() ? "nocPun" : "noc");
+  // Zora i sumrak: vedro jutro/veče nose svoje lava, nebo prati izlazak i zalazak
+  var jeJutroS = jeJutro(tekst) && moodKlasa === "sunce";
+  var jeSumrakS = jeSumrak(tekst) && moodKlasa === "sunce";
+  if (jeJutroS) {
+    document.getElementById("mood").textContent = "Zora lije zlato — Lav se budi 🌅";
+    postaviLava("jutro");
+  }
+  if (jeSumrakS) {
+    document.getElementById("mood").textContent = "Sumrak lije zlato preko brkova 🌇";
+    postaviLava("sumrak");
+  }
+  // Jak vetar: poruka prati vetar — važi iznad doba dana i temperature
+  if (v > 40) document.getElementById("mood").textContent = "Vetar nosi i lavove 💨";
+  // Doba dana: svaki vremenski lav ima svog noćnog, zoru i sumrak
+  if (jeNoc(tekst) && LAVOVI[moodKlasa + "Noc"]) postaviLava(moodKlasa + "Noc");
+  if (jeJutro(tekst) && LAVOVI[moodKlasa + "Jutro"]) postaviLava(moodKlasa + "Jutro");
+  if (jeSumrak(tekst) && LAVOVI[moodKlasa + "Sumrak"]) postaviLava(moodKlasa + "Sumrak");
+  postaviEfekte(moodKlasa);
+  var stare = document.body.className.match(/mood-\S+/g) || [];
+  for (var mi = 0; mi < stare.length; mi++) document.body.classList.remove(stare[mi]);
+  document.body.classList.add("mood-" + moodKlasa);
+  if (jeNoc(tekst)) document.body.classList.add("je-noc");
+  else document.body.classList.remove("je-noc");
+  if (jeJutro(tekst)) document.body.classList.add("je-jutro");
+  else document.body.classList.remove("je-jutro");
+  if (jeSumrak(tekst)) document.body.classList.add("je-sumrak");
+  else document.body.classList.remove("je-sumrak");
+  postaviScenu(moodKlasa);
+  // Traka brauzera prati nebo
+  var TEMA = { sunce: "#103a75", oblacno: "#1f3350", magla: "#2c3543", kisa: "#12335c", sneg: "#224678", oluja: "#31415f", noc: "#0a0e20" };
+  var tema = TEMA[moodKlasa] || "#0a0f1a";
+  if (moodKlasa === "sunce" && jeJutro(tekst)) tema = "#7ba3d6";
+  if (moodKlasa === "sunce" && jeSumrak(tekst)) tema = "#7a4666";
+  var temaMeta = document.querySelector('meta[name="theme-color"]');
+  if (temaMeta) temaMeta.setAttribute("content", tema);
+  podesiMesec();
+  var lavVrsta = moodKlasa === "noc" ? (jePunMesec() ? "nocPun" : "noc") : info[1];
+  if (jeJutroS) lavVrsta = "jutro";
+  if (jeSumrakS) lavVrsta = "sumrak";
+  if (jeNoc(tekst) && LAVOVI[moodKlasa + "Noc"]) lavVrsta = moodKlasa + "Noc";
+  if (jeJutro(tekst) && LAVOVI[moodKlasa + "Jutro"]) lavVrsta = moodKlasa + "Jutro";
+  if (jeSumrak(tekst) && LAVOVI[moodKlasa + "Sumrak"]) lavVrsta = moodKlasa + "Sumrak";
+  document.getElementById("lav-top").src = GAL_URL(lavDana());
+  document.getElementById("msg").style.display = "none";
+  document.getElementById("loader").style.display = "none";
+
+  var e = tekst.daily ? tekst.daily : null;
+  if (e) {
+    if (e.temperature_2m_max) document.getElementById("m-ecmwf-temp").textContent = Math.round(e.temperature_2m_max[0]) + "°";
+    if (e.precipitation_probability_max) {
+      var p = e.precipitation_probability_max[0];
+      document.getElementById("m-ecmwf-kisa").textContent = (p != null ? p + "%" : "–");
+    }
+    if (e.wind_speed_10m_max) document.getElementById("m-ecmwf-vetar").textContent = Math.round(e.wind_speed_10m_max[0]);
+  }
+  if (e && e.sunrise && e.sunset) {
+    document.getElementById("izlazak").textContent = e.sunrise[0].slice(11, 16);
+    document.getElementById("zalazak").textContent = e.sunset[0].slice(11, 16);
+  }
+  // Faza meseca -- crtanje osvetljenog dela + ime
+  var mp = fazaMeseca(tekst.current ? tekst.current.time : new Date().toISOString());
+  var moonLit = document.getElementById("moon-lit");
+  if (moonLit) moonLit.setAttribute("d", moonPath(44, mp));
+  var mesecEl = document.getElementById("mesec");
+  if (mesecEl) mesecEl.textContent = imeMeseca(mp);
+  postaviTraku();
+  renderDana(tekst.daily);
+  // ?mkisa= test param — ubaci fake kišu u minutni panel (samo sa ?proba=1)
+  var mkData = tekst.minutely_15;
+  if (PROBA_MKISA) {
+    try {
+      var bt = (tekst.minutely_15 && tekst.minutely_15.time) ? tekst.minutely_15.time.slice() : [];
+      if (bt.length === 0) {
+        var sd = new Date();
+        for (var mi = 0; mi < 8; mi++) { bt.push(new Date(sd.getTime() + mi * 15 * 60000).toISOString().slice(0, 16)); }
+      }
+      var fake = {
+        kisa:  [0, 0, 0.2, 0.6, 1.1, 0.8, 0.3, 0.1],
+        jaka:  [0, 0, 1.5, 2.8, 3.2, 2.1, 0.5, 0],
+        pada:  [0.4, 0.8, 1.2, 0.9, 0.5, 0.2, 0, 0],
+        suvo:  [0, 0, 0, 0, 0, 0, 0, 0]
+      };
+      if (fake[PROBA_MKISA]) mkData = { time: bt, precipitation: fake[PROBA_MKISA] };
+    } catch(err) {
+      alert("CATCH GREŠKA: " + err.message);
+    }
+  }
+  renderKisaMinutno(mkData);
+}
+
+function uporediModel(model, prefix) {
+  var d = model.daily;
+  if (!d) return;
+  if (d.temperature_2m_max) document.getElementById(prefix + "-temp").textContent = Math.round(d.temperature_2m_max[0]) + "°";
+  if (d.precipitation_probability_max) {
+    var p = d.precipitation_probability_max[0];
+    document.getElementById(prefix + "-kisa").textContent = (p != null ? p + "%" : "–");
+  }
+  if (d.wind_speed_10m_max) document.getElementById(prefix + "-vetar").textContent = Math.round(d.wind_speed_10m_max[0]);
+}
+
+function greska(poruka) {
+  var el = document.getElementById("err");
+  el.style.display = "block";
+  el.innerHTML = "Greška: " + poruka + ". <button type='button' class='retry-btn' id='retry-btn'>Pokušaj ponovo</button>";
+  document.getElementById("msg").style.display = "none";
+  document.getElementById("loader").style.display = "none";
+  var rb = document.getElementById("retry-btn");
+  if (rb) rb.onclick = ucitajPrognozu;
+}
+
+// Registracija service workera — omogućava "Instaliraj aplikaciju"
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js").catch(function(){});
+}
+
+// ——— Keš poslednje prognoze: kad nema neta, lav pamti ———
+var KES_KEY = "lav-vreme-kes";
+function sacuvajKes(j) {
+  try { localStorage.setItem(KES_KEY, JSON.stringify({ vreme: Date.now(), lat: LOK.lat, lon: LOK.lon, podaci: j })); } catch (e) {}
+}
+function prikaziKes(razlog) {
+  var kes = null;
+  try { kes = JSON.parse(localStorage.getItem(KES_KEY)); } catch (e) {}
+  if (kes && kes.podaci && kes.podaci.current && kes.lat === LOK.lat && kes.lon === LOK.lon) {
+    obradi(kes.podaci);
+    var d = new Date(kes.vreme), h = d.getHours(), m = d.getMinutes();
+    var el = document.getElementById("msg");
+    el.style.display = "block";
+    el.innerHTML = "Lav pamti prognozu · osveženo u " + (h<10?"0":"") + h + ":" + (m<10?"0":"") + m + " <button type='button' class='retry-btn' id='retry-btn'>Pokušaj ponovo</button>";
+    document.getElementById("offline-bedz").classList.add("prikazi");
+    var rb = document.getElementById("retry-btn");
+    if (rb) rb.onclick = ucitajPrognozu;
+  } else {
+    greska(razlog);
+  }
+}
+
+// Prognoza za trenutnu lokaciju (LOK)
+function ucitajPrognozu() {
+  document.getElementById("err").style.display = "none";
+  document.getElementById("msg").style.display = "block";
+  document.getElementById("offline-bedz").classList.remove("prikazi");
+  document.getElementById("msg").textContent = "Učitavam prognozu…";
+  document.getElementById("loader").style.display = "block";
+
+  fetch(
+    "https://api.open-meteo.com/v1/forecast?latitude=" + LOK.lat + "&longitude=" + LOK.lon +
+    "&current=temperature_2m,weather_code,wind_speed_10m,precipitation,apparent_temperature,relative_humidity_2m,surface_pressure,uv_index,wind_direction_10m" +
+    "&hourly=temperature_2m,weather_code,precipitation_probability" +
+    "&minutely_15=precipitation&forecast_minutely_15=8" +
+    "&daily=temperature_2m_max,temperature_2m_min,weather_code,sunrise,sunset,precipitation_probability_max,wind_speed_10m_max" +
+    "&forecast_days=7&timezone=auto"
+  )
+    .then(function(r){ return r.json(); })
+    .then(function(j){ sacuvajKes(j); obradi(j); })
+    .catch(function(){ prikaziKes("prognoza nije stigla"); });
+
+  // Uporedni modeli (ECMWF dolazi iz glavnog poziva)
+  fetch(
+    "https://api.open-meteo.com/v1/forecast?latitude=" + LOK.lat + "&longitude=" + LOK.lon +
+    "&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max&forecast_days=1&timezone=auto&models=gfs_seamless"
+  )
+    .then(function(r){ return r.json(); })
+    .then(function(j){ uporediModel(j, "m-gfs"); })
+    .catch(function(){});
+
+  fetch(
+    "https://api.open-meteo.com/v1/forecast?latitude=" + LOK.lat + "&longitude=" + LOK.lon +
+    "&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max&forecast_days=1&timezone=auto&models=icon_seamless"
+  )
+    .then(function(r){ return r.json(); })
+    .then(function(j){ uporediModel(j, "m-icon"); })
+    .catch(function(){});
+
+  // v3.69 Grupa 10: Kvalitet vazduha — Open-Meteo air-quality API (EU AQI)
+  fetch(
+    "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=" + LOK.lat + "&longitude=" + LOK.lon +
+    "&current=european_aqi,european_aqi_pm2_5,european_aqi_pm10,european_aqi_o3,european_aqi_no2,european_aqi_so2,pm2_5,pm10,ozone,nitrogen_dioxide,sulphur_dioxide&timezone=auto"
+  )
+    .then(function(r){ return r.json(); })
+    .then(function(j){ obradiVazduh(j); })
+    .catch(function(){ var vi2 = document.getElementById("vazduh-ime"); if (vi2) vi2.textContent = "Nedostupno"; });
+}
+ucitajPrognozu();
+
+// Auto-osvežavanje — na svakih 30 min i svaki put kad se app otvori
+setInterval(ucitajPrognozu, 30 * 60 * 1000);
+document.addEventListener("visibilitychange", function() {
+  if (!document.hidden) ucitajPrognozu();
+});
+
+// ——— Lokacija: pretraga grada, GPS, pamćenje ———
+function postaviLokaciju(lat, lon, ime) {
+  LOK = { lat: lat, lon: lon, ime: ime };
+  try { localStorage.setItem(LOK_KEY, JSON.stringify(LOK)); } catch (e) {}
+  postaviGradUI(ime);
+  document.getElementById("lok-unos").value = "";
+  document.getElementById("lok-rez").innerHTML = "";
+  document.getElementById("lav").classList.add("fade");
+  ucitajPrognozu();
+}
+
+function traziGrad() {
+  var q = document.getElementById("lok-unos").value.trim();
+  var rez = document.getElementById("lok-rez");
+  if (q.length < 2) { rez.textContent = "Ukucaj bar dva slova."; return; }
+  rez.textContent = "Tražim…";
+  fetch("https://geocoding-api.open-meteo.com/v1/search?name=" + encodeURIComponent(q) + "&count=6&language=sr")
+    .then(function(r){ return r.json(); })
+    .then(function(j){
+      var rezultati = j.results || [];
+      rez.innerHTML = "";
+      if (!rezultati.length) { rez.textContent = "Ništa nije nađeno 🤷"; return; }
+      rezultati.forEach(function(r){
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "lok-rez-btn";
+        var opis = r.name;
+        if (r.admin1 && r.admin1 !== r.name) opis += ", " + r.admin1;
+        if (r.country) opis += " (" + r.country + ")";
+        b.textContent = opis;
+        b.onclick = function(){ postaviLokaciju(r.latitude, r.longitude, r.name); };
+        rez.appendChild(b);
+      });
+    })
+    .catch(function(){ rez.textContent = "Pretraga pukla — proveri net." });
+}
+
+function gpsLokacija() {
+  var rez = document.getElementById("lok-rez");
+  if (!navigator.geolocation) { rez.textContent = "GPS nije dostupan na ovom uređaju."; return; }
+  rez.textContent = "Tražim GPS…";
+  navigator.geolocation.getCurrentPosition(
+    function(p){ postaviLokaciju(p.coords.latitude, p.coords.longitude, "Moja lokacija"); },
+    function(){ rez.textContent = "GPS odbijen ili nedostupan."; },
+    { timeout: 10000 }
+  );
+}
+
+document.getElementById("lok-trazi").onclick = traziGrad;
+document.getElementById("lok-gps").onclick = gpsLokacija;
+document.getElementById("lok-unos").addEventListener("keydown", function(e){
+  if (e.key === "Enter") traziGrad();
+});
+
+// v3.55: tap na mesec otvara krupan prikaz sa kraterima
+window.addEventListener("DOMContentLoaded", function(){
+  var mz = document.getElementById("mesec-zum");
+  var ms = document.getElementById("mesec-zum-sadrzaj");
+  var zatvori = document.getElementById("mesec-zatvori");
+  if (!mz || !zatvori) return;
+  function otvori(){
+    var m = mesecKrupniSVG();
+    ms.innerHTML = m.svg + "<h3>" + m.ime + "</h3><p>" + m.procenat + "% osvetljeno</p>";
+    mz.classList.add("otvoren");
+  }
+  function zatvoriZum(){ mz.classList.remove("otvoren"); }
+  var mesecEl = document.querySelector(".nebo-mesec");
+  if (mesecEl) mesecEl.addEventListener("click", otvori);
+  var ugaoEl = document.querySelector(".ugao-nebo");
+  if (ugaoEl) ugaoEl.addEventListener("click", otvori);
+  zatvori.addEventListener("click", zatvoriZum);
+  mz.addEventListener("click", function(e){ if (e.target === mz) zatvoriZum(); });
+});
+
+// v3.61: Radar — Leaflet + RainViewer, kretanje oblaka i padavina (Vlad 8.10)
+window.addEventListener("DOMContentLoaded", function(){
+  var rz = document.getElementById("radar-zum");
+  var rZatvori = document.getElementById("radar-zatvori");
+  var rGrad = document.getElementById("radar-grad");
+  var rMapa = document.getElementById("radar-mapa");
+  var rPlay = document.getElementById("radar-play");
+  var rTraka = document.getElementById("radar-traka");
+  var rPun = rTraka.querySelector(".pun");
+  var rKvoci = rTraka.querySelector(".kvoci");
+  var rVreme = document.getElementById("radar-vreme");
+  if (!rz || !rZatvori) return;
+
+  var mapa = null;
+  var okviri = [];        // RainViewer prošli frejmovi
+  var host = "";
+  var pozicija = 0;
+  var sloj = null;        // trenutni radarski tileLayer
+  var tajmer = null;
+  var playing = false;
+  var TILE = window.devicePixelRatio >= 2 ? 512 : 256;
+
+  function fmtVreme(ts){
+    var d = new Date(ts * 1000);
+    var h = d.getHours().toString().padStart(2,"0");
+    var m = d.getMinutes().toString().padStart(2,"0");
+    return h + ":" + m;
+  }
+
+  function prikaziOkvir(i){
+    if (!mapa || !okviri.length) return;
+    if (i < 0) i = 0;
+    if (i >= okviri.length) i = okviri.length - 1;
+    pozicija = i;
+    var fr = okviri[i];
+    if (sloj) mapa.removeLayer(sloj);
+    sloj = L.tileLayer(host + fr.path + "/" + TILE + "/{z}/{x}/{y}/2/1_1.png", {
+      tileSize: 256,
+      opacity: 0.78,
+      maxNativeZoom: 7,
+      maxZoom: 12,
+      zIndex: 250
+    });
+    sloj.addTo(mapa);
+    var p = okviri.length > 1 ? i / (okviri.length - 1) : 0;
+    rPun.style.width = (p * 100) + "%";
+    rKvoci.style.left = (p * 100) + "%";
+    rVreme.textContent = fmtVreme(fr.time);
+  }
+
+  function play(){
+    if (playing || okviri.length < 2) return;
+    playing = true;
+    rPlay.textContent = "⏸";
+    tajmer = setInterval(function(){
+      prikaziOkvir((pozicija + 1) % okviri.length);
+    }, 650);
+  }
+  function pauziraj(){
+    playing = false;
+    rPlay.textContent = "▶";
+    if (tajmer){ clearInterval(tajmer); tajmer = null; }
+  }
+
+  function trakaKlik(e){
+    if (!okviri.length) return;
+    var rect = rTraka.getBoundingClientRect();
+    var x = (e.clientX - rect.left) / rect.width;
+    if (x < 0) x = 0; if (x > 1) x = 1;
+    var idx = Math.round(x * (okviri.length - 1));
+    pauziraj();
+    prikaziOkvir(idx);
+  }
+
+  function init(){
+    if (mapa) return;
+    if (typeof L === "undefined"){
+      rMapa.innerHTML = '<div class="radar-greska">Mapa nije dostupna — proveri konekciju.</div>';
+      return;
+    }
+    mapa = L.map("radar-mapa", {
+      center: [LOK.lat, LOK.lon],
+      zoom: 7,
+      zoomControl: true,
+      attributionControl: true
+    });
+    // Esri Dark Gray Canvas (besplatan, bez API ključa — CARTO od 2025. zahteva ključ)
+    L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
+      attribution: 'Tiles &copy; Esri · &copy; OpenStreetMap · &copy; RainViewer',
+      maxZoom: 12,
+      zIndex: 100
+    }).addTo(mapa);
+    // Esri Dark Gray Reference — gradski labeli na transparentnoj pozadini
+    L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}", {
+      maxZoom: 12,
+      zIndex: 110,
+      opacity: 0.9
+    }).addTo(mapa);
+    L.circleMarker([LOK.lat, LOK.lon], {
+      radius: 5,
+      color: "#d4af37",
+      weight: 2,
+      fillColor: "#d4af37",
+      fillOpacity: 0.45
+    }).addTo(mapa);
+  }
+
+  function ucitajRadar(){
+    rGrad.textContent = LOK.ime;
+    rVreme.textContent = "Učitavam…";
+    init();
+    if (!mapa) return;
+    if (sloj){ mapa.removeLayer(sloj); sloj = null; }
+    okviri = [];
+    rPun.style.width = "0%";
+    rKvoci.style.left = "0%";
+    pauziraj();
+    setTimeout(function(){ mapa.invalidateSize(); }, 60);
+    fetch("https://api.rainviewer.com/public/weather-maps.json")
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        host = d.host;
+        okviri = (d.radar && d.radar.past) ? d.radar.past : [];
+        if (!okviri.length){
+          rVreme.textContent = "—";
+          rMapa.innerHTML = '<div class="radar-greska">Trenutno nema radarskih podataka. Pokušaj kasnije.</div>';
+          return;
+        }
+        prikaziOkvir(okviri.length - 1); // najnoviji frejm
+        play(); // automatski pokreni animaciju
+      })
+      .catch(function(){
+        rVreme.textContent = "—";
+        rMapa.innerHTML = '<div class="radar-greska">Ne mogu da dohvatim radar — proveri internet.</div>';
+      });
+  }
+
+  function otvori(){ rz.classList.add("otvoren"); ucitajRadar(); }
+  function zatvori(){ pauziraj(); rz.classList.remove("otvoren"); }
+
+  var dugme = document.getElementById("lok-radar");
+  if (dugme) dugme.addEventListener("click", otvori);
+  rZatvori.addEventListener("click", zatvori);
+  rz.addEventListener("click", function(e){ if (e.target === rz) zatvori(); });
+  rPlay.addEventListener("click", function(){ if (playing) pauziraj(); else play(); });
+  rTraka.addEventListener("click", trakaKlik);
+});
+</script>
+<div class="mesec-zum" id="mesec-zum" role="dialog" aria-label="Krupan prikaz Meseca">
+  <span class="mesec-zatvori" id="mesec-zatvori">&times;</span>
+  <div class="mesec-zum-unutra">
+    <div id="mesec-zum-sadrzaj"></div>
+  </div>
+</div>
+<div class="radar-zum" id="radar-zum" role="dialog" aria-label="Radar — kretanje oblaka i padavina">
+  <div class="radar-glava">
+    <h3>RADAR <b id="radar-grad">—</b></h3>
+    <button class="radar-zatvori" id="radar-zatvori" type="button" aria-label="Zatvori radar">&times;</button>
+  </div>
+  <div id="radar-mapa"></div>
+  <div class="radar-dno">
+    <button id="radar-play" type="button" aria-label="Pokreni ili pauziraj animaciju">▶</button>
+    <div id="radar-traka" role="slider" aria-label="Vremenska traka radara">
+      <div class="pun"></div>
+      <div class="kvoci"></div>
+    </div>
+    <span id="radar-vreme">—</span>
+  </div>
+</div>
+<div class="galerija" id="galerija" role="dialog" aria-label="Galerija lavova">
+  <button class="galerija-zatvori" id="galerija-zatvori" type="button" aria-label="Zatvori galeriju">&times;</button>
+  <div class="galerija-unutra">
+    <h3>Lavovi</h3>
+    <div class="galerija-lepeza" id="galerija-lepeza"></div>
+    <div class="galerija-krupno" id="galerija-krupno">
+      <img id="galerija-krupno-img" src="" alt="">
+      <div class="potpis" id="galerija-krupno-potpis"></div>
+      <div class="hint">tap bilo gde za nazad</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
