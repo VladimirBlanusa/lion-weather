@@ -1449,28 +1449,16 @@ var OBL_PALETA = {
 };
 
 var OBL_GEN = 0;     // generacija — kad se scena menja, stari loop stane
-var OBL_RAF = null;  // requestAnimationFrame ID
 
 function oblaciCanvas(vrsta, fazaDana) {
   OBL_GEN++;
-  var gen = OBL_GEN;
 
-  var sc = document.getElementById("scena");
-  if (!sc) return;
+  // ako nema oblaka — ne crtaj (OBL_GEN++ već zaustavio stari loop)
+  if (vrsta !== "kisa" && vrsta !== "oluja" && vrsta !== "sneg" && vrsta !== "oblacno" && vrsta !== "magla") return;
 
-  var stari = sc.querySelector("#obl-canvas");
-  if (stari) stari.remove();
-
-  // ako nema oblaka — ne crtaj
-  if (vrsta !== "kisa" && vrsta !== "oluja" && vrsta !== "sneg" && vrsta !== "oblacno" && vrsta !== "magla") {
-    if (OBL_RAF) { cancelAnimationFrame(OBL_RAF); OBL_RAF = null; }
-    return;
-  }
-
-  var cv = document.createElement("canvas");
-  cv.id = "obl-canvas";
-  sc.insertBefore(cv, sc.firstChild);
-  var ctx = cv.getContext("2d");
+  var e = canvasEngine("obl-canvas", OBL_GEN, function() { return OBL_GEN; }, true); // insertFirst — iza oblaka
+  if (!e) return;
+  var W = e.getW(), H = e.getH();
 
   // odredi paletu — nijanse sive + tople za sumrak/jutro
   var pKey = vrsta;
@@ -1526,35 +1514,10 @@ function oblaciCanvas(vrsta, fazaDana) {
     return off;
   };
 
-  // ——— resize ———
-  var W = 0, H = 0, DPR = 1;
-  function resize() {
-    var r = sc.getBoundingClientRect();
-    W = r.width; H = r.height;
-    DPR = Math.min(window.devicePixelRatio || 1, (window.matchMedia && window.matchMedia("(pointer: fine)").matches) ? 1 : 1.5);
-    cv.width = Math.max(1, Math.floor(W * DPR));
-    cv.height = Math.max(1, Math.floor(H * DPR));
-    cv.style.width = W + "px";
-    cv.style.height = H + "px";
-  }
-  resize();
-
   // ——— animacijski loop — drawImage teksture sa kontinualnim drift (mirror) ———
-  var t = 0;
   var driftOffset = 0;
   var brzinaDrift = 0.3;  // px po frejmu — podesivo (šav kasni ~60s)
-  var frameSkip = 0, tik = 0;
-  function loop() {
-    if (gen !== OBL_GEN) return;
-    if (!SCENA_VIDANA && !SCENA_SVEZA) { if (++tik >= 48) { tik = 0; SCENA_SVEZA = true; } requestAnimationFrame(loop); return; }
-    frameSkip++;
-    if (frameSkip % FRAME_KORAK) { requestAnimationFrame(loop); return; }
-    t += 1;
-
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.clearRect(0, 0, cv.width, cv.height);
-    ctx.scale(DPR, DPR);
-
+  e.startLoop(function(ctx, W, H, DPR) {
     if (oblImg.complete && oblImg.naturalWidth > 0) {
       // kreiraj faded teksturu (jednom, keširano) — ublažava mirror šav
       if (!OBL_FADE_CACHE[pKey]) OBL_FADE_CACHE[pKey] = napraviFadedTex(oblImg);
@@ -1571,17 +1534,6 @@ function oblaciCanvas(vrsta, fazaDana) {
       ctx.drawImage(fadeTex, -driftOffset + 2 * drawW, dy, -drawW, drawH);
       ctx.globalAlpha = 1;
     }
-
-    SCENA_SVEZA = false;
-    OBL_RAF = requestAnimationFrame(loop);
-  }
-  loop();
-
-  var toResize = null;
-  window.addEventListener("resize", function() {
-    if (gen !== OBL_GEN) return;
-    clearTimeout(toResize);
-    toResize = setTimeout(resize, 200);
   });
 }
 
