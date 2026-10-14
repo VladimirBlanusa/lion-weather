@@ -2109,44 +2109,61 @@ function sunceCanvas(vrsta, fazaDana) {
     ctx.fillStyle = sjajGrd;
     ctx.fillRect(-1, -1, 2, 2);
     ctx.restore();
-    // organički zraci — 14 zrakova, nejednake dužine i širine, kušasti (tapered)
+    // organički zraci — 14 glavnih + 14 kraćih između (popunjava praznine)
     var ugao = t * 0.018;
     var brojZraka = 14;
-    // oreol zraci (široki, bledi — mekan sjaj oko svakog kraka)
-    ctx.save();
-    ctx.translate(suncex, suncey);
-    ctx.rotate(ugao);
-    for (var i = 0; i < brojZraka; i++) {
-      var fz = i * 0.7; // svaki zrak drugačija faza
-      var vd = 1 + 0.35 * Math.sin(t * 0.5 + fz); // dužina varira
-      var sw = 14 + 5 * Math.sin(t * 0.3 + fz); // širina varira
-      ctx.rotate((Math.PI * 2) / brojZraka);
-      ctx.fillStyle = "rgba(" + bojaZrak + "," + (0.10 * puls * vd).toFixed(3) + ")";
-      ctx.beginPath();
-      ctx.moveTo(R * 1.05, -sw);
-      ctx.lineTo(R * 3.2 * vd, -sw * 0.2);
-      ctx.lineTo(R * 3.5 * vd, 0);
-      ctx.lineTo(R * 3.2 * vd, sw * 0.2);
-      ctx.lineTo(R * 1.05, sw);
-      ctx.closePath();
-      ctx.fill();
-    }
-    ctx.restore();
-    // sjajna jezgra zrakova (uži, sjajniji)
+    // oreol zraci — glavni (široki, bledi)
     ctx.save();
     ctx.translate(suncex, suncey);
     ctx.rotate(ugao);
     for (var i = 0; i < brojZraka; i++) {
       var fz = i * 0.7;
-      var vd = 1 + 0.35 * Math.sin(t * 0.5 + fz);
+      var vd = 1 + 0.15 * Math.sin(t * 0.5 + fz); // blaga varijacija
+      var sw = 13 + 4 * Math.sin(t * 0.3 + fz);
+      ctx.rotate((Math.PI * 2) / brojZraka);
+      ctx.fillStyle = "rgba(" + bojaZrak + "," + (0.10 * puls * vd).toFixed(3) + ")";
+      ctx.beginPath();
+      ctx.moveTo(R * 1.05, -sw);
+      ctx.lineTo(R * 3.0 * vd, -sw * 0.2);
+      ctx.lineTo(R * 3.3 * vd, 0);
+      ctx.lineTo(R * 3.0 * vd, sw * 0.2);
+      ctx.lineTo(R * 1.05, sw);
+      ctx.closePath();
+      ctx.fill();
+    }
+    // sekundarni kraći zraci između glavnih (popunjava praznine)
+    ctx.rotate(Math.PI / brojZraka); // pomeraj na pola razmaka
+    for (var i = 0; i < brojZraka; i++) {
+      var fz = i * 0.9 + 1.5; // drugačija faza od glavnih
+      var vd = 1 + 0.15 * Math.sin(t * 0.5 + fz);
+      var sw = 8 + 3 * Math.sin(t * 0.3 + fz); // uži
+      ctx.rotate((Math.PI * 2) / brojZraka);
+      ctx.fillStyle = "rgba(" + bojaZrak + "," + (0.07 * puls * vd).toFixed(3) + ")";
+      ctx.beginPath();
+      ctx.moveTo(R * 1.05, -sw);
+      ctx.lineTo(R * 2.0 * vd, -sw * 0.2); // kraći
+      ctx.lineTo(R * 2.2 * vd, 0);
+      ctx.lineTo(R * 2.0 * vd, sw * 0.2);
+      ctx.lineTo(R * 1.05, sw);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.restore();
+    // sjajna jezgra zrakova (uži, sjajniji) — samo glavni, bez sekundarnih
+    ctx.save();
+    ctx.translate(suncex, suncey);
+    ctx.rotate(ugao);
+    for (var i = 0; i < brojZraka; i++) {
+      var fz = i * 0.7;
+      var vd = 1 + 0.15 * Math.sin(t * 0.5 + fz);
       var sw = 5 + 2 * Math.sin(t * 0.3 + fz);
       ctx.rotate((Math.PI * 2) / brojZraka);
       ctx.fillStyle = "rgba(" + bojaZrak + "," + (0.55 * puls * vd).toFixed(3) + ")";
       ctx.beginPath();
       ctx.moveTo(R * 1.1, -sw);
-      ctx.lineTo(R * 2.9 * vd, -sw * 0.15);
-      ctx.lineTo(R * 3.1 * vd, 0);
-      ctx.lineTo(R * 2.9 * vd, sw * 0.15);
+      ctx.lineTo(R * 2.8 * vd, -sw * 0.15);
+      ctx.lineTo(R * 3.0 * vd, 0);
+      ctx.lineTo(R * 2.8 * vd, sw * 0.15);
       ctx.lineTo(R * 1.1, sw);
       ctx.closePath();
       ctx.fill();
