@@ -1481,7 +1481,7 @@ function oblaciCanvas(vrsta, fazaDana) {
   // ——— animacijski loop — drawImage teksture sa kontinualnim drift ———
   var t = 0;
   var driftOffset = 0;
-  var brzinaDrift = 1.2;  // px po frejmu — podesivo
+  var brzinaDrift = 0.5;  // px po frejmu — podesivo
   var frameSkip = 0, tik = 0;
   function loop() {
     if (gen !== OBL_GEN) return;
@@ -1501,11 +1501,11 @@ function oblaciCanvas(vrsta, fazaDana) {
       var drawW = imgW * scale;
       var drawH = imgH * scale;
       var dy = (H - drawH) / 2;
-      // kontinualni drift ulevo — dve kopije za seamless wrap
+      // kontinualni drift ulevo — dve kopije, druga ogledalo (seamless spoj bez šava)
       driftOffset = (driftOffset + brzinaDrift) % drawW;
       ctx.globalAlpha = alfaOsnovna;
       ctx.drawImage(oblImg, -driftOffset, dy, drawW, drawH);
-      ctx.drawImage(oblImg, -driftOffset + drawW, dy, drawW, drawH);
+      ctx.drawImage(oblImg, -driftOffset + 2 * drawW, dy, -drawW, drawH);
       ctx.globalAlpha = 1;
     }
 
