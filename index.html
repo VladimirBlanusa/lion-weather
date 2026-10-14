@@ -1374,6 +1374,58 @@ function mesecKrupniSVG() {
 // (stari SVG oblakSVG() + KAP_SVG uklonjeni — zamenjeni canvas engine-om sa teksturama oblaka)
 
 // ═══════════════════════════════════════════════════════════
+// CANVAS ENGINE HELPER — zajednički boilerplate za sve canvas engine-e
+// (canvas setup, resize, RAF loop sa SCENA_VIDANA/frameSkip, resize listener)
+// Svaki engine zadržava samo svoj unikatni init + draw kod.
+// ═══════════════════════════════════════════════════════════
+function canvasEngine(canvasId, gen, getGenCount, insertFirst, onResize) {
+  var sc = document.getElementById("scena");
+  if (!sc) return null;
+  var stari = sc.querySelector("#" + canvasId);
+  if (stari) stari.remove();
+  var cv = document.createElement("canvas");
+  cv.id = canvasId;
+  if (insertFirst) sc.insertBefore(cv, sc.firstChild);
+  else sc.appendChild(cv);
+  var ctx = cv.getContext("2d");
+  var W = 0, H = 0, DPR = 1;
+  function resize() {
+    var r = sc.getBoundingClientRect();
+    W = r.width; H = r.height;
+    DPR = Math.min(window.devicePixelRatio || 1, (window.matchMedia && window.matchMedia("(pointer: fine)").matches) ? 1 : 1.5);
+    cv.width = Math.max(1, Math.floor(W * DPR));
+    cv.height = Math.max(1, Math.floor(H * DPR));
+    cv.style.width = W + "px";
+    cv.style.height = H + "px";
+    if (onResize) onResize();
+  }
+  resize();
+  function startLoop(drawFn) {
+    var frameSkip = 0, tik = 0;
+    function loop() {
+      if (gen !== getGenCount()) return;
+      if (!SCENA_VIDANA && !SCENA_SVEZA) { if (++tik >= 48) { tik = 0; SCENA_SVEZA = true; } requestAnimationFrame(loop); return; }
+      frameSkip++;
+      if (frameSkip % FRAME_KORAK) { requestAnimationFrame(loop); return; }
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, cv.width, cv.height);
+      ctx.scale(DPR, DPR);
+      drawFn(ctx, W, H, DPR);
+      SCENA_SVEZA = false;
+      requestAnimationFrame(loop);
+    }
+    loop();
+    var toR = null;
+    window.addEventListener("resize", function() {
+      if (gen !== getGenCount()) return;
+      clearTimeout(toR);
+      toR = setTimeout(resize, 200);
+    });
+  }
+  return { cv: cv, ctx: ctx, getW: function() { return W; }, getH: function() { return H; }, getDPR: function() { return DPR; }, resize: resize, startLoop: startLoop };
+}
+
+// ═══════════════════════════════════════════════════════════
 // CANVAS OBLACI — volumenski, slojeviti, sa parallax dubinom
 // Referenca: Vladove slike stvarnih oblaka
 //   — hladni plavo-sivi kišni oblaci (#c9d4e1, #9aa9bd)
@@ -1535,31 +1587,13 @@ function oblaciCanvas(vrsta, fazaDana) {
 var KISA_GEN = 0;
 function kisaCanvas(vrsta, fazaDana) {
   KISA_GEN++;
-  var gen = KISA_GEN;
-  var sc = document.getElementById("scena");
-  if (!sc) return;
-  var stari = sc.querySelector("#kisa-canvas");
-  if (stari) stari.remove();
-  var cv = document.createElement("canvas");
-  cv.id = "kisa-canvas";
-  sc.appendChild(cv);
-  var ctx = cv.getContext("2d");
-  var W = 0, H = 0, DPR = 1;
-  function resize() {
-    var r = sc.getBoundingClientRect();
-    W = r.width; H = r.height;
-    DPR = Math.min(window.devicePixelRatio || 1, (window.matchMedia && window.matchMedia("(pointer: fine)").matches) ? 1 : 1.5); // komp DPR 1, telefon 1.5
-    cv.width = Math.max(1, Math.floor(W * DPR));
-    cv.height = Math.max(1, Math.floor(H * DPR));
-    cv.style.width = W + "px";
-    cv.style.height = H + "px";
-  }
-  resize();
+  var e = canvasEngine("kisa-canvas", KISA_GEN, function() { return KISA_GEN; }, false);
+  if (!e) return;
+  var W = e.getW(), H = e.getH();
   var vetarUgao = vrsta === "oluja" ? 0.35 : (vrsta === "maglovita" ? 0.12 : 0.18);
   var brzinaBaza = vrsta === "oluja" ? 14 : (vrsta === "maglovita" ? 7 : 9);
   var brojKapi = vrsta === "oluja" ? 180 : (vrsta === "maglovita" ? 160 : 120);
   var boja = vrsta === "oluja" ? "180,205,245" : (vrsta === "maglovita" ? "230,245,255" : "195,220,250");
-  // faze dana menjaju nijansu kiše
   if (fazaDana === "noc") boja = "120,140,175";
   else if (fazaDana === "sumrak") boja = "230,180,140";
   else if (fazaDana === "jutro") boja = "240,200,175";
@@ -1574,15 +1608,7 @@ function kisaCanvas(vrsta, fazaDana) {
       deb: vrsta === "maglovita" ? (1.3 + dubina * 1.3) : (0.8 + dubina * 1.2)
     });
   }
-  var frameSkip = 0, tik = 0; // frame cap 30fps
-  function loop() {
-    if (gen !== KISA_GEN) return;
-    if (!SCENA_VIDANA && !SCENA_SVEZA) { if (++tik >= 48) { tik = 0; SCENA_SVEZA = true; } requestAnimationFrame(loop); return; }
-    frameSkip++;
-    if (frameSkip % FRAME_KORAK) { requestAnimationFrame(loop); return; }
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.clearRect(0, 0, cv.width, cv.height);
-    ctx.scale(DPR, DPR);
+  e.startLoop(function(ctx, W, H, DPR) {
     var dx = Math.sin(vetarUgao), dy = Math.cos(vetarUgao);
     for (var i = 0; i < kapi.length; i++) {
       var k = kapi[i];
@@ -1597,15 +1623,6 @@ function kisaCanvas(vrsta, fazaDana) {
       ctx.lineTo(k.x + dx * k.duz, k.y + dy * k.duz);
       ctx.stroke();
     }
-    SCENA_SVEZA = false;
-    requestAnimationFrame(loop);
-  }
-  loop();
-  var toR = null;
-  window.addEventListener("resize", function() {
-    if (gen !== KISA_GEN) return;
-    clearTimeout(toR);
-    toR = setTimeout(resize, 200);
   });
 }
 
