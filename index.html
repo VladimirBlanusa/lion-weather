@@ -944,7 +944,7 @@
       <span id="temp">–</span>
       <span class="temp-unit">°C</span>
     </div>
-    <div id="desc">Provera vremena…</div>
+    <div id="desc" data-i18n="proveraVremena">Provera vremena…</div>
     <div id="upozorenje" class="upozorenje" style="display:none"></div>
     <div id="mood"></div>
     <div id="loader" aria-hidden="true"></div>
@@ -1235,7 +1235,19 @@ var I18N = {
     lokacija: "Lokacija — bilo gde",
     trazi: "Traži",
     traziPlaceholder: "Traži grad (Beograd, Kotor, New York…)",
-    poDanima: "Po danima — 7 dana"
+    poDanima: "Po danima — 7 dana",
+    nepoznato: "Nepoznato",
+    lavZbunjen: "Lav je zbunjen 🤔",
+    sunceVruce: "Vreme je za sunčanje 😎",
+    suncePrijatno: "Sunčano i prijatno — dan za šetnju 😌",
+    vedroZima: "Vedro, ali zima ❄️",
+    greska: "Greška",
+    pokretPonovo: "Pokušaj ponovo",
+    lavPamti: "Lav pamti prognozu · osveženo u ",
+    nemaRadar: "Trenutno nema radarskih podataka. Pokušaj kasnije.",
+    mapaNedostupna: "Mapa nije dostupna — proveri konekciju.",
+    neMoguRadar: "Ne mogu da dohvatim radar — proveri internet.",
+    proveraVremena: "Provera vremena…"
   },
   en: {
     dani: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
@@ -1269,7 +1281,19 @@ var I18N = {
     lokacija: "Location — anywhere",
     trazi: "Search",
     traziPlaceholder: "Search city (Beograd, Kotor, New York…)",
-    poDanima: "Daily — 7 days"
+    poDanima: "Daily — 7 days",
+    nepoznato: "Unknown",
+    lavZbunjen: "The Lion is confused 🤔",
+    sunceVruce: "Time to soak up the sun 😎",
+    suncePrijatno: "Sunny and pleasant — a day for a walk 😌",
+    vedroZima: "Clear but cold ❄️",
+    greska: "Error",
+    pokretPonovo: "Try again",
+    lavPamti: "Lion keeps the forecast · updated at ",
+    nemaRadar: "No radar data right now. Try later.",
+    mapaNedostupna: "Map unavailable — check connection.",
+    neMoguRadar: "Can't fetch radar — check internet.",
+    proveraVremena: "Checking weather…"
   }
 };
 function t(key) {
@@ -1411,7 +1435,7 @@ function fazaMeseca(datum) {
   return p;
 }
 function imeMeseca(p) {
-  var IMENA = ["Mlad mesec","Mladi srp","Prva četvrt","Rastući ogrbljeni","Pun mesec","Opadajući ogrbljeni","Poslednja četvrt","Stari srp"];
+  var IMENA = JEZIK === 'sr' ? ["Mlad mesec","Mladi srp","Prva četvrt","Rastući ogrbljeni","Pun mesec","Opadajući ogrbljeni","Poslednja četvrt","Stari srp"] : ["New moon","Waxing crescent","First quarter","Waxing gibbous","Full moon","Waning gibbous","Last quarter","Waning crescent"];
   return IMENA[Math.round(p * 8) % 8];
 }
 function moonPath(R, p) {
@@ -2542,15 +2566,15 @@ function obradi(tekst) {
   if (PROBA_KOD !== undefined) kod = PROBA_KOD;
   var v = Math.round(tekst.current.wind_speed_10m);
   var k = (tekst.current.precipitation || 0);
-  var info = WCODE[kod] || ["Nepoznato", "oblacno", "Lav je zbunjen 🤔"];
+  var info = WCODE[kod] || [t('nepoznato'), "oblacno", t('lavZbunjen')];
 
   document.getElementById("temp").textContent = t;
   document.getElementById("desc").textContent = info[0];
   var poruka = info[2];
   if (kod === 0) {
-    if (t >= 25) poruka = "Vreme je za sunčanje 😎";
-    else if (t >= 12) poruka = "Sunčano i prijatno — dan za šetnju 😌";
-    else poruka = "Vedro, ali zima ❄️";
+    if (t >= 25) poruka = t('sunceVruce');
+    else if (t >= 12) poruka = t('suncePrijatno');
+    else poruka = t('vedroZima');
   }
   document.getElementById("mood").textContent = poruka;
   document.getElementById("wind").textContent = v;
@@ -2690,7 +2714,7 @@ function uporediModel(model, prefix) {
 function greska(poruka) {
   var el = document.getElementById("err");
   el.style.display = "block";
-  el.innerHTML = "Greška: " + poruka + ". <button type='button' class='retry-btn' id='retry-btn'>Pokušaj ponovo</button>";
+  el.innerHTML = t('greska') + ": " + poruka + ". <button type='button' class='retry-btn' id='retry-btn'>" + t('pokretPonovo') + "</button>";
   document.getElementById("msg").style.display = "none";
   document.getElementById("loader").style.display = "none";
   var rb = document.getElementById("retry-btn");
@@ -2715,7 +2739,7 @@ function prikaziKes(razlog) {
     var d = new Date(kes.vreme), h = d.getHours(), m = d.getMinutes();
     var el = document.getElementById("msg");
     el.style.display = "block";
-    el.innerHTML = "Lav pamti prognozu · osveženo u " + (h<10?"0":"") + h + ":" + (m<10?"0":"") + m + " <button type='button' class='retry-btn' id='retry-btn'>Pokušaj ponovo</button>";
+    el.innerHTML = t('lavPamti') + (h<10?"0":"") + h + ":" + (m<10?"0":"") + m + " <button type='button' class='retry-btn' id='retry-btn'>" + t('pokretPonovo') + "</button>";
     document.getElementById("offline-bedz").classList.add("prikazi");
     var rb = document.getElementById("retry-btn");
     if (rb) rb.onclick = ucitajPrognozu;
@@ -2929,7 +2953,7 @@ window.addEventListener("DOMContentLoaded", function(){
   function init(){
     if (mapa) return;
     if (typeof L === "undefined"){
-      rMapa.innerHTML = '<div class="radar-greska">Mapa nije dostupna — proveri konekciju.</div>';
+      rMapa.innerHTML = '<div class="radar-greska">' + t('mapaNedostupna') + '</div>';
       return;
     }
     mapa = L.map("radar-mapa", {
@@ -2977,7 +3001,7 @@ window.addEventListener("DOMContentLoaded", function(){
         okviri = (d.radar && d.radar.past) ? d.radar.past : [];
         if (!okviri.length){
           rVreme.textContent = "—";
-          rMapa.innerHTML = '<div class="radar-greska">Trenutno nema radarskih podataka. Pokušaj kasnije.</div>';
+          rMapa.innerHTML = '<div class="radar-greska">' + t('nemaRadar') + '</div>';
           return;
         }
         prikaziOkvir(okviri.length - 1); // najnoviji frejm
@@ -2985,7 +3009,7 @@ window.addEventListener("DOMContentLoaded", function(){
       })
       .catch(function(){
         rVreme.textContent = "—";
-        rMapa.innerHTML = '<div class="radar-greska">Ne mogu da dohvatim radar — proveri internet.</div>';
+        rMapa.innerHTML = '<div class="radar-greska">' + t('neMoguRadar') + '</div>';
       });
   }
 
