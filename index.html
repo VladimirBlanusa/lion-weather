@@ -1478,6 +1478,34 @@ function oblaciCanvas(vrsta, fazaDana) {
   }
   resize();
 
+  // ——— pre-render teksture sa fade ivicama (seamless crossfade) ———
+  var oblTex = null, oblTexReady = false;
+  function buildTex() {
+    if (oblTexReady) return;
+    if (!oblImg.complete || oblImg.naturalWidth === 0) return;
+    var imgW = oblImg.naturalWidth, imgH = oblImg.naturalHeight;
+    var scale = Math.max(W / imgW, H / imgH);
+    var tw = Math.ceil(imgW * scale), th = Math.ceil(imgH * scale);
+    var fadeW = Math.min(80, tw * 0.12);
+    oblTex = document.createElement("canvas");
+    oblTex.width = tw; oblTex.height = th;
+    var tctx = oblTex.getContext("2d");
+    tctx.drawImage(oblImg, 0, 0, tw, th);
+    tctx.globalCompositeOperation = "destination-out";
+    var rg = tctx.createLinearGradient(tw - fadeW, 0, tw, 0);
+    rg.addColorStop(0, "rgba(0,0,0,0)");
+    rg.addColorStop(1, "rgba(0,0,0,1)");
+    tctx.fillStyle = rg;
+    tctx.fillRect(tw - fadeW, 0, fadeW, th);
+    var lg = tctx.createLinearGradient(0, 0, fadeW, 0);
+    lg.addColorStop(0, "rgba(0,0,0,1)");
+    lg.addColorStop(1, "rgba(0,0,0,0)");
+    tctx.fillStyle = lg;
+    tctx.fillRect(0, 0, fadeW, th);
+    tctx.globalCompositeOperation = "source-over";
+    oblTexReady = true;
+  }
+
   // ——— animacijski loop — drawImage teksture sa kontinualnim drift ———
   var t = 0;
   var driftOffset = 0;
@@ -1494,18 +1522,16 @@ function oblaciCanvas(vrsta, fazaDana) {
     ctx.clearRect(0, 0, cv.width, cv.height);
     ctx.scale(DPR, DPR);
 
-    if (oblImg.complete && oblImg.naturalWidth > 0) {
-      // cover fit
-      var imgW = oblImg.naturalWidth, imgH = oblImg.naturalHeight;
-      var scale = Math.max(W / imgW, H / imgH);
-      var drawW = imgW * scale;
-      var drawH = imgH * scale;
-      var dy = (H - drawH) / 2;
-      // kontinualni drift ulevo — dve kopije, druga ogledalo (seamless spoj bez šava)
-      driftOffset = (driftOffset + brzinaDrift) % drawW;
+    buildTex();
+    if (oblTex) {
+      var dy = (H - oblTex.height) / 2;
+      // kontinualni drift ulevo — dve kopije sa fade ivicama + lighter (seamless crossfade)
+      driftOffset = (driftOffset + brzinaDrift) % oblTex.width;
       ctx.globalAlpha = alfaOsnovna;
-      ctx.drawImage(oblImg, -driftOffset, dy, drawW, drawH);
-      ctx.drawImage(oblImg, -driftOffset + 2 * drawW, dy, -drawW, drawH);
+      ctx.drawImage(oblTex, -driftOffset, dy, oblTex.width, oblTex.height);
+      ctx.globalCompositeOperation = "lighter";
+      ctx.drawImage(oblTex, -driftOffset + oblTex.width, dy, oblTex.width, oblTex.height);
+      ctx.globalCompositeOperation = "source-over";
       ctx.globalAlpha = 1;
     }
 
@@ -1518,7 +1544,7 @@ function oblaciCanvas(vrsta, fazaDana) {
   window.addEventListener("resize", function() {
     if (gen !== OBL_GEN) return;
     clearTimeout(toResize);
-    toResize = setTimeout(resize, 200);
+    toResize = setTimeout(function() { resize(); oblTexReady = false; }, 200);
   });
 }
 
