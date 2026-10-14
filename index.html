@@ -1364,33 +1364,7 @@ function mesecKrupniSVG() {
 }
 
 // Scena u kvadratu oko lava — cela pozornica se menja sa vremenom
-// Vlad 3.0: organska oblak-silueta — pufnaste mase, talasasta donja ivica (referenca: Vladovi meki kumulusi)
-var OB_SED = [3, 7, 11, 17, 23, 29, 41]; // v3.53: random seed-ovi za raznolike siluete
-var OB_UID = 0;
-// v3.53: višeslojni oblak — dve preklopljene mase, jači gradijent (tamni vrh → svetao donji rub), feTurbulence tekstura, radialni highlight (svetlo odozdo)
-function oblakSVG(seed){
-  OB_UID++; var u="ob"+OB_UID; var sd = (seed===undefined) ? OB_SED[OB_UID % OB_SED.length] : seed;
-  // dve pufnaste mase preklopljene: glavna (levo) + sporedna (desno, manja, više)
-  return '<svg viewBox="0 0 220 130" preserveAspectRatio="none"><defs>' +
-    '<linearGradient id="'+u+'g" x1="0" y1="0" x2="0" y2="1">' +
-    '<stop offset="0%" style="stop-color:var(--ob-z)"/>' +        // tamni vrh (senka)
-    '<stop offset="35%" style="stop-color:var(--ob-g)"/>' +        // srednji ton
-    '<stop offset="75%" style="stop-color:var(--ob-h)"/>' +        // svetao rub
-    '<stop offset="100%" style="stop-color:var(--ob-h)"/></linearGradient>' +
-    '<radialGradient id="'+u+'l" cx="38%" cy="78%" r="42%">' +      // svetlo odozdo (referenca: atmospheric illumination)
-    '<stop offset="0%" style="stop-color:var(--ob-h);stop-opacity:.55"/>' +
-    '<stop offset="100%" style="stop-color:var(--ob-h);stop-opacity:0"/></radialGradient>' +
-    '<filter id="'+u+'f" x="-14%" y="-14%" width="128%" height="130%">' +
-    '<feTurbulence type="fractalNoise" baseFrequency="0.011 0.018" numOctaves="3" seed="'+sd+'" result="noise"/>' +
-    '<feDisplacementMap in="SourceGraphic" in2="noise" scale="6" xChannelSelector="R" yChannelSelector="G" result="shape"/>' +
-    '<feGaussianBlur stdDeviation="0.5"/></filter></defs>' +
-    '<g filter="url(#'+u+'f)">' +
-    '<path fill="url(#'+u+'g)" d="M28,102C16,100 8,88 14,72C6,56 20,40 38,44C42,22 68,12 84,26C94,8 124,10 134,26C146,12 176,18 176,40C196,44 204,68 188,80C200,88 194,102 178,100C160,110 150,100 134,104C118,114 104,102 88,106C72,116 58,104 44,106C36,108 30,106 28,102Z"/>' +
-    '<path fill="url(#'+u+'g)" d="M96,112C84,112 76,100 82,86C76,72 90,58 108,62C112,44 138,38 150,52C160,40 186,46 184,66C200,70 204,92 188,100C198,108 188,118 174,114C158,122 148,112 132,114C116,122 102,112 96,112Z" opacity=".88"/>' +
-    '<path fill="url(#'+u+'l)" d="M40,70C38,52 60,42 78,48C66,54 54,62 48,76C46,75 42,72 40,70Z" opacity=".7"/>' +
-    '</g></svg>';
-}
-var KAP_SVG = '<svg viewBox="0 0 8 16" preserveAspectRatio="none"><path d="M4,0.5 C4,3 7,8 7,12 A3.5,3.5 0 1,1 1,12 C1,8 4,3 4,0.5 Z" fill="rgba(205,226,248,.92)"/></svg>';
+// (stari SVG oblakSVG() + KAP_SVG uklonjeni — zamenjeni canvas engine-om sa teksturama oblaka)
 
 // ═══════════════════════════════════════════════════════════
 // CANVAS OBLACI — volumenski, slojeviti, sa parallax dubinom
@@ -1448,14 +1422,14 @@ function oblaciCanvas(vrsta, fazaDana) {
 
   // ——— teksture oblaka — 8 generisanih slika po varijanti (pKey → URL) ———
   var OBL_TEX = {
-    oblacno: "https://oss-macaron-ai.macaron.im/image/text_to_image/6acf31ce7a54714631726adb.webp",
-    kisa:    "https://oss-macaron-ai.macaron.im/image/text_to_image/6acf31ce1ea25d2b44709b07.webp",
-    oluja:   "https://oss-macaron-ai.macaron.im/image/text_to_image/6acf31ce1ea25d2b44709b05.webp",
-    sneg:    "https://oss-macaron-ai.macaron.im/image/text_to_image/6acf31cea36ccea6ed3714ce.webp",
-    magla:   "https://oss-macaron-ai.macaron.im/image/text_to_image/6acf31ce7a54714631726add.webp",
-    sumrak:  "https://oss-macaron-ai.macaron.im/image/text_to_image/6acf31ce7a54714631726adf.webp",
-    jutro:   "https://oss-macaron-ai.macaron.im/image/text_to_image/6acf31ce1ea25d2b44709b09.webp",
-    noc:     "https://oss-macaron-ai.macaron.im/image/text_to_image/6acf31ce7a54714631726ae1.webp"
+    oblacno: "https://oss-macaron-ai.macaron.im/image/text_to_image/6acf3d2ea36ccea6ed3721fa.webp",
+    kisa:    "https://oss-macaron-ai.macaron.im/image/text_to_image/6acf3d2e1ea25d2b4470ad56.webp",
+    oluja:   "https://oss-macaron-ai.macaron.im/image/text_to_image/6acf3d2e7a54714631727dc7.webp",
+    sneg:    "https://oss-macaron-ai.macaron.im/image/text_to_image/6acf3d2ea36ccea6ed3721fe.webp",
+    magla:   "https://oss-macaron-ai.macaron.im/image/text_to_image/6acf3d2ea36ccea6ed3721fc.webp",
+    sumrak:  "https://oss-macaron-ai.macaron.im/image/text_to_image/6acf3d2e1ea25d2b4470ad54.webp",
+    jutro:   "https://oss-macaron-ai.macaron.im/image/text_to_image/6acf3d2e7a54714631727dc3.webp",
+    noc:     "https://oss-macaron-ai.macaron.im/image/text_to_image/6acf3d2e7a54714631727dc5.webp"
   };
   if (!window.OBL_IMG_CACHE) window.OBL_IMG_CACHE = {};
   if (!OBL_IMG_CACHE[pKey]) {
@@ -1478,35 +1452,7 @@ function oblaciCanvas(vrsta, fazaDana) {
   }
   resize();
 
-  // ——— pre-render teksture sa fade ivicama (seamless crossfade) ———
-  var oblTex = null, oblTexReady = false;
-  function buildTex() {
-    if (oblTexReady) return;
-    if (!oblImg.complete || oblImg.naturalWidth === 0) return;
-    var imgW = oblImg.naturalWidth, imgH = oblImg.naturalHeight;
-    var scale = Math.max(W / imgW, H / imgH);
-    var tw = Math.ceil(imgW * scale), th = Math.ceil(imgH * scale);
-    var fadeW = Math.min(80, tw * 0.12);
-    oblTex = document.createElement("canvas");
-    oblTex.width = tw; oblTex.height = th;
-    var tctx = oblTex.getContext("2d");
-    tctx.drawImage(oblImg, 0, 0, tw, th);
-    tctx.globalCompositeOperation = "destination-out";
-    var rg = tctx.createLinearGradient(tw - fadeW, 0, tw, 0);
-    rg.addColorStop(0, "rgba(0,0,0,0)");
-    rg.addColorStop(1, "rgba(0,0,0,1)");
-    tctx.fillStyle = rg;
-    tctx.fillRect(tw - fadeW, 0, fadeW, th);
-    var lg = tctx.createLinearGradient(0, 0, fadeW, 0);
-    lg.addColorStop(0, "rgba(0,0,0,1)");
-    lg.addColorStop(1, "rgba(0,0,0,0)");
-    tctx.fillStyle = lg;
-    tctx.fillRect(0, 0, fadeW, th);
-    tctx.globalCompositeOperation = "source-over";
-    oblTexReady = true;
-  }
-
-  // ——— animacijski loop — drawImage teksture sa kontinualnim drift ———
+  // ——— animacijski loop — drawImage teksture sa kontinualnim drift (mirror) ———
   var t = 0;
   var driftOffset = 0;
   var brzinaDrift = 0.5;  // px po frejmu — podesivo
@@ -1522,16 +1468,17 @@ function oblaciCanvas(vrsta, fazaDana) {
     ctx.clearRect(0, 0, cv.width, cv.height);
     ctx.scale(DPR, DPR);
 
-    buildTex();
-    if (oblTex) {
-      var dy = (H - oblTex.height) / 2;
-      // kontinualni drift ulevo — dve kopije sa fade ivicama + lighter (seamless crossfade)
-      driftOffset = (driftOffset + brzinaDrift) % oblTex.width;
+    if (oblImg.complete && oblImg.naturalWidth > 0) {
+      var imgW = oblImg.naturalWidth, imgH = oblImg.naturalHeight;
+      var scale = Math.max(W / imgW, H / imgH);
+      var drawW = imgW * scale;
+      var drawH = imgH * scale;
+      var dy = (H - drawH) / 2;
+      // kontinualni drift ulevo — dve kopije, druga ogledalo (mirror spoj)
+      driftOffset = (driftOffset + brzinaDrift) % drawW;
       ctx.globalAlpha = alfaOsnovna;
-      ctx.drawImage(oblTex, -driftOffset, dy, oblTex.width, oblTex.height);
-      ctx.globalCompositeOperation = "lighter";
-      ctx.drawImage(oblTex, -driftOffset + oblTex.width, dy, oblTex.width, oblTex.height);
-      ctx.globalCompositeOperation = "source-over";
+      ctx.drawImage(oblImg, -driftOffset, dy, drawW, drawH);
+      ctx.drawImage(oblImg, -driftOffset + 2 * drawW, dy, -drawW, drawH);
       ctx.globalAlpha = 1;
     }
 
@@ -1544,7 +1491,7 @@ function oblaciCanvas(vrsta, fazaDana) {
   window.addEventListener("resize", function() {
     if (gen !== OBL_GEN) return;
     clearTimeout(toResize);
-    toResize = setTimeout(function() { resize(); oblTexReady = false; }, 200);
+    toResize = setTimeout(resize, 200);
   });
 }
 
