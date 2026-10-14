@@ -1455,7 +1455,7 @@ function oblaciCanvas(vrsta, fazaDana) {
   // ——— animacijski loop — drawImage teksture sa kontinualnim drift (mirror) ———
   var t = 0;
   var driftOffset = 0;
-  var brzinaDrift = 0.4;  // px po frejmu — podesivo (smanjeno: šav kasni ~45s umesto ~30s)
+  var brzinaDrift = 0.3;  // px po frejmu — podesivo (šav kasni ~60s)
   var frameSkip = 0, tik = 0;
   function loop() {
     if (gen !== OBL_GEN) return;
