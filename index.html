@@ -1752,26 +1752,9 @@ function snegCanvas(vrsta, fazaDana) {
 var ZVEZDE_GEN = 0;
 function zvezdeCanvas(vrsta, fazaDana) {
   ZVEZDE_GEN++;
-  var gen = ZVEZDE_GEN;
-  var sc = document.getElementById("scena");
-  if (!sc) return;
-  var stari = sc.querySelector("#zvezde-canvas");
-  if (stari) stari.remove();
-  var cv = document.createElement("canvas");
-  cv.id = "zvezde-canvas";
-  sc.appendChild(cv);
-  var ctx = cv.getContext("2d");
-  var W = 0, H = 0, DPR = 1;
-  function resize() {
-    var r = sc.getBoundingClientRect();
-    W = r.width; H = r.height;
-    DPR = Math.min(window.devicePixelRatio || 1, (window.matchMedia && window.matchMedia("(pointer: fine)").matches) ? 1 : 1.5); // komp DPR 1, telefon 1.5
-    cv.width = Math.max(1, Math.floor(W * DPR));
-    cv.height = Math.max(1, Math.floor(H * DPR));
-    cv.style.width = W + "px";
-    cv.style.height = H + "px";
-  }
-  resize();
+  var e = canvasEngine("zvezde-canvas", ZVEZDE_GEN, function() { return ZVEZDE_GEN; }, false);
+  if (!e) return;
+  var W = e.getW(), H = e.getH();
   // 40 zvezda — parallax dubina, gornji deo neba (bilo 60)
   var zvezde = [];
   for (var i = 0; i < 40; i++) {
@@ -1786,15 +1769,7 @@ function zvezdeCanvas(vrsta, fazaDana) {
       sjaj: dubina > 0.7                       // vece zvezde imaju sjaj
     });
   }
-  var frameSkip = 0, tik = 0; // frame cap 30fps
-  function loop() {
-    if (gen !== ZVEZDE_GEN) return;
-    if (!SCENA_VIDANA && !SCENA_SVEZA) { if (++tik >= 48) { tik = 0; SCENA_SVEZA = true; } requestAnimationFrame(loop); return; }
-    frameSkip++;
-    if (frameSkip % FRAME_KORAK) { requestAnimationFrame(loop); return; }
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.clearRect(0, 0, cv.width, cv.height);
-    ctx.scale(DPR, DPR);
+  e.startLoop(function(ctx, W, H, DPR) {
     var t = performance.now() * 0.001;
     for (var i = 0; i < zvezde.length; i++) {
       var z = zvezde[i];
@@ -1848,15 +1823,6 @@ function zvezdeCanvas(vrsta, fazaDana) {
       ctx.fill();
       ctx.restore();
     }
-    SCENA_SVEZA = false;
-    requestAnimationFrame(loop);
-  }
-  loop();
-  var toR4 = null;
-  window.addEventListener("resize", function() {
-    if (gen !== ZVEZDE_GEN) return;
-    clearTimeout(toR4);
-    toR4 = setTimeout(resize, 200);
   });
 }
 
