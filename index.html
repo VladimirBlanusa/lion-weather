@@ -1674,26 +1674,9 @@ function maglaCanvas(vrsta, fazaDana) {
 var SNEG_GEN = 0;
 function snegCanvas(vrsta, fazaDana) {
   SNEG_GEN++;
-  var gen = SNEG_GEN;
-  var sc = document.getElementById("scena");
-  if (!sc) return;
-  var stari = sc.querySelector("#sneg-canvas");
-  if (stari) stari.remove();
-  var cv = document.createElement("canvas");
-  cv.id = "sneg-canvas";
-  sc.appendChild(cv);
-  var ctx = cv.getContext("2d");
-  var W = 0, H = 0, DPR = 1;
-  function resize() {
-    var r = sc.getBoundingClientRect();
-    W = r.width; H = r.height;
-    DPR = Math.min(window.devicePixelRatio || 1, (window.matchMedia && window.matchMedia("(pointer: fine)").matches) ? 1 : 1.5); // komp DPR 1, telefon 1.5
-    cv.width = Math.max(1, Math.floor(W * DPR));
-    cv.height = Math.max(1, Math.floor(H * DPR));
-    cv.style.width = W + "px";
-    cv.style.height = H + "px";
-  }
-  resize();
+  var e = canvasEngine("sneg-canvas", SNEG_GEN, function() { return SNEG_GEN; }, false);
+  if (!e) return;
+  var W = e.getW(), H = e.getH();
   // boja pahulja po fazi
   var boja;
   if (fazaDana === "noc") boja = "205,222,255";
@@ -1716,7 +1699,7 @@ function snegCanvas(vrsta, fazaDana) {
       razgranata: dubina > 0.55       // vece pahulje su razgranate
     });
   }
-  function nacrtajPahulju(px, py, p) {
+  function nacrtajPahulju(ctx, px, py, p) {
     ctx.save();
     ctx.translate(px, py);
     ctx.rotate(p.rot);
@@ -1750,15 +1733,7 @@ function snegCanvas(vrsta, fazaDana) {
     }
     ctx.restore();
   }
-  var frameSkip = 0, tik = 0; // frame cap 30fps
-  function loop() {
-    if (gen !== SNEG_GEN) return;
-    if (!SCENA_VIDANA && !SCENA_SVEZA) { if (++tik >= 48) { tik = 0; SCENA_SVEZA = true; } requestAnimationFrame(loop); return; }
-    frameSkip++;
-    if (frameSkip % FRAME_KORAK) { requestAnimationFrame(loop); return; }
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.clearRect(0, 0, cv.width, cv.height);
-    ctx.scale(DPR, DPR);
+  e.startLoop(function(ctx, W, H, DPR) {
     var t = performance.now() * 0.001;
     for (var i = 0; i < pahulje.length; i++) {
       var p = pahulje[i];
@@ -1768,17 +1743,8 @@ function snegCanvas(vrsta, fazaDana) {
       if (p.y > H + 12) { p.y = -12; p.x = Math.random() * W; }
       if (p.x > W + 12) p.x = -12;
       if (p.x < -12) p.x = W + 12;
-      nacrtajPahulju(p.x, p.y, p);
+      nacrtajPahulju(ctx, p.x, p.y, p);
     }
-    SCENA_SVEZA = false;
-    requestAnimationFrame(loop);
-  }
-  loop();
-  var toR3 = null;
-  window.addEventListener("resize", function() {
-    if (gen !== SNEG_GEN) return;
-    clearTimeout(toR3);
-    toR3 = setTimeout(resize, 200);
   });
 }
 
