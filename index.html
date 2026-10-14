@@ -951,21 +951,21 @@
     <div id="kisa-paznja"></div>
     <div class="meta">
       <span id="grad">Stara Pazova</span>
-      <span> vetar: <b id="wind">–</b> km/h <b id="wind-dir"></b></span>
-      <span> kiša: <b id="rain">–</b> mm</span>
-      <span id="sansa-red" style="display:none"> šansa: <b id="sansa">–</b>%</span>
+<span> <span data-i18n="vetar">vetar</span>: <b id="wind">–</b> km/h <b id="wind-dir"></b></span>
+      <span> <span data-i18n="kisa">kiša</span>: <b id="rain">–</b> mm</span>
+      <span id="sansa-red" style="display:none"> <span data-i18n="sansa">šansa</span>: <b id="sansa">–</b>%</span>
       <span class="meta-prelom"></span>
-      <span> izlazak: <b id="izlazak">–</b></span>
-      <span> zalazak: <b id="zalazak">–</b></span>
-      <span> mesec: <svg class="moon" width="18" height="18" viewBox="-50 -50 100 100" style="vertical-align:-3px" aria-hidden="true"><circle cx="0" cy="0" r="44" fill="#2a2a3e" stroke="#3a3a5e" stroke-width="2"/><path id="moon-lit" d="" fill="#f5ecd0"/></svg> <b id="mesec">–</b></span>
+      <span> <span data-i18n="izlazak">izlazak</span>: <b id="izlazak">–</b></span>
+      <span> <span data-i18n="zalazak">zalazak</span>: <b id="zalazak">–</b></span>
+      <span> <span data-i18n="mesec">mesec</span>: <svg class="moon" width="18" height="18" viewBox="-50 -50 100 100" style="vertical-align:-3px" aria-hidden="true"><circle cx="0" cy="0" r="44" fill="#2a2a3e" stroke="#3a3a5e" stroke-width="2"/><path id="moon-lit" d="" fill="#f5ecd0"/></svg> <b id="mesec">–</b></span>
     </div>
     <div class="meta meta-detalji">
-      <span> osećaj: <b id="osecaj">–</b>°</span>
-      <span> vlažnost: <b id="vlaznost">–</b>%</span>
-      <span> pritisak: <b id="pritisak">–</b> hPa</span>
+      <span> <span data-i18n="osecaj">osećaj</span>: <b id="osecaj">–</b>°</span>
+      <span> <span data-i18n="vlaznost">vlažnost</span>: <b id="vlaznost">–</b>%</span>
+      <span> <span data-i18n="pritisak">pritisak</span>: <b id="pritisak">–</b> hPa</span>
       <span> UV: <b id="uv">–</b></span>
     </div>
-    <div id="msg" class="loading">Učitavam prognozu…</div>
+    <div id="msg" class="loading" data-i18n="ucitavam">Učitavam prognozu…</div>
     <div id="err" class="err"></div>
     <button id="lok-radar" type="button" title="Radar — kretanje oblaka" aria-label="Radar — kretanje oblaka">
       <span class="radar-snop"></span>
@@ -980,14 +980,14 @@
   </div>
 
   <div class="panel kisa-minutno" id="kisa-minutno-panel">
-    <h3>Sledeća 2 sata — kiša</h3>
+    <h3 data-i18n="sledeca2">Sledeća 2 sata — kiša</h3>
     <div id="kisa-minutno-rezime" class="kisa-rezime"></div>
     <div id="kisa-minutno-traka" class="kisa-minutno-traka"></div>
     <div id="kisa-minutno-vremena" class="kisa-minutno-vremena"></div>
   </div>
 
   <div class="panel vazduh" id="vazduh-panel">
-    <h3>Kvalitet vazduha — EU indeks</h3>
+    <h3 data-i18n="kvalitet">Kvalitet vazduha</h3>
     <div class="vazduh-glavni">
       <div class="vazduh-broj" id="vazduh-broj">–</div>
       <div class="vazduh-opis">
@@ -1004,7 +1004,7 @@
   </div>
 
   <div class="panel models">
-    <h3>Modeli — uporedno</h3>
+    <h3 data-i18n="modeli">Modeli</h3>
     <div class="models-grid">
       <div></div>
       <div class="models-h">ECMWF</div>
@@ -1014,11 +1014,11 @@
       <div id="m-ecmwf-temp">–</div>
       <div id="m-gfs-temp">–</div>
       <div id="m-icon-temp">–</div>
-      <div class="models-l">Kiša</div>
+      <div class="models-l" data-i18n="kisa">Kiša</div>
       <div id="m-ecmwf-kisa">–</div>
       <div id="m-gfs-kisa">–</div>
       <div id="m-icon-kisa">–</div>
-      <div class="models-l">Vetar</div>
+      <div class="models-l" data-i18n="vetar">Vetar</div>
       <div id="m-ecmwf-vetar">–</div>
       <div id="m-gfs-vetar">–</div>
       <div id="m-icon-vetar">–</div>
@@ -1140,7 +1140,7 @@ document.addEventListener("DOMContentLoaded", function() {
   });
 });
 
-var WCODE = {
+var WCODE = (localStorage.getItem('lw-jezik')||'sr') === 'sr' ? {
   0:  ["Vedro",                 "sunce",  "Vreme je za sunčanje 😎", "☀️"],
   1:  ["Pretežno vedro",         "sunce",  "Malo sunca, malo hlada — taman 😁", "🌤️"],
   2:  ["Delimično oblačno",      "oblacno","Oblak tu, sunce tamo — dogovoriće se već", "⛅"],
@@ -1169,6 +1169,35 @@ var WCODE = {
   95: ["Grmljavinska oluja",     "oluja",  "Grom k'o iz topa", "⛈️"],
   96: ["Oluja s gradom",         "oluja",  "Oluja je punog sadržaja — grom i led", "⛈️"],
   99: ["Jaka oluja s gradom",    "oluja",  "Sedi gde si — čekaj da prođe", "⛈️"]
+} : {
+  0:  ["Clear",                  "sunce",  "Time to soak up the sun 😎", "☀️"],
+  1:  ["Mostly clear",           "sunce",  "A bit of sun, a bit of shade — just right 😁", "🌤️"],
+  2:  ["Partly cloudy",         "oblacno","Cloud here, sun there — they'll work it out", "⛅"],
+  3:  ["Cloudy",                 "oblacno","The sun took time off indefinitely", "☁️"],
+  45: ["Fog",                    "magla",  "Can't see past my whiskers", "🌫️"],
+  48: ["Frost fog",              "magla",  "Fog and frost — a den day", "🌫️"],
+  51: ["Light rain",             "kisa",   "I'd bring an umbrella — you decide", "🌦️"],
+  53: ["Light rain",             "kisa",   "Drop by drop — the day drags on", "🌦️"],
+  55: ["Heavy rain",             "kisa",   "Falling with no plans to stop", "🌧️"],
+  56: ["Light freezing rain",   "kisa",   "Falling and freezing — watch your step", "🌧️"],
+  57: ["Freezing rain",          "kisa",   "Rain that freezes — better in the den", "🌧️"],
+  61: ["Light rain",             "kisa",   "Light rain — a hood fixes everything", "🌦️"],
+  63: ["Rain",                   "kisa",   "Rain is rain — the day goes on", "🌧️"],
+  65: ["Heavy rain",             "kisa",   "Pouring like there's no tomorrow", "🌧️"],
+  66: ["Light rain with snow",   "sneg",   "Neither rain nor snow — yet both", "🌨️"],
+  67: ["Rain with snow",         "sneg",   "The sky can't make up its mind", "🌨️"],
+  71: ["Light snow",             "sneg",   "More promise than snow", "🌨️"],
+  73: ["Snow",                   "sneg",   "A postcard day — white all around", "🌨️"],
+  75: ["Heavy snow",             "sneg",   "Who's shoveling tomorrow 🤦", "❄️"],
+  77: ["Snow grains",            "sneg",   "Tiny grains — stinging the whiskers", "🌨️"],
+  80: ["Light shower",           "kisa",   "Lighter shower — a good sign to hurry", "🌦️"],
+  81: ["Shower",                 "kisa",   "Pouring like a bucket — but brief", "🌧️"],
+  82: ["Heavy shower",           "kisa",   "The sky opened up", "⛈️"],
+  85: ["Light snow showers",     "sneg",   "Stop and go — a snowy rhythm", "🌨️"],
+  86: ["Snow showers",           "sneg",   "The sky dumps snow", "❄️"],
+  95: ["Thunderstorm",           "oluja",  "Thunder like a cannon", "⛈️"],
+  96: ["Storm with hail",        "oluja",  "A full storm — thunder and ice", "⛈️"],
+  99: ["Severe storm with hail", "oluja",  "Stay put — let it pass", "⛈️"]
 };
 // ——— Doba dana u porukama: noć, zora i sumrak nose svoje rečenice (Vlad: poruka mora da isprati fazu) ———
 // ——— i18n — jezički sistem (sr/en) ———
@@ -1187,7 +1216,22 @@ var I18N = {
     ponesiKisobran: "— ponesi kišobran ☔",
     mesečina: "Vreme je za mesečinu 🌙",
     zora: "Zora lije zlato — Lav se budi 🌅",
-    sumrak: "Sumrak lije zlato preko brkova 🌇"
+    sumrak: "Sumrak lije zlato preko brkova 🌇",
+    vetar: "vetar",
+    kisa: "kiša",
+    sansa: "šansa",
+    izlazak: "izlazak",
+    zalazak: "zalazak",
+    mesec: "mesec",
+    sledeca2: "Sledeća 2 sata — kiša",
+    modeli: "Modeli",
+    temp: "Temp",
+    vidljivost: "Vidljivost",
+    vlaznost: "Vlažnost",
+    pritisak: "Pritisak",
+    kvalitet: "Kvalitet vazduha",
+    osecaj: "osećaj",
+    ucitavam: "Učitavam prognozu…"
   },
   en: {
     dani: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
@@ -1202,7 +1246,22 @@ var I18N = {
     ponesiKisobran: "— bring an umbrella ☔",
     mesečina: "Time for moonlight 🌙",
     zora: "Dawn pours gold — the Lion awakes 🌅",
-    sumrak: "Dusk pours gold across the whiskers 🌇"
+    sumrak: "Dusk pours gold across the whiskers 🌇",
+    vetar: "wind",
+    kisa: "rain",
+    sansa: "chance",
+    izlazak: "sunrise",
+    zalazak: "sunset",
+    mesec: "moon",
+    sledeca2: "Next 2 hours — rain",
+    modeli: "Models",
+    temp: "Temp",
+    vidljivost: "Visibility",
+    vlaznost: "Humidity",
+    pritisak: "Pressure",
+    kvalitet: "Air quality",
+    osecaj: "feels",
+    ucitavam: "Loading forecast…"
   }
 };
 function t(key) {
@@ -1216,6 +1275,7 @@ function t(key) {
   return val != null ? val : key;
 }
 // ——— Init statičkih HTML labela na trenutni jezik ———
+var __i18n_els = document.querySelectorAll('[data-i18n]'); for (var __i = 0; __i < __i18n_els.length; __i++) { var __el = __i18n_els[__i]; var __k = __el.getAttribute('data-i18n'); __el.textContent = t(__k); }
 var __i18n_el = document.getElementById('sati-naslov'); if (__i18n_el) __i18n_el.textContent = t('poSatima');
 
 var FAZA_PORUKE = {
@@ -2411,13 +2471,20 @@ function obradiVazduh(j) {
   var aqi = c.european_aqi;
   if (aqi == null) { var vi1 = document.getElementById("vazduh-ime"); if (vi1) vi1.textContent = t('nedostupno'); return; }
 
-  var KAT = [
+  var KAT = JEZIK === 'sr' ? [
     [20, "Dobar", "linear-gradient(180deg, #8fbf8a, #4a7a52)", "Vazduh je čist — slobodno napolje"],
     [40, "Umeren", "linear-gradient(180deg, #e8c873, #b8893a)", "Kvalitet je prihvatljiv"],
     [60, "Loš za osetljive", "linear-gradient(180deg, #e8a35a, #b56a30)", "Osetljive grupe neka paze"],
     [80, "Loš", "linear-gradient(180deg, #c8634a, #8a3528)", "Smanjite napore napolju"],
     [100, "Veoma loš", "linear-gradient(180deg, #8a4a6e, #4a2840)", "Bolje ostati unutra"],
     [Infinity, "Ekstremno loš", "linear-gradient(180deg, #5a2832, #2e1418)", "Izbegavajte boravak napolju"]
+  ] : [
+    [20, "Good", "linear-gradient(180deg, #8fbf8a, #4a7a52)", "Air is clean — enjoy the outdoors"],
+    [40, "Moderate", "linear-gradient(180deg, #e8c873, #b8893a)", "Quality is acceptable"],
+    [60, "Poor for sensitive", "linear-gradient(180deg, #e8a35a, #b56a30)", "Sensitive groups take care"],
+    [80, "Poor", "linear-gradient(180deg, #c8634a, #8a3528)", "Reduce outdoor exertion"],
+    [100, "Very poor", "linear-gradient(180deg, #8a4a6e, #4a2840)", "Better to stay indoors"],
+    [Infinity, "Extremely poor", "linear-gradient(180deg, #5a2832, #2e1418)", "Avoid outdoor exposure"]
   ];
   var ime = "–", boja = "linear-gradient(180deg, #5a6275, #3a3d4a)", savet = "";
   for (var i = 0; i < KAT.length; i++) {
@@ -2653,7 +2720,7 @@ function ucitajPrognozu() {
   document.getElementById("err").style.display = "none";
   document.getElementById("msg").style.display = "block";
   document.getElementById("offline-bedz").classList.remove("prikazi");
-  document.getElementById("msg").textContent = "Učitavam prognozu…";
+  document.getElementById("msg").textContent = t('ucitavam');
   document.getElementById("loader").style.display = "block";
 
   fetch(
@@ -2885,7 +2952,7 @@ window.addEventListener("DOMContentLoaded", function(){
 
   function ucitajRadar(){
     rGrad.textContent = LOK.ime;
-    rVreme.textContent = "Učitavam…";
+    rVreme.textContent = t('ucitavam');
     init();
     if (!mapa) return;
     if (sloj){ mapa.removeLayer(sloj); sloj = null; }
