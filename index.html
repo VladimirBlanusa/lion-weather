@@ -1215,6 +1215,8 @@ function t(key) {
   }
   return val != null ? val : key;
 }
+// ——— Init statičkih HTML labela na trenutni jezik ———
+var __i18n_el = document.getElementById('sati-naslov'); if (__i18n_el) __i18n_el.textContent = t('poSatima');
 
 var FAZA_PORUKE = {
   kisa:    { noc: "Noćna kiša — k'o uspavanka za Lavove 🌧️",
@@ -1232,6 +1234,23 @@ var FAZA_PORUKE = {
   magla:   { noc: "Magla u noći — svetlost pliva kroz mleko 🌫️",
              jutro: "Magla sa zore — svet se budi polako 🌫️",
              sumrak: "Sumrak u magli — fenjeri lebde sami 🌫️" }
+};
+var FAZA_PORUKE_EN = {
+  kisa:    { noc: "Night rain — a lullaby for Lions 🌧️",
+             jutro: "Rain follows dawn — a damp start 🌧️",
+             sumrak: "Rain at dusk — streets gleam in drops 🌧️" },
+  sneg:    { noc: "Snowy night — all sleeps under a white blanket ❄️",
+             jutro: "Snow arrived before dawn — all untouched ❄️",
+             sumrak: "Snowy dusk — the city slips into white ❄️" },
+  oblacno: { noc: "Clouds hide the stars — Lion watches in the dark 🌌",
+             jutro: "Dawn under clouds — the day wakes quietly 🌥️",
+             sumrak: "Dusk under clouds — the sky closes like a book ☁️" },
+  oluja:   { noc: "Storm at night — thunder plays a deep song ⛈️",
+             jutro: "Thunder from dawn — Lion wakes before the alarm ⛈️",
+             sumrak: "Storm darkens dusk — lightning steals the show ⛈️" },
+  magla:   { noc: "Fog at night — light swims through milk 🌫️",
+             jutro: "Fog at dawn — the world wakes slowly 🌫️",
+             sumrak: "Dusk in fog — lanterns float alone 🌫️" }
 };
 // ——— Naše zlatne ikone: nacrtane u kodu, identične na svakom uređaju (zamenjuju sistemske emoji) ———
 var IKONE = {
@@ -2168,7 +2187,7 @@ function renderSate(h, trenutno, sunrise0, sunset0, sadaSat) {
     var jeSada = (i === sadaIdx);
     var d = document.createElement("div");
     d.className = "sat-item" + (f ? " faza-" + f.toLowerCase() : "") + (jeSada ? " sat-sada" : "");
-    d.innerHTML = (jeSada ? "<span class=\"sat-sada-oznaka\">Sada</span>" : "") +
+    d.innerHTML = (jeSada ? "<span class=\"sat-sada-oznaka\">" + t('sada') + "</span>" : "") +
                   "<span>" + h.time[i].slice(11, 13) + "h</span>" +
                   "<img src=\"" + LAVOVI[lavKey] + "\" alt=\"\">" +
                   "<span class=\"sat-emoji\">" + (IKONE[info[3]] || info[3] || "") + "</span>" +
@@ -2207,7 +2226,7 @@ function postaviTraku() {
     naslov.textContent = t('poSatima') + " — " + t('dani')[dt.getDay()].toLowerCase();
   } else {
     renderSate(POSLEDNJI_TEKST.hourly, POSLEDNJI_TEKST.current.time, d && d.sunrise && d.sunrise[0], d && d.sunset && d.sunset[0], POSLEDNJI_TEKST.current.time);
-    naslov.textContent = "Po satima";
+    naslov.textContent = t('poSatima');
   }
 }
 
@@ -2249,11 +2268,11 @@ function proveriKisu(tekst) {
   if (VEC_PADA) return;
   var si = tekst.hourly.time.indexOf(tekst.current.time.slice(0, 13) + ":00");
   if (si < 0) return;
-  var kad = ["kroz sat", "za dva sata"];
+  var kad = JEZIK === 'sr' ? ["kroz sat", "za dva sata"] : ["in an hour", "in two hours"];
   for (var p = 1; p <= 2; p++) {
     var s = tekst.hourly.precipitation_probability[si + p];
     if (s !== undefined && s >= 50) {
-      el.textContent = "Lav kaže: kiša stiže " + kad[p - 1] + " — ponesi kišobran ☔";
+      el.textContent = t('lavKaze') + " " + kad[p - 1] + " " + t('ponesiKisobran');
       el.style.display = "block";
       return;
     }
@@ -2273,7 +2292,7 @@ function renderKisaMinutno(m) {
   var rezime = document.getElementById("kisa-minutno-rezime");
   if (maxP < 0.05) {
     // Suvo — samo rezime, sakrij bar chart i vremena
-    rezime.textContent = "Suvo naredna 2 sata \u2600\uFE0F";
+    rezime.textContent = t('suvo') + " ☀️";
     rezime.style.color = "rgba(245, 241, 230, .82)";
     traka.style.display = "none";
     vremena.style.display = "none";
@@ -2387,10 +2406,10 @@ function obradiUpozorenja(tekst) {
 function obradiVazduh(j) {
   var p = document.getElementById("vazduh-panel");
   if (!p) return;
-  if (!j || !j.current) { var vi0 = document.getElementById("vazduh-ime"); if (vi0) vi0.textContent = "Nedostupno"; return; }
+  if (!j || !j.current) { var vi0 = document.getElementById("vazduh-ime"); if (vi0) vi0.textContent = t('nedostupno'); return; }
   var c = j.current;
   var aqi = c.european_aqi;
-  if (aqi == null) { var vi1 = document.getElementById("vazduh-ime"); if (vi1) vi1.textContent = "Nedostupno"; return; }
+  if (aqi == null) { var vi1 = document.getElementById("vazduh-ime"); if (vi1) vi1.textContent = t('nedostupno'); return; }
 
   var KAT = [
     [20, "Dobar", "linear-gradient(180deg, #8fbf8a, #4a7a52)", "Vazduh je čist — slobodno napolje"],
@@ -2488,18 +2507,18 @@ function obradi(tekst) {
   if (jeNoc(tekst) && moodKlasa === "sunce") moodKlasa = "noc";
   // Doba dana: i kiša, sneg, oblačno, oluja i magla imaju svoje noćne, zorne i sumračne rečenice
   var fazaPor = jeNoc(tekst) ? "noc" : (jeJutro(tekst) ? "jutro" : (jeSumrak(tekst) ? "sumrak" : "dan"));
-  if (fazaPor !== "dan" && FAZA_PORUKE[moodKlasa] && FAZA_PORUKE[moodKlasa][fazaPor]) document.getElementById("mood").textContent = FAZA_PORUKE[moodKlasa][fazaPor];
-  if (moodKlasa === "noc") document.getElementById("mood").textContent = "Vreme je za mesečinu 🌙";
+  if (fazaPor !== "dan" && FAZA_PORUKE[moodKlasa] && FAZA_PORUKE[moodKlasa][fazaPor]) document.getElementById("mood").textContent = (JEZIK === 'sr' ? FAZA_PORUKE : FAZA_PORUKE_EN)[moodKlasa][fazaPor];
+  if (moodKlasa === "noc") document.getElementById("mood").textContent = t('mesečina');
   if (moodKlasa === "noc") postaviLava(jePunMesec() ? "nocPun" : "noc");
   // Zora i sumrak: vedro jutro/veče nose svoje lava, nebo prati izlazak i zalazak
   var jeJutroS = jeJutro(tekst) && moodKlasa === "sunce";
   var jeSumrakS = jeSumrak(tekst) && moodKlasa === "sunce";
   if (jeJutroS) {
-    document.getElementById("mood").textContent = "Zora lije zlato — Lav se budi 🌅";
+    document.getElementById("mood").textContent = t('zora');
     postaviLava("jutro");
   }
   if (jeSumrakS) {
-    document.getElementById("mood").textContent = "Sumrak lije zlato preko brkova 🌇";
+    document.getElementById("mood").textContent = t('sumrak');
     postaviLava("sumrak");
   }
   // Jak vetar: poruka prati vetar — važi iznad doba dana i temperature
@@ -2673,7 +2692,7 @@ function ucitajPrognozu() {
   )
     .then(function(r){ return r.json(); })
     .then(function(j){ obradiVazduh(j); })
-    .catch(function(){ var vi2 = document.getElementById("vazduh-ime"); if (vi2) vi2.textContent = "Nedostupno"; });
+    .catch(function(){ var vi2 = document.getElementById("vazduh-ime"); if (vi2) vi2.textContent = t('nedostupno'); });
 }
 ucitajPrognozu();
 
