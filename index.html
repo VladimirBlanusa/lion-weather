@@ -1105,9 +1105,11 @@ var LAVOVI = {
 
 // ——— Galerija lavova: svi lavovi koje smo ikad napravili — i oni iz fioke (Vlad 3.9) ———
 var FIOKA_DZEBRA = "https://macaron-sandbox-workspace.oss-accelerate.aliyuncs.com/prod/01a05aef-9b6e-7737-bec4-ae31a3069526/workspace/lav-vreme/img-dzebra.jpg";
-var GAL_NIZ = ["sunce","kisa","sneg","oluja","oblacno","magla","noc","kisaNoc","snegNoc","olujaNoc","oblacnoNoc","maglaNoc","nocPun","dzebra","jutro","kisaJutro","snegJutro","olujaJutro","oblacnoJutro","maglaJutro","sumrak","kisaSumrak","snegSumrak","olujaSumrak","oblacnoSumrak","maglaSumrak"]; // v3.51: plava "Ikonica — ravna" napolje iz galerije — ne prati priču
+var GAL_NIZ = ["sunce","kisa","sneg","oluja","oblacno","magla","noc","kisaNoc","snegNoc","olujaNoc","oblacnoNoc","maglaNoc","nocPun","jutro","kisaJutro","snegJutro","olujaJutro","oblacnoJutro","maglaJutro","sumrak","kisaSumrak","snegSumrak","olujaSumrak","oblacnoSumrak","maglaSumrak"]; // v3.51: plava "Ikonica — ravna" napolje iz galerije — ne prati priču
 var GAL_IMENA = { sunce:"Sunčani dan", kisa:"Kiša", sneg:"Sneg", oluja:"Oluja", oblacno:"Oblačno", magla:"Magla", noc:"Vedra noć", kisaNoc:"Kiša — noć", snegNoc:"Sneg — noć", olujaNoc:"Oluja — noć", oblacnoNoc:"Oblačno — noć", maglaNoc:"Magla — noć", nocPun:"Pun mesec", dzebra:"Џебра Д Лајон", jutro:"Zora", kisaJutro:"Kiša — zora", snegJutro:"Sneg — zora", olujaJutro:"Oluja — zora", oblacnoJutro:"Oblačno — zora", maglaJutro:"Magla — zora", sumrak:"Sumrak", kisaSumrak:"Kiša — sumrak", snegSumrak:"Sneg — sumrak", olujaSumrak:"Oluja — sumrak", oblacnoSumrak:"Oblačno — sumrak", maglaSumrak:"Magla — sumrak" };
 function GAL_URL(k) { return k === "dzebra" ? FIOKA_DZEBRA : LAVOVI[k]; }
+var GAL_IMENA_EN = { sunce:"Sunny day", kisa:"Rain", sneg:"Snow", oluja:"Storm", oblacno:"Cloudy", magla:"Fog", noc:"Clear night", kisaNoc:"Rain — night", snegNoc:"Snow — night", olujaNoc:"Storm — night", oblacnoNoc:"Cloudy — night", maglaNoc:"Fog — night", nocPun:"Full moon", dzebra:"Џебра the Lion", jutro:"Dawn", kisaJutro:"Rain — dawn", snegJutro:"Snow — dawn", olujaJutro:"Storm — dawn", oblacnoJutro:"Cloudy — dawn", maglaJutro:"Fog — dawn", sumrak:"Dusk", kisaSumrak:"Rain — dusk", snegSumrak:"Snow — dusk", olujaSumrak:"Storm — dusk", oblacnoSumrak:"Cloudy — dusk", maglaSumrak:"Fog — dusk" };
+var GAL_IME = function(k) { return (JEZIK === 'sr' ? GAL_IMENA : GAL_IMENA_EN)[k]; };
 function lavDana() { var d = Math.floor(Date.now() / 86400000); return GAL_NIZ[d % GAL_NIZ.length]; }
 function otvoriGaleriju() {
   var lepeza = document.getElementById("galerija-lepeza");
@@ -1115,7 +1117,7 @@ function otvoriGaleriju() {
   GAL_NIZ.forEach(function(k) {
     var b = document.createElement("button");
     b.className = "galerija-stavka"; b.type = "button";
-    b.innerHTML = '<img src="' + GAL_URL(k) + '" alt="' + GAL_IMENA[k] + '" loading="lazy"><span>' + GAL_IMENA[k] + '</span>';
+    b.innerHTML = '<img src="' + GAL_URL(k) + '" alt="' + GAL_IME(k) + '" loading="lazy"><span>' + GAL_IME(k) + '</span>';
     b.addEventListener("click", function(ev) { ev.stopPropagation(); prikaziKrupno(k); });
     lepeza.appendChild(b);
   });
@@ -1125,7 +1127,7 @@ function otvoriGaleriju() {
 }
 function prikaziKrupno(k) {
   document.getElementById("galerija-krupno-img").src = GAL_URL(k);
-  document.getElementById("galerija-krupno-potpis").textContent = GAL_IMENA[k];
+  document.getElementById("galerija-krupno-potpis").textContent = GAL_IME(k);
   document.getElementById("galerija-lepeza").style.display = "none";
   document.getElementById("galerija-krupno").style.display = "block";
 }
