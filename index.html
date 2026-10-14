@@ -999,7 +999,7 @@
   </div>
 
   <div class="panel dani">
-    <h3>Po danima — 7 dana</h3>
+    <h3 data-i18n="poDanima">Po danima — 7 dana</h3>
     <div id="dani-lista"></div>
   </div>
 
@@ -1026,12 +1026,12 @@
   </div>
 
   <div class="panel lok" style="position:relative">
-    <h3>Lokacija — bilo gde</h3>
+    <h3 data-i18n="lokacija">Lokacija — bilo gde</h3>
     <button id="jezik-dugme" type="button" style="position:absolute;right:16px;top:6px;background:rgba(212,175,55,.16);border:1px solid rgba(212,175,55,.45);border-radius:10px;color:var(--gold-light);font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer;display:inline-flex;align-items:center;gap:4px" onclick="JEZIK=(JEZIK==='sr'?'en':'sr');localStorage.setItem('lw-jezik',JEZIK);location.reload();"><svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="#d4af37" stroke-width="1.4"/><ellipse cx="12" cy="12" rx="9" ry="4" fill="none" stroke="#d4af37" stroke-width="1.4"/><line x1="3" y1="12" x2="21" y2="12" stroke="#d4af37" stroke-width="1.4"/><line x1="12" y1="3" x2="12" y2="21" stroke="#d4af37" stroke-width="1.4"/></svg><span id="jezik-tekst">SRB</span></button>
     <script>document.getElementById('jezik-tekst').textContent=(localStorage.getItem('lw-jezik')||'sr')==='sr'?'SRB':'ENG';</script>
     <div class="lok-red">
-      <input id="lok-unos" placeholder="Traži grad (Beograd, Kotor, New York…)" autocomplete="off">
-      <button id="lok-trazi" type="button">Traži</button>
+      <input id="lok-unos" data-i18n-ph="traziPlaceholder" placeholder="Traži grad (Beograd, Kotor, New York…)" autocomplete="off">
+      <button id="lok-trazi" type="button" data-i18n="trazi">Traži</button>
       <button id="lok-gps" type="button" title="Moja lokacija"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="16" height="16" aria-hidden="true"><path d="M12 2.1c-3.9 0-7.1 3.1-7.1 7 0 5 7.1 12.8 7.1 12.8s7.1-7.8 7.1-12.8c0-3.9-3.2-7-7.1-7z" fill="#d4af37" stroke="#9c7f26" stroke-width="0.9"/><circle cx="12" cy="9.1" r="2.55" fill="#131b2a"/></svg></button>
     </div>
     <div id="lok-rez"></div>
@@ -1231,7 +1231,11 @@ var I18N = {
     pritisak: "Pritisak",
     kvalitet: "Kvalitet vazduha",
     osecaj: "osećaj",
-    ucitavam: "Učitavam prognozu…"
+    ucitavam: "Učitavam prognozu…",
+    lokacija: "Lokacija — bilo gde",
+    trazi: "Traži",
+    traziPlaceholder: "Traži grad (Beograd, Kotor, New York…)",
+    poDanima: "Po danima — 7 dana"
   },
   en: {
     dani: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
@@ -1261,7 +1265,11 @@ var I18N = {
     pritisak: "Pressure",
     kvalitet: "Air quality",
     osecaj: "feels",
-    ucitavam: "Loading forecast…"
+    ucitavam: "Loading forecast…",
+    lokacija: "Location — anywhere",
+    trazi: "Search",
+    traziPlaceholder: "Search city (Beograd, Kotor, New York…)",
+    poDanima: "Daily — 7 days"
   }
 };
 function t(key) {
@@ -1277,6 +1285,7 @@ function t(key) {
 // ——— Init statičkih HTML labela na trenutni jezik ———
 var __i18n_els = document.querySelectorAll('[data-i18n]'); for (var __i = 0; __i < __i18n_els.length; __i++) { var __el = __i18n_els[__i]; var __k = __el.getAttribute('data-i18n'); __el.textContent = t(__k); }
 var __i18n_el = document.getElementById('sati-naslov'); if (__i18n_el) __i18n_el.textContent = t('poSatima');
+var __i18n_phs = document.querySelectorAll('[data-i18n-ph]'); for (var __j = 0; __j < __i18n_phs.length; __j++) { var __ph = __i18n_phs[__j]; __ph.placeholder = t(__ph.getAttribute('data-i18n-ph')); }
 
 var FAZA_PORUKE = {
   kisa:    { noc: "Noćna kiša — k'o uspavanka za Lavove 🌧️",
@@ -1454,7 +1463,7 @@ function podesiMesec() {
   var f = mesecFaza();
   var mt = parseFloat(new URLSearchParams(location.search).get("mfaza"));
   if (!isNaN(mt) && mt >= 0 && mt <= 1) f = mt;
-  var IMENA_FAZA = ["Mlad mesec","Mladi srp","Prva četvrt","Rastući ogrbljeni","Pun mesec","Opadajući ogrbljeni","Poslednja četvrt","Stari srp"];
+  var IMENA_FAZA = JEZIK === 'sr' ? ["Mlad mesec","Mladi srp","Prva četvrt","Rastući ogrbljeni","Pun mesec","Opadajući ogrbljeni","Poslednja četvrt","Stari srp"] : ["New moon","Waxing crescent","First quarter","Waxing gibbous","Full moon","Waning gibbous","Last quarter","Waning crescent"];
   var idxFaze = Math.round(f * 8) % 8;
   el.setAttribute("data-faza", IMENA_FAZA[idxFaze]);
   el.title = IMENA_FAZA[idxFaze];
@@ -1494,7 +1503,7 @@ function mesecKrupniSVG() {
   var f = mesecFaza();
   var mt = parseFloat(new URLSearchParams(location.search).get("mfaza"));
   if (!isNaN(mt) && mt >= 0 && mt <= 1) f = mt;
-  var IMENA_FAZA = ["Mlad mesec","Mladi srp","Prva četvrt","Rastući ogrbljeni","Pun mesec","Opadajući ogrbljeni","Poslednja četvrt","Stari srp"];
+  var IMENA_FAZA = JEZIK === 'sr' ? ["Mlad mesec","Mladi srp","Prva četvrt","Rastući ogrbljeni","Pun mesec","Opadajući ogrbljeni","Poslednja četvrt","Stari srp"] : ["New moon","Waxing crescent","First quarter","Waxing gibbous","Full moon","Waning gibbous","Last quarter","Waning crescent"];
   var idxFaze = Math.round(f * 8) % 8;
   var TXT = "https://oss-macaron-ai.macaron.im/image/text_to_image/6ac7c941b13ed015324cee6b.webp";
   var R = 85, cx = 100, cy = 100;
