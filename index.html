@@ -2136,14 +2136,14 @@ function sunceCanvas(vrsta, fazaDana) {
     for (var i = 0; i < brojZraka; i++) {
       var fz = i * 0.9 + 1.5; // drugačija faza od glavnih
       var vd = 1 + 0.15 * Math.sin(t * 0.5 + fz);
-      var sw = 8 + 3 * Math.sin(t * 0.3 + fz); // uži
+      var sw = 10 + 3 * Math.sin(t * 0.3 + fz); // uži od glavnih
       ctx.rotate((Math.PI * 2) / brojZraka);
-      ctx.fillStyle = "rgba(" + bojaZrak + "," + (0.07 * puls * vd).toFixed(3) + ")";
+      ctx.fillStyle = "rgba(" + bojaZrak + "," + (0.13 * puls * vd).toFixed(3) + ")";
       ctx.beginPath();
       ctx.moveTo(R * 1.05, -sw);
-      ctx.lineTo(R * 2.0 * vd, -sw * 0.2); // kraći
-      ctx.lineTo(R * 2.2 * vd, 0);
-      ctx.lineTo(R * 2.0 * vd, sw * 0.2);
+      ctx.lineTo(R * 2.3 * vd, -sw * 0.2); // kraći od glavnih
+      ctx.lineTo(R * 2.5 * vd, 0);
+      ctx.lineTo(R * 2.3 * vd, sw * 0.2);
       ctx.lineTo(R * 1.05, sw);
       ctx.closePath();
       ctx.fill();
