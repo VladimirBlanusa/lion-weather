@@ -2069,16 +2069,23 @@ function sunceCanvas(vrsta, fazaDana) {
     racunajSunceY(); // osveži suncey posle promene veličine (rotacija ekrana itd.)
   }
   resize(); // prvi poziv — postavlja W/H/DPR + računa suncey
-  // boje po fazi dana
-  var bojaCentar, bojaZrak, bojaSjaj;
-  if (fazaDana === "sumrak") { bojaCentar = "255,150,80"; bojaZrak = "255,120,60"; bojaSjaj = "255,130,60"; }
-  else if (fazaDana === "jutro") { bojaCentar = "255,198,120"; bojaZrak = "255,180,100"; bojaSjaj = "255,190,110"; }
-  else { bojaCentar = "255,224,140"; bojaZrak = "255,208,120"; bojaSjaj = "255,216,120"; }
-  // keširani radial gradient za sjaj — pravi se jednom po sceni (puls je blaga,alfa fiksna)
+  // boje po fazi dana — bogatije, toplije
+  var bojaCentar, bojaZrak, bojaSjaj, bojaJezgro;
+  if (fazaDana === "sumrak") { bojaCentar = "255,140,70"; bojaZrak = "255,110,50"; bojaSjaj = "255,120,55"; bojaJezgro = "255,200,130"; }
+  else if (fazaDana === "jutro") { bojaCentar = "255,190,110"; bojaZrak = "255,170,90"; bojaSjaj = "255,180,100"; bojaJezgro = "255,230,170"; }
+  else { bojaCentar = "255,218,130"; bojaZrak = "255,200,110"; bojaSjaj = "255,210,120"; bojaJezgro = "255,245,210"; }
+  // keširani radial gradient za sjaj — više stopova za mekaniji atmosferski osećaj
   var sjajGrd = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
-  sjajGrd.addColorStop(0, "rgba(" + bojaSjaj + ",0.42)");
-  sjajGrd.addColorStop(0.25, "rgba(" + bojaSjaj + ",0.18)");
+  sjajGrd.addColorStop(0, "rgba(" + bojaSjaj + ",0.48)");
+  sjajGrd.addColorStop(0.15, "rgba(" + bojaSjaj + ",0.26)");
+  sjajGrd.addColorStop(0.5, "rgba(" + bojaSjaj + ",0.08)");
   sjajGrd.addColorStop(1, "rgba(" + bojaSjaj + ",0)");
+  // keširani gradient za krug sunca — dubina (sjajno jezgro → topli centar → dublja ivica)
+  var sunceGrd = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
+  sunceGrd.addColorStop(0, "rgba(" + bojaJezgro + ",1)");
+  sunceGrd.addColorStop(0.55, "rgba(" + bojaCentar + ",1)");
+  sunceGrd.addColorStop(0.9, "rgba(" + bojaCentar + ",0.98)");
+  sunceGrd.addColorStop(1, "rgba(" + bojaZrak + ",0.72)");
   var frameSkip = 0, tik = 0; // frame cap 30fps
   function loop() {
     if (gen !== SUNCE_GEN) return;
@@ -2102,52 +2109,69 @@ function sunceCanvas(vrsta, fazaDana) {
     ctx.fillStyle = sjajGrd;
     ctx.fillRect(-1, -1, 2, 2);
     ctx.restore();
-    // zraci — 12 zrakova, sporo rotacija; shadowBlur uklonjen (skup) — sjaj preko debelih poluprovodnih zraka
+    // organički zraci — 14 zrakova, nejednake dužine i širine, kušasti (tapered)
     var ugao = t * 0.018;
-    var brojZraka = 12;
-    var dugPuls = 1 + 0.15 * Math.sin(t * 0.5);  // pulsiranje dužine krakova
-    // oreol krakovi (širok, bled, mekan sjaj oko linije)
+    var brojZraka = 14;
+    // oreol zraci (široki, bledi — mekan sjaj oko svakog kraka)
     ctx.save();
     ctx.translate(suncex, suncey);
     ctx.rotate(ugao);
-    ctx.strokeStyle = "rgba(" + bojaZrak + "," + (0.22 * puls).toFixed(3) + ")";
-    ctx.lineWidth = 14;
-    ctx.lineCap = "round";
-    ctx.shadowBlur = 0;
     for (var i = 0; i < brojZraka; i++) {
+      var fz = i * 0.7; // svaki zrak drugačija faza
+      var vd = 1 + 0.35 * Math.sin(t * 0.5 + fz); // dužina varira
+      var sw = 14 + 5 * Math.sin(t * 0.3 + fz); // širina varira
       ctx.rotate((Math.PI * 2) / brojZraka);
+      ctx.fillStyle = "rgba(" + bojaZrak + "," + (0.10 * puls * vd).toFixed(3) + ")";
       ctx.beginPath();
-      ctx.moveTo(R * 1.1, 0);
-      ctx.lineTo(R * 3.0 * dugPuls, 0);
-      ctx.stroke();
+      ctx.moveTo(R * 1.05, -sw);
+      ctx.lineTo(R * 3.2 * vd, -sw * 0.2);
+      ctx.lineTo(R * 3.5 * vd, 0);
+      ctx.lineTo(R * 3.2 * vd, sw * 0.2);
+      ctx.lineTo(R * 1.05, sw);
+      ctx.closePath();
+      ctx.fill();
     }
     ctx.restore();
-    // sjajna jezgra krakova (deblji, sjajniji)
+    // sjajna jezgra zrakova (uži, sjajniji)
     ctx.save();
     ctx.translate(suncex, suncey);
     ctx.rotate(ugao);
-    ctx.strokeStyle = "rgba(" + bojaZrak + "," + (0.85 * puls).toFixed(3) + ")";
-    ctx.lineWidth = 5.5;
-    ctx.lineCap = "round";
-    ctx.shadowBlur = 0; // uklonjen drugi shadowBlur — sjaj se dobija debelim oreol zracima iznad
     for (var i = 0; i < brojZraka; i++) {
+      var fz = i * 0.7;
+      var vd = 1 + 0.35 * Math.sin(t * 0.5 + fz);
+      var sw = 5 + 2 * Math.sin(t * 0.3 + fz);
       ctx.rotate((Math.PI * 2) / brojZraka);
+      ctx.fillStyle = "rgba(" + bojaZrak + "," + (0.55 * puls * vd).toFixed(3) + ")";
       ctx.beginPath();
-      ctx.moveTo(R * 1.15, 0);
-      ctx.lineTo(R * 2.8 * dugPuls, 0);
-      ctx.stroke();
+      ctx.moveTo(R * 1.1, -sw);
+      ctx.lineTo(R * 2.9 * vd, -sw * 0.15);
+      ctx.lineTo(R * 3.1 * vd, 0);
+      ctx.lineTo(R * 2.9 * vd, sw * 0.15);
+      ctx.lineTo(R * 1.1, sw);
+      ctx.closePath();
+      ctx.fill();
     }
     ctx.restore();
-    // krug sunca
-    ctx.fillStyle = "rgba(" + bojaCentar + "," + (0.95 * puls).toFixed(3) + ")";
+    // krug sunca — radial gradient za dubinu
+    ctx.save();
+    ctx.translate(suncex, suncey);
+    ctx.scale(R, R);
+    ctx.fillStyle = sunceGrd;
     ctx.beginPath();
-    ctx.arc(suncex, suncey, R, 0, Math.PI * 2);
+    ctx.arc(0, 0, 1, 0, Math.PI * 2);
     ctx.fill();
-    // sjajno jezgro
-    ctx.fillStyle = "rgba(255,250,235," + (0.55 * puls).toFixed(3) + ")";
+    ctx.restore();
+    // sjajno jezgro (pulsira)
+    ctx.fillStyle = "rgba(255,250,235," + (0.42 * puls).toFixed(3) + ")";
     ctx.beginPath();
-    ctx.arc(suncex, suncey, R * 0.58, 0, Math.PI * 2);
+    ctx.arc(suncex, suncey, R * 0.5, 0, Math.PI * 2);
     ctx.fill();
+    // suptilan lens flare prsten
+    ctx.strokeStyle = "rgba(" + bojaSjaj + "," + (0.06 * puls).toFixed(3) + ")";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(suncex, suncey, R * 1.8, 0, Math.PI * 2);
+    ctx.stroke();
     requestAnimationFrame(loop);
   }
   loop();
