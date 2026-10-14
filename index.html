@@ -975,7 +975,7 @@
   </div>
 
   <div class="panel sati">
-    <h3 id="sati-naslov">Po satima</h3>
+    <h3 id="sati-naslov" data-i18n="poSatima">Po satima</h3>
     <div id="sati-traka" class="sati-traka"></div>
   </div>
 
@@ -1248,7 +1248,9 @@ var I18N = {
     mapaNedostupna: "Mapa nije dostupna — proveri konekciju.",
     neMoguRadar: "Ne mogu da dohvatim radar — proveri internet.",
     proveraVremena: "Provera vremena…",
-    prognozaNijeStigla: "prognoza nije stigla"
+    prognozaNijeStigla: "prognoza nije stigla",
+    osvetljeno: "osvetljeno",
+    lavovi: "Lavovi"
   },
   en: {
     dani: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
@@ -1295,7 +1297,9 @@ var I18N = {
     mapaNedostupna: "Map unavailable — check connection.",
     neMoguRadar: "Can't fetch radar — check internet.",
     proveraVremena: "Checking weather…",
-    prognozaNijeStigla: "forecast unavailable"
+    prognozaNijeStigla: "forecast unavailable",
+    osvetljeno: "lit",
+    lavovi: "Lions"
   }
 };
 function t(key) {
@@ -2866,7 +2870,7 @@ window.addEventListener("DOMContentLoaded", function(){
   if (!mz || !zatvori) return;
   function otvori(){
     var m = mesecKrupniSVG();
-    ms.innerHTML = m.svg + "<h3>" + m.ime + "</h3><p>" + m.procenat + "% osvetljeno</p>";
+    ms.innerHTML = m.svg + "<h3>" + m.ime + "</h3><p>" + m.procenat + "% " + t('osvetljeno') + "</p>";
     mz.classList.add("otvoren");
   }
   function zatvoriZum(){ mz.classList.remove("otvoren"); }
@@ -3050,7 +3054,7 @@ window.addEventListener("DOMContentLoaded", function(){
 <div class="galerija" id="galerija" role="dialog" aria-label="Galerija lavova">
   <button class="galerija-zatvori" id="galerija-zatvori" type="button" aria-label="Zatvori galeriju">&times;</button>
   <div class="galerija-unutra">
-    <h3>Lavovi</h3>
+    <h3 data-i18n="lavovi">Lavovi</h3>
     <div class="galerija-lepeza" id="galerija-lepeza"></div>
     <div class="galerija-krupno" id="galerija-krupno">
       <img id="galerija-krupno-img" src="" alt="">
