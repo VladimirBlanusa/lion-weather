@@ -1247,7 +1247,8 @@ var I18N = {
     nemaRadar: "Trenutno nema radarskih podataka. Pokušaj kasnije.",
     mapaNedostupna: "Mapa nije dostupna — proveri konekciju.",
     neMoguRadar: "Ne mogu da dohvatim radar — proveri internet.",
-    proveraVremena: "Provera vremena…"
+    proveraVremena: "Provera vremena…",
+    prognozaNijeStigla: "prognoza nije stigla"
   },
   en: {
     dani: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
@@ -1293,7 +1294,8 @@ var I18N = {
     nemaRadar: "No radar data right now. Try later.",
     mapaNedostupna: "Map unavailable — check connection.",
     neMoguRadar: "Can't fetch radar — check internet.",
-    proveraVremena: "Checking weather…"
+    proveraVremena: "Checking weather…",
+    prognozaNijeStigla: "forecast unavailable"
   }
 };
 function t(key) {
@@ -2766,7 +2768,7 @@ function ucitajPrognozu() {
   )
     .then(function(r){ return r.json(); })
     .then(function(j){ sacuvajKes(j); obradi(j); })
-    .catch(function(){ prikaziKes("prognoza nije stigla"); });
+    .catch(function(){ prikaziKes(t('prognozaNijeStigla')); });
 
   // Uporedni modeli (ECMWF dolazi iz glavnog poziva)
   fetch(
