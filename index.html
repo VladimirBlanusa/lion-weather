@@ -1439,6 +1439,32 @@ function oblaciCanvas(vrsta, fazaDana) {
   }
   var oblImg = OBL_IMG_CACHE[pKey];
 
+  // ——— crossfade: offscreen canvas sa fade ivicama (ublažava mirror šav) ———
+  if (!window.OBL_FADE_CACHE) window.OBL_FADE_CACHE = {};
+  var napraviFadedTex = function(img) {
+    var fw = Math.max(40, Math.floor(img.naturalWidth * 0.12)); // fade širina = 12% teksture
+    var off = document.createElement("canvas");
+    off.width = img.naturalWidth;
+    off.height = img.naturalHeight;
+    var octx = off.getContext("2d");
+    octx.drawImage(img, 0, 0);
+    octx.globalCompositeOperation = "destination-out";
+    // desna ivica → fade na 50% (ne na 0 — sprečava potpuno prozirnu traku)
+    var gR = octx.createLinearGradient(off.width - fw, 0, off.width, 0);
+    gR.addColorStop(0, "rgba(0,0,0,0)");
+    gR.addColorStop(1, "rgba(0,0,0,0.5)");
+    octx.fillStyle = gR;
+    octx.fillRect(off.width - fw, 0, fw, off.height);
+    // leva ivica → fade na 50%
+    var gL = octx.createLinearGradient(0, 0, fw, 0);
+    gL.addColorStop(0, "rgba(0,0,0,0.5)");
+    gL.addColorStop(1, "rgba(0,0,0,0)");
+    octx.fillStyle = gL;
+    octx.fillRect(0, 0, fw, off.height);
+    octx.globalCompositeOperation = "source-over";
+    return off;
+  };
+
   // ——— resize ———
   var W = 0, H = 0, DPR = 1;
   function resize() {
@@ -1469,16 +1495,19 @@ function oblaciCanvas(vrsta, fazaDana) {
     ctx.scale(DPR, DPR);
 
     if (oblImg.complete && oblImg.naturalWidth > 0) {
-      var imgW = oblImg.naturalWidth, imgH = oblImg.naturalHeight;
+      // kreiraj faded teksturu (jednom, keširano) — ublažava mirror šav
+      if (!OBL_FADE_CACHE[pKey]) OBL_FADE_CACHE[pKey] = napraviFadedTex(oblImg);
+      var fadeTex = OBL_FADE_CACHE[pKey];
+      var imgW = fadeTex.width, imgH = fadeTex.height;
       var scale = Math.max(W / imgW, H / imgH);
       var drawW = imgW * scale;
       var drawH = imgH * scale;
       var dy = (H - drawH) / 2;
-      // kontinualni drift ulevo — dve kopije, druga ogledalo (mirror spoj)
+      // kontinualni drift ulevo — dve kopije, druga ogledalo (mirror) sa fade ivicama
       driftOffset = (driftOffset + brzinaDrift) % drawW;
       ctx.globalAlpha = alfaOsnovna;
-      ctx.drawImage(oblImg, -driftOffset, dy, drawW, drawH);
-      ctx.drawImage(oblImg, -driftOffset + 2 * drawW, dy, -drawW, drawH);
+      ctx.drawImage(fadeTex, -driftOffset, dy, drawW, drawH);
+      ctx.drawImage(fadeTex, -driftOffset + 2 * drawW, dy, -drawW, drawH);
       ctx.globalAlpha = 1;
     }
 
