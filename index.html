@@ -1832,62 +1832,37 @@ function zvezdeCanvas(vrsta, fazaDana) {
 var SUNCE_GEN = 0;
 function sunceCanvas(vrsta, fazaDana) {
   SUNCE_GEN++;
-  var gen = SUNCE_GEN;
-  var sc = document.getElementById("scena");
-  if (!sc) return;
-  var stari = sc.querySelector("#sunce-canvas");
-  if (stari) stari.remove();
-  var cv = document.createElement("canvas");
-  cv.id = "sunce-canvas";
-  sc.appendChild(cv);
-  var ctx = cv.getContext("2d");
-  var W = 0, H = 0, DPR = 1;
   // suncey = centar lava u sceni — keširano, računa se jednom + na resize (getBoundingClientRect u loopu izaziva layout reflow svaki frame)
-  var suncey = H * 0.22;
+  var suncey = 0;
   function racunajSunceY() {
+    var scEl = document.getElementById("scena");
+    var sR = scEl.getBoundingClientRect();
     var lavEl = document.getElementById("lav");
-    if (!lavEl) { suncey = H * 0.22; return; }
+    if (!lavEl) { suncey = sR.height * 0.22; return; }
     var lR = lavEl.getBoundingClientRect();
-    var sR = sc.getBoundingClientRect();
     suncey = (lR.top + lR.height / 2) - sR.top;
   }
-  function resize() {
-    var r = sc.getBoundingClientRect();
-    W = r.width; H = r.height;
-    DPR = Math.min(window.devicePixelRatio || 1, (window.matchMedia && window.matchMedia("(pointer: fine)").matches) ? 1 : 1.5); // komp DPR 1, telefon 1.5
-    cv.width = Math.max(1, Math.floor(W * DPR));
-    cv.height = Math.max(1, Math.floor(H * DPR));
-    cv.style.width = W + "px";
-    cv.style.height = H + "px";
-    racunajSunceY(); // osveži suncey posle promene veličine (rotacija ekrana itd.)
-  }
-  resize(); // prvi poziv — postavlja W/H/DPR + računa suncey
+  var e = canvasEngine("sunce-canvas", SUNCE_GEN, function() { return SUNCE_GEN; }, false, racunajSunceY);
+  if (!e) return;
+  var W = e.getW(), H = e.getH();
   // boje po fazi dana — bogatije, toplije
   var bojaCentar, bojaZrak, bojaSjaj, bojaJezgro;
   if (fazaDana === "sumrak") { bojaCentar = "255,140,70"; bojaZrak = "255,110,50"; bojaSjaj = "255,120,55"; bojaJezgro = "255,200,130"; }
   else if (fazaDana === "jutro") { bojaCentar = "255,190,110"; bojaZrak = "255,170,90"; bojaSjaj = "255,180,100"; bojaJezgro = "255,230,170"; }
   else { bojaCentar = "255,218,130"; bojaZrak = "255,200,110"; bojaSjaj = "255,210,120"; bojaJezgro = "255,245,210"; }
   // keširani radial gradient za sjaj — više stopova za mekaniji atmosferski osećaj
-  var sjajGrd = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
+  var sjajGrd = e.ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
   sjajGrd.addColorStop(0, "rgba(" + bojaSjaj + ",0.48)");
   sjajGrd.addColorStop(0.15, "rgba(" + bojaSjaj + ",0.26)");
   sjajGrd.addColorStop(0.5, "rgba(" + bojaSjaj + ",0.08)");
   sjajGrd.addColorStop(1, "rgba(" + bojaSjaj + ",0)");
   // keširani gradient za krug sunca — dubina (sjajno jezgro → topli centar → dublja ivica)
-  var sunceGrd = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
+  var sunceGrd = e.ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
   sunceGrd.addColorStop(0, "rgba(" + bojaJezgro + ",1)");
   sunceGrd.addColorStop(0.55, "rgba(" + bojaCentar + ",1)");
   sunceGrd.addColorStop(0.9, "rgba(" + bojaCentar + ",0.98)");
   sunceGrd.addColorStop(1, "rgba(" + bojaZrak + ",0.72)");
-  var frameSkip = 0, tik = 0; // frame cap 30fps
-  function loop() {
-    if (gen !== SUNCE_GEN) return;
-    if (!SCENA_VIDANA && !SCENA_SVEZA) { if (++tik >= 48) { tik = 0; SCENA_SVEZA = true; } requestAnimationFrame(loop); return; }
-    frameSkip++;
-    if (frameSkip % FRAME_KORAK) { requestAnimationFrame(loop); return; }
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.clearRect(0, 0, cv.width, cv.height);
-    ctx.scale(DPR, DPR);
+  e.startLoop(function(ctx, W, H, DPR) {
     var t = performance.now() * 0.001;
     // sunce centrirano na lav centru — lav u srcu sunca (krakovi zrače iz lava)
     var suncex = W * 0.5;
@@ -2003,14 +1978,6 @@ function sunceCanvas(vrsta, fazaDana) {
     ctx.beginPath();
     ctx.arc(suncex, suncey, R * 1.8, 0, Math.PI * 2);
     ctx.stroke();
-    requestAnimationFrame(loop);
-  }
-  loop();
-  var toR5 = null;
-  window.addEventListener("resize", function() {
-    if (gen !== SUNCE_GEN) return;
-    clearTimeout(toR5);
-    toR5 = setTimeout(function() { resize(); racunajSunceY(); }, 200);
   });
 }
 
