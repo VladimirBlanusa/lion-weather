@@ -1444,13 +1444,26 @@ function oblaciCanvas(vrsta, fazaDana) {
   else if (fazaDana === "jutro") pKey = "jutro";
   var P = OBL_PALETA[pKey] || OBL_PALETA.oblacno;
 
-  // helper: hex → "r,g,b" string
-  function hexR(h) {
-    h = h.replace('#', '');
-    return parseInt(h.slice(0, 2), 16) + "," + parseInt(h.slice(2, 4), 16) + "," + parseInt(h.slice(4, 6), 16);
-  }
-  var rgbVrh = hexR(P.vrh), rgbDon = hexR(P.don);
   var alfaOsnovna = P.alfa;
+
+  // ——— teksture oblaka — 8 generisanih slika po varijanti (pKey → URL) ———
+  var OBL_TEX = {
+    oblacno: "https://oss-macaron-ai.macaron.im/image/text_to_image/6acf31ce7a54714631726adb.webp",
+    kisa:    "https://oss-macaron-ai.macaron.im/image/text_to_image/6acf31ce1ea25d2b44709b07.webp",
+    oluja:   "https://oss-macaron-ai.macaron.im/image/text_to_image/6acf31ce1ea25d2b44709b05.webp",
+    sneg:    "https://oss-macaron-ai.macaron.im/image/text_to_image/6acf31cea36ccea6ed3714ce.webp",
+    magla:   "https://oss-macaron-ai.macaron.im/image/text_to_image/6acf31ce7a54714631726add.webp",
+    sumrak:  "https://oss-macaron-ai.macaron.im/image/text_to_image/6acf31ce7a54714631726adf.webp",
+    jutro:   "https://oss-macaron-ai.macaron.im/image/text_to_image/6acf31ce1ea25d2b44709b09.webp",
+    noc:     "https://oss-macaron-ai.macaron.im/image/text_to_image/6acf31ce7a54714631726ae1.webp"
+  };
+  if (!window.OBL_IMG_CACHE) window.OBL_IMG_CACHE = {};
+  if (!OBL_IMG_CACHE[pKey]) {
+    var im = new Image();
+    im.src = OBL_TEX[pKey];
+    OBL_IMG_CACHE[pKey] = im;
+  }
+  var oblImg = OBL_IMG_CACHE[pKey];
 
   // ——— resize ———
   var W = 0, H = 0, DPR = 1;
@@ -1465,95 +1478,7 @@ function oblaciCanvas(vrsta, fazaDana) {
   }
   resize();
 
-  // ——— offscreen template puffs — jednom po sceni, drawImage u loopu ———
-  // dva template-a: tamni (pozadinski slojevi) i svetli (prednji sloj) — separacija bojama
-  var TSIZ = 128;
-  var tplTamni = document.createElement("canvas");
-  tplTamni.width = TSIZ; tplTamni.height = TSIZ;
-  var tplSvetli = document.createElement("canvas");
-  tplSvetli.width = TSIZ; tplSvetli.height = TSIZ;
-
-  // pufnasti oblik — 7 preklopljenih bumpova za bogatiji kumulus oblik
-  var BUMPS = [
-    { x: .50, y: .60, r: .44, a: .98 },  // glavni trbuh
-    { x: .28, y: .54, r: .32, a: .85 },  // levi bump
-    { x: .72, y: .56, r: .34, a: .87 },  // desni bump
-    { x: .38, y: .38, r: .26, a: .70 },  // gornji levi mali
-    { x: .56, y: .36, r: .24, a: .65 },  // gornji srednji
-    { x: .68, y: .42, r: .22, a: .60 },  // gornji desni mali
-    { x: .20, y: .64, r: .20, a: .55 },  // donji levi
-  ];
-
-  function napraviTemplate(tctx, bojaGlavna, bojaSenka) {
-    tctx.clearRect(0, 0, TSIZ, TSIZ);
-    // svetli deo (donji — trbuh oblaka)
-    for (var i = 0; i < BUMPS.length; i++) {
-      var b = BUMPS[i];
-      var cx = b.x * TSIZ, cy = b.y * TSIZ, cr = b.r * TSIZ;
-      var g = tctx.createRadialGradient(cx, cy, 0, cx, cy, cr);
-      g.addColorStop(0, "rgba(" + bojaGlavna + "," + b.a + ")");
-      g.addColorStop(0.5, "rgba(" + bojaGlavna + "," + (b.a * .35).toFixed(3) + ")");
-      g.addColorStop(1, "rgba(" + bojaGlavna + ",0)");
-      tctx.fillStyle = g;
-      tctx.fillRect(0, 0, TSIZ, TSIZ);
-    }
-    // senka (gornji deo — dubina)
-    for (var i = 0; i < BUMPS.length; i++) {
-      var b = BUMPS[i];
-      var cx = b.x * TSIZ, cy = (b.y - b.r * .2) * TSIZ, cr = b.r * TSIZ * .65;
-      var g = tctx.createRadialGradient(cx, cy, 0, cx, cy, cr);
-      g.addColorStop(0, "rgba(" + bojaSenka + "," + (b.a * .5).toFixed(3) + ")");
-      g.addColorStop(0.5, "rgba(" + bojaSenka + "," + (b.a * .18).toFixed(3) + ")");
-      g.addColorStop(1, "rgba(" + bojaSenka + ",0)");
-      tctx.fillStyle = g;
-      tctx.fillRect(0, 0, TSIZ, TSIZ);
-    }
-    // odsjaj (mali, gore-desno)
-    var hl = tctx.createRadialGradient(TSIZ * .62, TSIZ * .34, 0, TSIZ * .62, TSIZ * .34, TSIZ * .14);
-    hl.addColorStop(0, "rgba(255,255,255,0.30)");
-    hl.addColorStop(1, "rgba(255,255,255,0)");
-    tctx.fillStyle = hl;
-    tctx.fillRect(0, 0, TSIZ, TSIZ);
-  }
-  // tamni template — pozadinski slojevi (dominantno vrh boja)
-  napraviTemplate(tplTamni.getContext("2d"), rgbVrh, rgbVrh);
-  // svetli template — prednji sloj (dominantno don boja, vrh senka)
-  napraviTemplate(tplSvetli.getContext("2d"), rgbDon, rgbVrh);
-
-  // ——— slojevi oblaka — isti broj slojeva, bez noise/seed ———
-  var slojevi = [];
-  function napraviSloj(cfg) {
-    var pufnovi = [];
-    for (var i = 0; i < cfg.n; i++) {
-      pufnovi.push({
-        x: (i / cfg.n) * 1.5 + Math.random() * .2,
-        y: cfg.yBase + (Math.random() - .5) * cfg.yRazmak,
-        r: cfg.rMin + Math.random() * cfg.rRazmak,
-        phase: Math.random() * Math.PI * 2
-      });
-    }
-    return { pufnovi: pufnovi, brzina: cfg.brzina, skala: cfg.skala, alfa: cfg.alfa };
-  }
-
-  function initSlojeve() {
-    slojevi = [];
-    slojevi.push(napraviSloj({ n: 4, brzina: .0018, skala: 2.0, alfa: .20,
-      yBase: .12, yRazmak: .12, rMin: .24, rRazmak: .15 }));
-    slojevi.push(napraviSloj({ n: 5, brzina: .0036, skala: 1.35, alfa: .38,
-      yBase: .26, yRazmak: .15, rMin: .16, rRazmak: .12 }));
-    slojevi.push(napraviSloj({ n: 6, brzina: .006, skala: .9, alfa: .80,
-      yBase: .42, yRazmak: .18, rMin: .12, rRazmak: .1 }));
-    if (vrsta === "magla") {
-      slojevi = [];
-      slojevi.push(napraviSloj({ n: 3, brzina: .0012, skala: 2.7, alfa: .25,
-        yBase: .3, yRazmak: .2, rMin: .32, rRazmak: .15 }));
-      slojevi.push(napraviSloj({ n: 4, brzina: .0024, skala: 1.9, alfa: .40,
-        yBase: .55, yRazmak: .15, rMin: .22, rRazmak: .12 }));
-    }
-  }
-  initSlojeve();
-
-  // ——— animacijski loop — drawImage template (brzo, bez noise) ———
+  // ——— animacijski loop — drawImage teksture sa blagim drift ———
   var t = 0;
   var frameSkip = 0, tik = 0;
   function loop() {
@@ -1567,22 +1492,20 @@ function oblaciCanvas(vrsta, fazaDana) {
     ctx.clearRect(0, 0, cv.width, cv.height);
     ctx.scale(DPR, DPR);
 
-    for (var si = 0; si < slojevi.length; si++) {
-      var sloj = slojevi[si];
-      ctx.globalAlpha = sloj.alfa * alfaOsnovna;
-      var tpl = (si < slojevi.length - 1) ? tplTamni : tplSvetli; // pozadina tamna, prednji svetao
-      for (var pi = 0; pi < sloj.pufnovi.length; pi++) {
-        var pf = sloj.pufnovi[pi];
-        pf.x += sloj.brzina;
-        if (pf.x > 1.3) pf.x = -.3;
-        var wobbleR = 1 + Math.sin(t * .01 + pf.phase) * .08;
-        var px = pf.x * W;
-        var py = pf.y * H + Math.sin(t * .008 + pf.phase) * 6;
-        var r = pf.r * Math.min(W, H) * sloj.skala * wobbleR;
-        ctx.drawImage(tpl, px - r * .8, py - r * .65, r * 1.6, r * 1.3);
-      }
+    if (oblImg.complete && oblImg.naturalWidth > 0) {
+      // cover fit + 15% overscan za drift bez ivica
+      var imgW = oblImg.naturalWidth, imgH = oblImg.naturalHeight;
+      var scale = Math.max(W / imgW, H / imgH);
+      var drawW = imgW * scale * 1.15;
+      var drawH = imgH * scale * 1.15;
+      var driftRange = (drawW - W) / 2;
+      var driftX = Math.sin(t * 0.003) * driftRange * 0.6;
+      var dx = (W - drawW) / 2 + driftX;
+      var dy = (H - drawH) / 2 + Math.sin(t * 0.002) * 5;
+      ctx.globalAlpha = alfaOsnovna;
+      ctx.drawImage(oblImg, dx, dy, drawW, drawH);
+      ctx.globalAlpha = 1;
     }
-    ctx.globalAlpha = 1;
 
     SCENA_SVEZA = false;
     OBL_RAF = requestAnimationFrame(loop);
