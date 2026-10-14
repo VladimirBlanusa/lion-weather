@@ -1256,7 +1256,7 @@ function sati(){
   var d = new Date();
   var h = d.getHours(), m = d.getMinutes();
   document.getElementById("sat").textContent = (h<10?"0":"")+h+":"+(m<10?"0":"")+m;
-  document.getElementById("datum").textContent = DANI_SR[d.getDay()]+", "+d.getDate()+". "+MES[d.getMonth()]+" "+d.getFullYear()+".";
+  document.getElementById("datum").textContent = t('dani')[d.getDay()]+", "+d.getDate()+". "+t('meseci')[d.getMonth()]+" "+d.getFullYear()+".";
 }
 sati();
 setInterval(sati, 1000);
@@ -2204,7 +2204,7 @@ function postaviTraku() {
   if (IZBRANI_DAN >= 0 && d && IZBRANI_DAN < d.time.length) {
     renderSateZaDan(POSLEDNJI_TEKST, IZBRANI_DAN);
     var dt = new Date(d.time[IZBRANI_DAN] + "T12:00:00");
-    naslov.textContent = "Po satima — " + DANI_SR[dt.getDay()].toLowerCase();
+    naslov.textContent = t('poSatima') + " — " + t('dani')[dt.getDay()].toLowerCase();
   } else {
     renderSate(POSLEDNJI_TEKST.hourly, POSLEDNJI_TEKST.current.time, d && d.sunrise && d.sunrise[0], d && d.sunset && d.sunset[0], POSLEDNJI_TEKST.current.time);
     naslov.textContent = "Po satima";
@@ -2220,7 +2220,7 @@ function renderDana(d) {
     var info = WCODE[d.weather_code[i]] || ["", "oblacno", ""];
     var dt = new Date(d.time[i] + "T12:00:00");
     var datum = dt.getDate() + "." + (dt.getMonth() + 1) + ".";
-    var ime = i === 0 ? "Danas" : DANI_SR_KRATKO[dt.getDay()] + " " + datum;
+    var ime = i === 0 ? t('danas') : t('daniKratko')[dt.getDay()] + " " + datum;
     var red = document.createElement("div");
     red.className = "dan-red" + (i === IZBRANI_DAN ? " dan-izabran" : "");
     red.onclick = (function(idx) { return function() {
