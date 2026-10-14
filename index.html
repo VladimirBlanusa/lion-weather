@@ -102,6 +102,23 @@
     box-shadow: 0 6px 18px rgba(0, 0, 0, .5);
     /* backdrop-filter: blur(6px) uklonjen — koči scroll na fixed elementu (višak iz eksperimenata) */
   }
+  /* ——— Avatar modal — klik na pečat otvara Vlad & Maki avatar ——— */
+  .avatar-modal {
+    position: fixed; inset: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .avatar-modal-bg {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,.85);
+    cursor: pointer;
+  }
+  .avatar-modal-img {
+    position: relative;
+    max-width: 90%; max-height: 80%;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.8);
+    border: 2px solid rgba(212,175,55,.5);
+  }
   .card {
     width: 100%;
     max-width: 420px;
@@ -1018,7 +1035,12 @@
     <div id="lok-rez"></div>
   </div>
 
-  <div class="vb-pecat">V.B. &amp; Macaron</div>
+  <div class="vb-pecat" onclick="document.getElementById('avatar-modal').style.display='flex'">V.B. &amp; Macaron</div>
+  <!-- Avatar modal — klik na pečat otvara Vlad & Maki -->
+  <div id="avatar-modal" class="avatar-modal" style="display:none">
+    <div class="avatar-modal-bg" onclick="document.getElementById('avatar-modal').style.display='none'"></div>
+    <img class="avatar-modal-img" src="https://macaron-sandbox-workspace.oss-accelerate.aliyuncs.com/prod/01a05aef-9b6e-7737-bec4-ae31a3069526/workspace/lav-vreme/avatar-vb-maki.jpeg" alt="Vladimir Blanuša & Macaron AI — stvaranje zajedno">
+  </div>
 
   <div class="foot">Lion Weather · Open-Meteo</div>
   <div class="foot foot-crveni">
