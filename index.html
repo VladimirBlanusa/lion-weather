@@ -2561,7 +2561,7 @@ function obradiVazduh(j) {
 
 function obradi(tekst) {
   POSLEDNJI_TEKST = tekst;
-  var t = Math.round(tekst.current.temperature_2m);
+  var tep = Math.round(tekst.current.temperature_2m);
   var kod = tekst.current.weather_code;
   // Probni režim: ?efekt= obara i prikaz, lava i rečenicu na forsirano vreme
   var PROBA_KOD = ({ sunce: 0, oblacno: 3, kisa: 63, sneg: 73, oluja: 95, magla: 45, noc: 0 })[PROBA_EFEKT];
@@ -2570,12 +2570,12 @@ function obradi(tekst) {
   var k = (tekst.current.precipitation || 0);
   var info = WCODE[kod] || [t('nepoznato'), "oblacno", t('lavZbunjen')];
 
-  document.getElementById("temp").textContent = t;
+  document.getElementById("temp").textContent = tep;
   document.getElementById("desc").textContent = info[0];
   var poruka = info[2];
   if (kod === 0) {
-    if (t >= 25) poruka = t('sunceVruce');
-    else if (t >= 12) poruka = t('suncePrijatno');
+    if (tep >= 25) poruka = t('sunceVruce');
+    else if (tep >= 12) poruka = t('suncePrijatno');
     else poruka = t('vedroZima');
   }
   document.getElementById("mood").textContent = poruka;
