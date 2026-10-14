@@ -382,7 +382,7 @@
     margin-top: 10px;
     padding: 11px 14px;
     border-radius: 12px;
-    font-size: 13px;
+    font-size: 16px;
     display: none;
     align-items: center;
     gap: 11px;
@@ -396,13 +396,6 @@
   .upozorenje.cisto { background: linear-gradient(180deg, #b53a2a, #7a1f15); }
   .upozorenje.umereno { background: linear-gradient(180deg, #cb4335, #8a281c); }
   .upozorenje.blago { background: linear-gradient(180deg, #c8634a, #8a3528); }
-  .upoz-ikona {
-    font-size: 18px; flex-shrink: 0;
-    width: 32px; height: 32px;
-    display: flex; align-items: center; justify-content: center;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, .22);
-  }
   .upoz-naslov { color: #f0d77a; font-weight: 800; }
   .meta {
     margin-top: 16px;
@@ -1253,16 +1246,16 @@ var I18N = {
     prognozaNijeStigla: "prognoza nije stigla",
     osvetljeno: "osvetljeno",
     lavovi: "Lavovi",
-    upozOluja: "Oluja danas — grom i grad, sedi gde si",
-    upozMecava: "Mećava danas — sneg i jak vetar, ostanite unutra",
-    upozLed: "Led i ledena kiša — ceste klizave, vozite pažljivo",
-    upozTalas: "Toplotni talas — do {x}°, pijte vodu",
-    upozJakSneg: "Jak sneg danas — očekujte nanose",
-    upozHladnoca: "Ekstremna hladnoća — do {x}°, toplo se obucite",
-    upozJakVetar: "Jak vetar — do {x} km/h, čuvaj stvari",
-    upozJakaKisa: "Jaka kiša danas — ponesi kišobran",
-    upozMraz: "Mraz — čuvaj biljke",
-    upozMagla: "Magla — vozite pažljivo"
+    upozOluja: "Upozorenje — Oluja!!!",
+    upozMecava: "Upozorenje — Mećava!!!",
+    upozLed: "Upozorenje — Led i ledena kiša!!!",
+    upozTalas: "Upozorenje — Toplotni talas!!!",
+    upozJakSneg: "Upozorenje — Jak sneg!!!",
+    upozHladnoca: "Upozorenje — Ekstremna hladnoća!!!",
+    upozJakVetar: "Upozorenje — Jak vetar!!!",
+    upozJakaKisa: "Upozorenje — Jaka kiša!!!",
+    upozMraz: "Upozorenje — Mraz!!!",
+    upozMagla: "Upozorenje — Magla!!!"
   },
   en: {
     dani: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
@@ -1312,16 +1305,16 @@ var I18N = {
     prognozaNijeStigla: "forecast unavailable",
     osvetljeno: "lit",
     lavovi: "Lions",
-    upozOluja: "Storm today — thunder and hail, stay put",
-    upozMecava: "Blizzard today — snow and strong wind, stay indoors",
-    upozLed: "Ice and freezing rain — roads slippery, drive carefully",
-    upozTalas: "Heat wave — up to {x}°, drink water",
-    upozJakSneg: "Heavy snow today — expect drifts",
-    upozHladnoca: "Extreme cold — down to {x}°, dress warmly",
-    upozJakVetar: "Strong wind — up to {x} km/h, secure things",
-    upozJakaKisa: "Heavy rain today — bring an umbrella",
-    upozMraz: "Frost — protect your plants",
-    upozMagla: "Fog — drive carefully"
+    upozOluja: "Warning — Storm!!!",
+    upozMecava: "Warning — Blizzard!!!",
+    upozLed: "Warning — Ice and freezing rain!!!",
+    upozTalas: "Warning — Heat wave!!!",
+    upozJakSneg: "Warning — Heavy snow!!!",
+    upozHladnoca: "Warning — Extreme cold!!!",
+    upozJakVetar: "Warning — Strong wind!!!",
+    upozJakaKisa: "Warning — Heavy rain!!!",
+    upozMraz: "Warning — Frost!!!",
+    upozMagla: "Warning — Fog!!!"
   }
 };
 function t(key) {
@@ -2460,22 +2453,22 @@ function obradiUpozorenja(tekst) {
   var PROBA_UPOZ = new URLSearchParams(location.search).get("upoz");
   if (PROBA_UPOZ) {
     var TEST = {
-      oluja: { nivo: "cisto", ikona: "⛈️", tekst: "Oluja danas — grom i grad, sedi gde si" },
-      vetar: { nivo: "umereno", ikona: "💨", tekst: "Jak vetar — test, čuvaj stvari" },
-      talas: { nivo: "cisto", ikona: "🌡️", tekst: "Toplotni talas — test, pijte vodu" },
-      kisa: { nivo: "umereno", ikona: "🌧️", tekst: "Jaka kiša danas — ponesi kišobran" },
-      mraz: { nivo: "blago", ikona: "❄️", tekst: "Mraz — čuvaj biljke" },
-      magla: { nivo: "blago", ikona: "🌫️", tekst: "Magla — vozite pažljivo" },
-      led: { nivo: "cisto", ikona: "🧊", tekst: "Led i ledena kiša — test, ceste klizave" },
-      sneg: { nivo: "umereno", ikona: "❄️", tekst: "Jak sneg — test, čistite sneg" },
-      mecava: { nivo: "cisto", ikona: "🌨️", tekst: "Mećava — test, sneg i vetar" },
-      hladnoca: { nivo: "umereno", ikona: "🥶", tekst: "Ekstremna hladnoća — test, toplo se obucite" }
+      oluja: { nivo: "cisto", tekst: t('upozOluja') },
+      vetar: { nivo: "umereno", tekst: t('upozJakVetar') },
+      talas: { nivo: "cisto", tekst: t('upozTalas') },
+      kisa: { nivo: "umereno", tekst: t('upozJakaKisa') },
+      mraz: { nivo: "blago", tekst: t('upozMraz') },
+      magla: { nivo: "blago", tekst: t('upozMagla') },
+      led: { nivo: "cisto", tekst: t('upozLed') },
+      sneg: { nivo: "umereno", tekst: t('upozJakSneg') },
+      mecava: { nivo: "cisto", tekst: t('upozMecava') },
+      hladnoca: { nivo: "umereno", tekst: t('upozHladnoca') }
     };
-    var t = TEST[PROBA_UPOZ];
-    if (t) {
-      el.className = "upozorenje " + t.nivo;
-      var dd = t.tekst.split(" — ");
-      el.innerHTML = '<span class="upoz-ikona">' + t.ikona + '</span><span><span class="upoz-naslov">' + dd[0] + '</span>' + (dd[1] ? ' — ' + dd[1] : '') + '</span>';
+    var proba = TEST[PROBA_UPOZ];
+    if (proba) {
+      el.className = "upozorenje " + proba.nivo;
+      var dd = proba.tekst.split(" — ");
+      el.innerHTML = '<span><span class="upoz-naslov">' + dd[0] + '</span>' + (dd[1] ? ' — ' + dd[1] : '') + '</span>';
       el.style.display = "flex";
     }
     return;
@@ -2500,13 +2493,13 @@ function obradiUpozorenja(tekst) {
   } else if ((danKod >= 56 && danKod <= 57) || (danKod >= 66 && danKod <= 67) || (curKod >= 56 && curKod <= 57) || (curKod >= 66 && curKod <= 67)) {
     upoz = { nivo: "cisto", ikona: "🧊", tekst: t('upozLed') };
   } else if (danTmax >= 33) {
-    upoz = { nivo: "cisto", ikona: "🌡️", tekst: t('upozTalas').replace('{x}', Math.round(danTmax)) };
+    upoz = { nivo: "cisto", ikona: "🌡️", tekst: t('upozTalas') };
   } else if (danKod === 75 || danKod === 86 || curKod === 75 || curKod === 86) {
     upoz = { nivo: "umereno", ikona: "❄️", tekst: t('upozJakSneg') };
   } else if (danTmin <= -10) {
-    upoz = { nivo: "umereno", ikona: "🥶", tekst: t('upozHladnoca').replace('{x}', Math.round(danTmin)) };
+    upoz = { nivo: "umereno", ikona: "🥶", tekst: t('upozHladnoca') };
   } else if (danVetarMax >= 50) {
-    upoz = { nivo: "umereno", ikona: "💨", tekst: t('upozJakVetar').replace('{x}', Math.round(danVetarMax)) };
+    upoz = { nivo: "umereno", ikona: "💨", tekst: t('upozJakVetar') };
   } else if (danKisaSansa >= 85) {
     upoz = { nivo: "umereno", ikona: "🌧️", tekst: t('upozJakaKisa') };
   } else if (danTmin < 1) {
@@ -2518,7 +2511,7 @@ function obradiUpozorenja(tekst) {
   if (upoz) {
     el.className = "upozorenje " + upoz.nivo;
     var dd = upoz.tekst.split(" — ");
-    el.innerHTML = '<span class="upoz-ikona">' + upoz.ikona + '</span><span><span class="upoz-naslov">' + dd[0] + '</span>' + (dd[1] ? ' — ' + dd[1] : '') + '</span>';
+    el.innerHTML = '<span><span class="upoz-naslov">' + dd[0] + '</span>' + (dd[1] ? ' — ' + dd[1] : '') + '</span>';
     el.style.display = "flex";
   }
 }
