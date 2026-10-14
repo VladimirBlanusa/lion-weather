@@ -382,7 +382,7 @@
     margin-top: 10px;
     padding: 11px 14px;
     border-radius: 12px;
-    font-size: 16px;
+    font-size: 18px;
     display: none;
     align-items: center;
     justify-content: center;
@@ -398,6 +398,7 @@
   .upozorenje.umereno { background: linear-gradient(180deg, #cb4335, #8a281c); }
   .upozorenje.blago { background: linear-gradient(180deg, #c8634a, #8a3528); }
   .upoz-naslov { color: #f0d77a; font-weight: 800; }
+  .upoz-tip { color: #1a0a06; font-weight: 800; }
   .meta {
     margin-top: 16px;
     display: flex;
@@ -2469,7 +2470,7 @@ function obradiUpozorenja(tekst) {
     if (proba) {
       el.className = "upozorenje " + proba.nivo;
       var dd = proba.tekst.split(" — ");
-      el.innerHTML = '<span><span class="upoz-naslov">' + dd[0] + '</span>' + (dd[1] ? ' — ' + dd[1] : '') + '</span>';
+      el.innerHTML = '<span><span class="upoz-naslov">' + dd[0] + '</span>' + (dd[1] ? ' — <span class="upoz-tip">' + dd[1] + '</span>' : '') + '</span>';
       el.style.display = "flex";
     }
     return;
@@ -2512,7 +2513,7 @@ function obradiUpozorenja(tekst) {
   if (upoz) {
     el.className = "upozorenje " + upoz.nivo;
     var dd = upoz.tekst.split(" — ");
-    el.innerHTML = '<span><span class="upoz-naslov">' + dd[0] + '</span>' + (dd[1] ? ' — ' + dd[1] : '') + '</span>';
+    el.innerHTML = '<span><span class="upoz-naslov">' + dd[0] + '</span>' + (dd[1] ? ' — <span class="upoz-tip">' + dd[1] + '</span>' : '') + '</span>';
     el.style.display = "flex";
   }
 }
