@@ -1425,8 +1425,8 @@ function oblaciCanvas(vrsta, fazaDana) {
     oblacno: "https://oss-macaron-ai.macaron.im/image/text_to_image/6acf3d2ea36ccea6ed3721fa.webp",
     kisa:    "https://oss-macaron-ai.macaron.im/image/text_to_image/6acf3d2e1ea25d2b4470ad56.webp",
     oluja:   "https://oss-macaron-ai.macaron.im/image/text_to_image/6acf3d2e7a54714631727dc7.webp",
-    sneg:    "https://oss-macaron-ai.macaron.im/image/text_to_image/6acf3d2ea36ccea6ed3721fe.webp",
-    magla:   "https://oss-macaron-ai.macaron.im/image/text_to_image/6acf3d2ea36ccea6ed3721fc.webp",
+    sneg:    "https://oss-macaron-ai.macaron.im/image/text_to_image/6acf41937a5471463172841c.webp",
+    magla:   "https://oss-macaron-ai.macaron.im/image/text_to_image/6acf4193a36ccea6ed372676.webp",
     sumrak:  "https://oss-macaron-ai.macaron.im/image/text_to_image/6acf3d2e1ea25d2b4470ad54.webp",
     jutro:   "https://oss-macaron-ai.macaron.im/image/text_to_image/6acf3d2e7a54714631727dc3.webp",
     noc:     "https://oss-macaron-ai.macaron.im/image/text_to_image/6acf3d2e7a54714631727dc5.webp"
@@ -1455,7 +1455,7 @@ function oblaciCanvas(vrsta, fazaDana) {
   // ——— animacijski loop — drawImage teksture sa kontinualnim drift (mirror) ———
   var t = 0;
   var driftOffset = 0;
-  var brzinaDrift = 0.5;  // px po frejmu — podesivo
+  var brzinaDrift = 0.4;  // px po frejmu — podesivo (smanjeno: šav kasni ~45s umesto ~30s)
   var frameSkip = 0, tik = 0;
   function loop() {
     if (gen !== OBL_GEN) return;
