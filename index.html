@@ -1478,8 +1478,10 @@ function oblaciCanvas(vrsta, fazaDana) {
   }
   resize();
 
-  // ——— animacijski loop — drawImage teksture sa blagim drift ———
+  // ——— animacijski loop — drawImage teksture sa kontinualnim drift ———
   var t = 0;
+  var driftOffset = 0;
+  var brzinaDrift = 1.2;  // px po frejmu — podesivo
   var frameSkip = 0, tik = 0;
   function loop() {
     if (gen !== OBL_GEN) return;
@@ -1493,17 +1495,17 @@ function oblaciCanvas(vrsta, fazaDana) {
     ctx.scale(DPR, DPR);
 
     if (oblImg.complete && oblImg.naturalWidth > 0) {
-      // cover fit + 15% overscan za drift bez ivica
+      // cover fit
       var imgW = oblImg.naturalWidth, imgH = oblImg.naturalHeight;
       var scale = Math.max(W / imgW, H / imgH);
-      var drawW = imgW * scale * 1.15;
-      var drawH = imgH * scale * 1.15;
-      var driftRange = (drawW - W) / 2;
-      var driftX = Math.sin(t * 0.003) * driftRange * 0.6;
-      var dx = (W - drawW) / 2 + driftX;
-      var dy = (H - drawH) / 2 + Math.sin(t * 0.002) * 5;
+      var drawW = imgW * scale;
+      var drawH = imgH * scale;
+      var dy = (H - drawH) / 2;
+      // kontinualni drift ulevo — dve kopije za seamless wrap
+      driftOffset = (driftOffset + brzinaDrift) % drawW;
       ctx.globalAlpha = alfaOsnovna;
-      ctx.drawImage(oblImg, dx, dy, drawW, drawH);
+      ctx.drawImage(oblImg, -driftOffset, dy, drawW, drawH);
+      ctx.drawImage(oblImg, -driftOffset + drawW, dy, drawW, drawH);
       ctx.globalAlpha = 1;
     }
 
