@@ -2138,7 +2138,7 @@ function sunceCanvas(vrsta, fazaDana) {
       var vd = 1 + 0.15 * Math.sin(t * 0.5 + fz);
       var sw = 10 + 3 * Math.sin(t * 0.3 + fz); // uži od glavnih
       ctx.rotate((Math.PI * 2) / brojZraka);
-      ctx.fillStyle = "rgba(" + bojaZrak + "," + (0.13 * puls * vd).toFixed(3) + ")";
+      ctx.fillStyle = "rgba(" + bojaZrak + "," + (0.18 * puls * vd).toFixed(3) + ")";
       ctx.beginPath();
       ctx.moveTo(R * 1.05, -sw);
       ctx.lineTo(R * 2.3 * vd, -sw * 0.2); // kraći od glavnih
@@ -2165,6 +2165,27 @@ function sunceCanvas(vrsta, fazaDana) {
       ctx.lineTo(R * 3.0 * vd, 0);
       ctx.lineTo(R * 2.8 * vd, sw * 0.15);
       ctx.lineTo(R * 1.1, sw);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.restore();
+    // korona zraci — kratki zlatno-beli krakovi odmah uz ivicu sunca
+    ctx.save();
+    ctx.translate(suncex, suncey);
+    ctx.rotate(ugao);
+    ctx.rotate(Math.PI / brojZraka); // između glavnih zrakova
+    for (var i = 0; i < brojZraka; i++) {
+      var fz = i * 1.1 + 2.0;
+      var vd = 1 + 0.10 * Math.sin(t * 0.6 + fz);
+      var sw = 5 + 1.5 * Math.sin(t * 0.4 + fz);
+      ctx.rotate((Math.PI * 2) / brojZraka);
+      ctx.fillStyle = "rgba(" + bojaJezgro + "," + (0.50 * puls * vd).toFixed(3) + ")";
+      ctx.beginPath();
+      ctx.moveTo(R * 1.02, -sw);
+      ctx.lineTo(R * 2.0 * vd, -sw * 0.15);
+      ctx.lineTo(R * 2.2 * vd, 0);
+      ctx.lineTo(R * 2.0 * vd, sw * 0.15);
+      ctx.lineTo(R * 1.02, sw);
       ctx.closePath();
       ctx.fill();
     }
