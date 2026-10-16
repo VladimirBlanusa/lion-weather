@@ -924,6 +924,19 @@
   <div class="top-row">
     <div>
       <div id="sat">--:--</div>
+      <div id="sat-analog" class="sat-analog" style="display:none">
+        <svg viewBox="0 0 100 100" width="64" height="64">
+          <circle cx="50" cy="50" r="48" fill="#0a0a0a" stroke="#c9a44a" stroke-width="1.5"/>
+          <text x="50" y="19" text-anchor="middle" fill="#c9a44a" font-size="8" font-weight="600">XII</text>
+          <text x="82" y="53" text-anchor="middle" fill="#c9a44a" font-size="8" font-weight="600">III</text>
+          <text x="50" y="87" text-anchor="middle" fill="#c9a44a" font-size="8" font-weight="600">VI</text>
+          <text x="18" y="53" text-anchor="middle" fill="#c9a44a" font-size="8" font-weight="600">IX</text>
+          <line id="kaz-sat" x1="50" y1="50" x2="50" y2="28" stroke="#c9a44a" stroke-width="3" stroke-linecap="round"/>
+          <line id="kaz-min" x1="50" y1="50" x2="50" y2="18" stroke="#c9a44a" stroke-width="2" stroke-linecap="round"/>
+          <line id="kaz-sec" x1="50" y1="50" x2="50" y2="14" stroke="#d4af37" stroke-width="1" stroke-linecap="round"/>
+          <circle cx="50" cy="50" r="2" fill="#c9a44a"/>
+        </svg>
+      </div>
       <div id="datum">-/-/-</div>
       <div id="offline-bedz" class="offline-bedz">Bez mreže · keš</div>
     </div>
@@ -3083,5 +3096,46 @@ window.addEventListener("DOMContentLoaded", function(){
     </div>
   </div>
 </div>
+<style>
+  .sat-analog {
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, .65)), drop-shadow(0 0 12px rgba(212, 175, 55, .15));
+    cursor: pointer;
+  }
+  .sat-analog svg { display: block; }
+  #sat { cursor: pointer; }
+</style>
+<script>
+// Analogni sat — kazaljke se pomeraju u realnom vremenu
+function analogSati(){
+  var d = new Date();
+  var h = d.getHours() % 12, m = d.getMinutes(), s = d.getSeconds();
+  var ugaoSat = (h + m/60) * 30;
+  var ugaoMin = (m + s/60) * 6;
+  var ugaoSec = s * 6;
+  var ks = document.getElementById("kaz-sat");
+  var km = document.getElementById("kaz-min");
+  var ksc = document.getElementById("kaz-sec");
+  if (ks) ks.setAttribute("transform", "rotate(" + ugaoSat + " 50 50)");
+  if (km) km.setAttribute("transform", "rotate(" + ugaoMin + " 50 50)");
+  if (ksc) ksc.setAttribute("transform", "rotate(" + ugaoSec + " 50 50)");
+}
+analogSati();
+setInterval(analogSati, 1000);
+
+// Tap na sat menja mod digitalni/analogni
+function toggleSat(){
+  var dig = document.getElementById("sat");
+  var ana = document.getElementById("sat-analog");
+  if (ana.style.display === "none") {
+    dig.style.display = "none";
+    ana.style.display = "block";
+  } else {
+    ana.style.display = "none";
+    dig.style.display = "block";
+  }
+}
+document.getElementById("sat").addEventListener("click", toggleSat);
+document.getElementById("sat-analog").addEventListener("click", toggleSat);
+</script>
 </body>
 </html>
