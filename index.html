@@ -435,9 +435,9 @@
   .models-grid { display: grid; grid-template-columns: auto 1fr 1fr 1fr; gap: 0; font-size: 13px; }
   .models-grid > div { padding: 6px 4px; border-bottom: 1px solid rgba(212,175,55,.08); }
   .models-grid > div:nth-last-child(-n+4) { border-bottom: none; }
-  .models-h { text-align: center; font-weight: 600; color: var(--gold); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; }
-  .models-l { color: rgba(245, 241, 230, .82); font-size: 12px; }
-  .models-grid > div:not(.models-h):not(.models-l) { text-align: center; color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .models-h { text-align: center; font-weight: 600; color: #c9a44a; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; }
+  .models-l { color: #c9a44a; font-size: 12px; }
+  .models-grid > div:not(.models-h):not(.models-l) { text-align: center; color: #c9a44a; font-weight: 600; font-variant-numeric: tabular-nums; }
   /* ——— Modeli — izvori: v3.22 vraćeni u standardno plavo staklo, isti sistem kao i ostali paneli ——— */
   /* ——— Pozornica prati nebo: dan diše, noć tone ——— */
   body.mood-sunce   { background: radial-gradient(ellipse at 50% 20%, #1d5aa8 0%, #103a75 60%, #081c3a 100%); }
@@ -689,13 +689,13 @@
     box-shadow: 0 0 0 2px rgba(212, 175, 55, .22), 0 4px 14px rgba(0, 0, 0, .35);
   }
   .vazduh-opis { flex: 1; min-width: 0; }
-  .vazduh-ime { font-size: 16px; font-weight: 600; color: var(--text); }
-  .vazduh-savet { font-size: 12px; color: rgba(245, 241, 230, .65); margin-top: 2px; line-height: 1.35; }
+  .vazduh-ime { font-size: 16px; font-weight: 600; color: #c9a44a; }
+  .vazduh-savet { font-size: 12px; font-weight: 500; color: #c9a44a; margin-top: 2px; line-height: 1.35; }
   .vazduh-stubici { display: flex; align-items: flex-end; gap: 6px; height: 70px; margin-top: 12px; }
   .vazduh-stub { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; }
   .vazduh-stub .bar { width: 100%; border-radius: 3px 3px 0 0; min-height: 4px; transition: height .15s ease; box-shadow: 0 2px 6px rgba(0,0,0,.25); }
-  .vazduh-stub .val { font-size: 11px; color: var(--text); font-weight: 600; margin-top: 3px; font-variant-numeric: tabular-nums; }
-  .vazduh-stub .ime { font-size: 9px; color: rgba(245, 241, 230, .5); text-transform: uppercase; letter-spacing: .04em; }
+  .vazduh-stub .val { font-size: 11px; color: #c9a44a; font-weight: 600; margin-top: 3px; font-variant-numeric: tabular-nums; }
+  .vazduh-stub .ime { font-size: 9px; color: #c9a44a; text-transform: uppercase; letter-spacing: .04em; }
 
   .dan-red {
     display: flex;
