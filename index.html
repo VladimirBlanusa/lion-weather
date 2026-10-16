@@ -924,16 +924,12 @@
   <div class="top-row">
     <div>
       <div id="sat">--:--</div>
-      <div id="sat-analog" class="sat-analog" style="display:none">
-        <svg viewBox="0 0 100 100" width="64" height="64">
-          <circle cx="50" cy="50" r="48" fill="#0a0a0a" stroke="#c9a44a" stroke-width="1.5"/>
-          <text x="50" y="19" text-anchor="middle" fill="#c9a44a" font-size="8" font-weight="600">XII</text>
-          <text x="82" y="53" text-anchor="middle" fill="#c9a44a" font-size="8" font-weight="600">III</text>
-          <text x="50" y="87" text-anchor="middle" fill="#c9a44a" font-size="8" font-weight="600">VI</text>
-          <text x="18" y="53" text-anchor="middle" fill="#c9a44a" font-size="8" font-weight="600">IX</text>
-          <line id="kaz-sat" x1="50" y1="50" x2="50" y2="28" stroke="#c9a44a" stroke-width="3" stroke-linecap="round"/>
-          <line id="kaz-min" x1="50" y1="50" x2="50" y2="18" stroke="#c9a44a" stroke-width="2" stroke-linecap="round"/>
-          <line id="kaz-sec" x1="50" y1="50" x2="50" y2="14" stroke="#d4af37" stroke-width="1" stroke-linecap="round"/>
+      <div id="sat-analog" class="sat-analog" style="display:none; position: relative; width: 130px; height: 130px; cursor: pointer;">
+        <img src="https://oss-macaron-ai.macaron.im/image/text_to_image/6ad2124a4686db36887df319.webp" alt="Analogni sat" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%;">
+        <svg viewBox="0 0 100 100" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
+          <line id="kaz-sat" x1="50" y1="50" x2="50" y2="28" stroke="#c9a44a" stroke-width="2.5" stroke-linecap="round"/>
+          <line id="kaz-min" x1="50" y1="50" x2="50" y2="18" stroke="#c9a44a" stroke-width="1.8" stroke-linecap="round"/>
+          <line id="kaz-sec" x1="50" y1="50" x2="50" y2="14" stroke="#d4af37" stroke-width="0.8" stroke-linecap="round"/>
           <circle cx="50" cy="50" r="2" fill="#c9a44a"/>
         </svg>
       </div>
