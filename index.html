@@ -6,7 +6,7 @@
 <title>Lion Weather</title>
 <meta name="description" content="Vremenska prognoza sa lavom koji zna šta priča 🦁 — sat, temperatura, 7 dana unapred, sve u zlatu.">
 <link rel="icon" type="image/png" href="https://macaron-sandbox-workspace.oss-accelerate.aliyuncs.com/prod/01a05aef-9b6e-7737-bec4-ae31a3069526/workspace/lav-vreme/favicon.png">
-<link rel="icon" type="image/webp" href="https://macaron-sandbox-workspace.oss-accelerate.aliyuncs.com/prod/01a05aef-9b6e-7737-bec4-ae31a3069526/workspace/lav-vreme/ikonica-zlatna-1024.webp"> <!-- v3.51: zlatni sunčani lav umesto plavog logo-lava -->
+<link rel="icon" type="image/webp" href="https://macaron-sandbox-workspace.oss-accelerate.aliyuncs.com/prod/01a05aef-9b6e-7737-bec4-ae31a3069526/workspace/lav-vreme/ikonica-zlatna-1024.webp">
 <link rel="apple-touch-icon" href="https://macaron-sandbox-workspace.oss-accelerate.aliyuncs.com/prod/01a05aef-9b6e-7737-bec4-ae31a3069526/workspace/lav-vreme/apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0a0f1a">
@@ -20,9 +20,7 @@
 <meta property="og:image" content="https://macaron-sandbox-workspace.oss-accelerate.aliyuncs.com/prod/01a05aef-9b6e-7737-bec4-ae31a3069526/workspace/lav-vreme/og-lav.jpg">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
-<!-- v3.61: Radar — Leaflet + RainViewer, centrirano na LOK -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
+<!-- Leaflet se učitava lazy u ucitajRadar() — ne koči prvi load -->
 <style>
   :root {
     --bg-mid: #111826;
@@ -145,7 +143,6 @@
   }
   #lav.fade { opacity: 0; }
   #lav-wrap { position: relative; display: inline-block; }
-  /* ef-* klase (stari CSS DOM efekti) UKLONJENE — zamenjene canvas engine-om; ef-disi ostaje (koristi ga nebo-sunce, #scena::before, dugme) */
   @keyframes ef-disi {
     0%, 100% { transform: scale(.94); opacity: .8; }
     50% { transform: scale(1.07); opacity: 1; }
@@ -464,7 +461,6 @@
     overflow: hidden;
     pointer-events: none;
     z-index: 0;
-    /* will-change: transform uklonjen — stvarao GPU sloj koji koči skrol (ChatGPT analiza) */
   }
   /* Noć: zvezdano nebo kao pozadina scene (ispod canvas zvezda) */
   .mood-noc #scena { background: url("https://oss-macaron-ai.macaron.im/image/chat_image/614da24e-e925-47fa-8a7d-09e156c6268e.webp") center/cover no-repeat, radial-gradient(ellipse at 50% 20%, #101630 0%, #0a0e20 65%, #040610 100%); }
@@ -528,7 +524,6 @@
     text-shadow: 0 1px 2px rgba(255,255,255,.55), 0 0 4px rgba(255,255,255,.3);
   }
   /* ——— Scena u kvadratu: kapi, pahulje, blesak, oblaci, zvezde ——— */
-  /* ——— STARI CSS efekti (.sc-kapa, .sc-kap, .sc-pahulja) UKLONJENI — zamenjeni canvas engine-om (kisaCanvas, snegCanvas) ——— */
   .sc-blesak {
     position: absolute; inset: 0;
     background: rgba(255,204,96,.22);
@@ -2814,22 +2809,24 @@ function ucitajPrognozu() {
     .then(function(j){ sacuvajKes(j); obradi(j); document.getElementById("msg").style.display = "none"; document.getElementById("loader").style.display = "none"; })
     .catch(function(){ if (!imaKes) prikaziKes(t('prognozaNijeStigla')); });
 
-  // Uporedni modeli (ECMWF dolazi iz glavnog poziva)
-  fetch(
-    "https://api.open-meteo.com/v1/forecast?latitude=" + LOK.lat + "&longitude=" + LOK.lon +
-    "&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max&forecast_days=1&timezone=auto&models=gfs_seamless"
-  )
-    .then(function(r){ return r.json(); })
-    .then(function(j){ uporediModel(j, "m-gfs"); })
-    .catch(function(){});
+  // Uporedni modeli — odloži da ne blokiraju glavni fetch (ECMWF dolazi iz glavnog poziva)
+  setTimeout(function(){
+    fetch(
+      "https://api.open-meteo.com/v1/forecast?latitude=" + LOK.lat + "&longitude=" + LOK.lon +
+      "&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max&forecast_days=1&timezone=auto&models=gfs_seamless"
+    )
+      .then(function(r){ return r.json(); })
+      .then(function(j){ uporediModel(j, "m-gfs"); })
+      .catch(function(){});
 
-  fetch(
-    "https://api.open-meteo.com/v1/forecast?latitude=" + LOK.lat + "&longitude=" + LOK.lon +
-    "&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max&forecast_days=1&timezone=auto&models=icon_seamless"
-  )
-    .then(function(r){ return r.json(); })
-    .then(function(j){ uporediModel(j, "m-icon"); })
-    .catch(function(){});
+    fetch(
+      "https://api.open-meteo.com/v1/forecast?latitude=" + LOK.lat + "&longitude=" + LOK.lon +
+      "&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max&forecast_days=1&timezone=auto&models=icon_seamless"
+    )
+      .then(function(r){ return r.json(); })
+      .then(function(j){ uporediModel(j, "m-icon"); })
+      .catch(function(){});
+  }, 0);
 
   // v3.69 Grupa 10: Kvalitet vazduha — Open-Meteo air-quality API (EU AQI)
   fetch(
@@ -2996,6 +2993,21 @@ window.addEventListener("DOMContentLoaded", function(){
     prikaziOkvir(idx);
   }
 
+  // ——— Leaflet lazy: učitaj CSS+JS tek kad se otvori radar (štediti load) ———
+  var LEAFLET_UCITAN = (typeof L !== "undefined");
+  function ucitajLeaflet(cb){
+    if (LEAFLET_UCITAN) { cb(); return; }
+    var l = document.createElement("link");
+    l.rel = "stylesheet";
+    l.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+    document.head.appendChild(l);
+    var s = document.createElement("script");
+    s.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+    s.onload = function(){ LEAFLET_UCITAN = true; cb(); };
+    s.onerror = function(){ rMapa.innerHTML = '<div class="radar-greska">' + t('mapaNedostupna') + '</div>'; };
+    document.head.appendChild(s);
+  }
+
   function init(){
     if (mapa) return;
     if (typeof L === "undefined"){
@@ -3032,31 +3044,33 @@ window.addEventListener("DOMContentLoaded", function(){
   function ucitajRadar(){
     rGrad.textContent = LOK.ime;
     rVreme.textContent = t('ucitavam');
-    init();
-    if (!mapa) return;
-    if (sloj){ mapa.removeLayer(sloj); sloj = null; }
-    okviri = [];
-    rPun.style.width = "0%";
-    rKvoci.style.left = "0%";
-    pauziraj();
-    setTimeout(function(){ mapa.invalidateSize(); }, 60);
-    fetch("https://api.rainviewer.com/public/weather-maps.json")
-      .then(function(r){ return r.json(); })
-      .then(function(d){
-        host = d.host;
-        okviri = (d.radar && d.radar.past) ? d.radar.past : [];
-        if (!okviri.length){
+    ucitajLeaflet(function(){
+      init();
+      if (!mapa) return;
+      if (sloj){ mapa.removeLayer(sloj); sloj = null; }
+      okviri = [];
+      rPun.style.width = "0%";
+      rKvoci.style.left = "0%";
+      pauziraj();
+      setTimeout(function(){ mapa.invalidateSize(); }, 60);
+      fetch("https://api.rainviewer.com/public/weather-maps.json")
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+          host = d.host;
+          okviri = (d.radar && d.radar.past) ? d.radar.past : [];
+          if (!okviri.length){
+            rVreme.textContent = "—";
+            rMapa.innerHTML = '<div class="radar-greska">' + t('nemaRadar') + '</div>';
+            return;
+          }
+          prikaziOkvir(okviri.length - 1); // najnoviji frejm
+          play(); // automatski pokreni animaciju
+        })
+        .catch(function(){
           rVreme.textContent = "—";
-          rMapa.innerHTML = '<div class="radar-greska">' + t('nemaRadar') + '</div>';
-          return;
-        }
-        prikaziOkvir(okviri.length - 1); // najnoviji frejm
-        play(); // automatski pokreni animaciju
-      })
-      .catch(function(){
-        rVreme.textContent = "—";
-        rMapa.innerHTML = '<div class="radar-greska">' + t('neMoguRadar') + '</div>';
-      });
+          rMapa.innerHTML = '<div class="radar-greska">' + t('neMoguRadar') + '</div>';
+        });
+    });
   }
 
   function otvori(){ rz.classList.add("otvoren"); ucitajRadar(); }
