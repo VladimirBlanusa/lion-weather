@@ -485,6 +485,8 @@
   /* Zora i sumrak: kartica topla na ivici dana */
   body.mood-sunce.je-jutro .card  { background: linear-gradient(180deg, rgba(128, 158, 204, .55), rgba(26, 50, 92, .8)); }
   body.mood-sunce.je-sumrak .card { background: linear-gradient(180deg, rgba(166, 104, 80, .6), rgba(48, 34, 62, .84)); }
+  body.mood-oblacno.je-jutro  { background: radial-gradient(ellipse at 30% 40%, #f0c478 0%, #c89870 25%, #6e5e58 55%, #2a2a32 100%); }
+  body.mood-oblacno.je-jutro .card { background: linear-gradient(180deg, rgba(80, 68, 58, .82), rgba(30, 28, 34, .9)); }
     /* ——— Zlatna slova za SVE vremenske uslove — konzistentan premium izgled ——— */
   .mood-magla #temp, .mood-oblacno #temp, .mood-sunce #temp, .mood-kisa #temp, .mood-sneg #temp, .mood-oluja #temp, .mood-noc #temp,
   .mood-magla #grad, .mood-oblacno #grad, .mood-sunce #grad, .mood-kisa #grad, .mood-sneg #grad, .mood-oluja #grad, .mood-noc #grad,
@@ -1671,7 +1673,6 @@ function oblaciCanvas(vrsta, fazaDana) {
   // odredi paletu — nijanse sive po tipu vremena; noc, zora i sumrak nose svoje tople palete
   var pKey = vrsta;
   if (fazaDana === "noc") pKey = "noc";
-  else if (fazaDana === "sumrak") pKey = "sumrak";
   else if (fazaDana === "jutro") pKey = "jutro";
   var P = OBL_PALETA[pKey] || OBL_PALETA.oblacno;
 
