@@ -278,7 +278,6 @@
   .mesec-zum h3 { margin: 18px 0 6px; font-size: 15px; color: var(--gold); letter-spacing: .3em; text-transform: uppercase; font-weight: 600; }
   .mesec-zum p { margin: 0; font-size: 13px; color: rgba(245,241,230,.7); }
   .mesec-zum .mesec-zatvori { position: fixed; top: 16px; right: 18px; font-size: 28px; color: rgba(245,241,230,.6); cursor: pointer; line-height: 1; }
-  /* ——— Radar: Leaflet + RainViewer (Vlad 8.10, v3.61) — centrirano na LOK ——— */
   .radar-zum { position: fixed; inset: 0; z-index: 60; display: flex; flex-direction: column;
     background: radial-gradient(circle at 50% 30%, rgba(20,28,44,.96), rgba(5,8,16,.98) 80%);
     opacity: 0; visibility: hidden; transition: opacity .32s ease, visibility .32s; }
@@ -374,7 +373,6 @@
     text-shadow: 0 1px 10px rgba(0, 0, 0, .6);
     display: none;
   }
-  /* v3.70 Grupa 9: Vremenska upozorenja — severity pozadina + uzvičnik */
   .upozorenje {
     margin-top: 10px;
     padding: 11px 14px;
@@ -435,7 +433,6 @@
   .models-h { text-align: center; font-weight: 600; color: #c9a44a; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; }
   .models-l { color: #c9a44a; font-size: 12px; }
   .models-grid > div:not(.models-h):not(.models-l) { text-align: center; color: #c9a44a; font-weight: 600; font-variant-numeric: tabular-nums; }
-  /* ——— Modeli — izvori: v3.22 vraćeni u standardno plavo staklo, isti sistem kao i ostali paneli ——— */
   /* ——— Pozornica prati nebo: dan diše, noć tone ——— */
   body.mood-sunce   { background: radial-gradient(ellipse at 50% 20%, #1d5aa8 0%, #103a75 60%, #081c3a 100%); }
   body.mood-oblacno { background: radial-gradient(ellipse at 50% 20%, #35506e 0%, #1f3350 60%, #0d1626 100%); }
@@ -641,7 +638,6 @@
     /* filter: brightness(1.18) uklonjen — 24 filtera je kočilo scroll; ikone već imaju boju */
   }
   .sat-item b { color: var(--text); font-size: 14px; }
-  /* ——— v3.68 Grupa 7: Minutna kiša — bar chart + pametni rezime ——— */
   .kisa-minutno-panel { }
   .kisa-rezime {
     font-size: 13px;
@@ -674,7 +670,6 @@
   }
   .kisa-minutno-vreme { flex: 1; text-align: center; }
 
-  /* ——— v3.69 Grupa 10: Kvalitet vazduha — EU AQI indeks + polutanti ——— */
   .vazduh-glavni { display: flex; align-items: center; gap: 14px; }
   .vazduh-broj {
     width: 58px; height: 58px; border-radius: 50%;
@@ -745,7 +740,6 @@
     cursor: pointer;
   }
   #lok-gps { font-size: 16px; padding: 10px 12px; display: inline-flex; align-items: center; justify-content: center; }
-  /* ——— Radar dugme: gore-levo na karti (simetrično sa .ugao-nebo gore-desno) — premešteno 8.10, v3.65b ——— */
   #lok-radar {
     position: absolute;
     left: 14px;
@@ -836,7 +830,6 @@
     margin-top: 10px;
     display: none;
   }
-  /* ——— v3.67 Grupa 6: Offline bedž + Retry dugme ——— */
   .offline-bedz {
     display: none;
     margin-top: 6px;
@@ -869,7 +862,6 @@
   .retry-btn:hover { background: rgba(212, 175, 55, .26); }
   .retry-btn:active { transform: scale(.96); }
   .loading { color: var(--gold-light); font-size: 14px; margin-top: 10px; }
-  /* ——— v3.66: Loader — indeterminate zlatna traka umesto "Lav se budi…" teksta ——— */
   #loader {
     margin: 12px auto 0;
     width: 140px;
@@ -890,7 +882,6 @@
   }
   @keyframes loader-klizaj { 0% { left: -35%; } 100% { left: 100%; } }
   @media (prefers-reduced-motion: reduce) { #loader::after { animation: none; } }
-  /* ——— v3.66: "Sada" marker na satnoj traci — zlatni pečat na trenutnom satu ——— */
   .sat-sada {
     position: relative;
     border-radius: 12px;
@@ -1108,7 +1099,7 @@ var LAVOVI = {
 
 // ——— Galerija lavova: svi lavovi koje smo ikad napravili — i oni iz fioke (Vlad 3.9) ———
 var FIOKA_DZEBRA = "https://macaron-sandbox-workspace.oss-accelerate.aliyuncs.com/prod/01a05aef-9b6e-7737-bec4-ae31a3069526/workspace/lav-vreme/img-dzebra.jpg";
-var GAL_NIZ = ["sunce","kisa","sneg","oluja","oblacno","magla","noc","kisaNoc","snegNoc","olujaNoc","oblacnoNoc","maglaNoc","nocPun","jutro","kisaJutro","snegJutro","olujaJutro","oblacnoJutro","maglaJutro","sumrak","kisaSumrak","snegSumrak","olujaSumrak","oblacnoSumrak","maglaSumrak"]; // v3.51: plava "Ikonica — ravna" napolje iz galerije — ne prati priču
+var GAL_NIZ = ["sunce","kisa","sneg","oluja","oblacno","magla","noc","kisaNoc","snegNoc","olujaNoc","oblacnoNoc","maglaNoc","nocPun","jutro","kisaJutro","snegJutro","olujaJutro","oblacnoJutro","maglaJutro","sumrak","kisaSumrak","snegSumrak","olujaSumrak","oblacnoSumrak","maglaSumrak"];
 var GAL_IMENA = { sunce:"Sunčani dan", kisa:"Kiša", sneg:"Sneg", oluja:"Oluja", oblacno:"Oblačno", magla:"Magla", noc:"Vedra noć", kisaNoc:"Kiša — noć", snegNoc:"Sneg — noć", olujaNoc:"Oluja — noć", oblacnoNoc:"Oblačno — noć", maglaNoc:"Magla — noć", nocPun:"Pun mesec", dzebra:"Џебра Д Лајон", jutro:"Zora", kisaJutro:"Kiša — zora", snegJutro:"Sneg — zora", olujaJutro:"Oluja — zora", oblacnoJutro:"Oblačno — zora", maglaJutro:"Magla — zora", sumrak:"Sumrak", kisaSumrak:"Kiša — sumrak", snegSumrak:"Sneg — sumrak", olujaSumrak:"Oluja — sumrak", oblacnoSumrak:"Oblačno — sumrak", maglaSumrak:"Magla — sumrak" };
 function GAL_URL(k) { return k === "dzebra" ? FIOKA_DZEBRA : LAVOVI[k]; }
 var GAL_IMENA_EN = { sunce:"Sunny day", kisa:"Rain", sneg:"Snow", oluja:"Storm", oblacno:"Cloudy", magla:"Fog", noc:"Clear night", kisaNoc:"Rain — night", snegNoc:"Snow — night", olujaNoc:"Storm — night", oblacnoNoc:"Cloudy — night", maglaNoc:"Fog — night", nocPun:"Full moon", dzebra:"Џебра the Lion", jutro:"Dawn", kisaJutro:"Rain — dawn", snegJutro:"Snow — dawn", olujaJutro:"Storm — dawn", oblacnoJutro:"Cloudy — dawn", maglaJutro:"Fog — dawn", sumrak:"Dusk", kisaSumrak:"Rain — dusk", snegSumrak:"Snow — dusk", olujaSumrak:"Storm — dusk", oblacnoSumrak:"Cloudy — dusk", maglaSumrak:"Fog — dusk" };
@@ -1416,7 +1407,7 @@ function postaviLava(vrsta) {
   }
 }
 
-// postaviEfekte() UKLONJENA — stari CSS DOM efekti (16 kapi, 9 pahulja, blesak, magla, halo, zrak) zamenjeni canvas engine-om; poziv komentarisan
+// postaviEfekte() — zamenjeni canvas engine-om (kisaCanvas, snegCanvas)
 
 // ——— Probni režim: ?faza=jutro|sumrak|noc forsira doba dana, ?efekt= vreme ———
 var PROBA = new URLSearchParams(window.location.search);
@@ -1553,7 +1544,6 @@ function podesiMesec() {
     '</svg>';
 }
 
-// v3.56: Krupan Mesec za zum — svež SVG, veci radius, unikatni id-jevi (bez kopiranja iz malog)
 function mesecKrupniSVG() {
   var f = mesecFaza();
   var mt = parseFloat(new URLSearchParams(location.search).get("mfaza"));
@@ -1592,7 +1582,6 @@ function mesecKrupniSVG() {
 }
 
 // Scena u kvadratu oko lava — cela pozornica se menja sa vremenom
-// (stari SVG oblakSVG() + KAP_SVG uklonjeni — zamenjeni canvas engine-om sa teksturama oblaka)
 
 // ═══════════════════════════════════════════════════════════
 // CANVAS ENGINE HELPER — zajednički boilerplate za sve canvas engine-e
@@ -2153,7 +2142,6 @@ function sunceCanvas(vrsta, fazaDana) {
 // ——— Pauzira canvas dok korisnik skroluje — štedi CPU; scena se gleda tek kad se umiri ———
 var SCENA_VIDANA = true;
 var SCENA_SVEZA = true; // posle postaviScenu → canvas nacrta barem jednom (sprečava bele kocke)
-// SCENA_TIK uklonjen — svaka petlja ima svoj lokalni `tik` (zajednički brojač je rastao 3x na oluji)
 // FRAME_KORAK: 2 = crta svaki 2. frame (~30fps), 3 = svaki 3. frame (~20fps). Komp bez jake GPU → 3, telefon → 2.
 var FRAME_KORAK = (window.matchMedia && window.matchMedia("(pointer: fine)").matches) ? 3 : 2;
 (function() {
@@ -2205,7 +2193,6 @@ function postaviScenu(vrsta) {
 
   if (vrsta === "kisa" || vrsta === "oluja") {
     kisaCanvas(vrsta, faza);
-    // sc-kap (stare CSS kapi) uklonjeno — kisaCanvas crta pravu kišu
     if (vrsta === "oluja") {
       var b = document.createElement("div");
       b.className = "sc-blesak";
@@ -2401,7 +2388,6 @@ function proveriKisu(tekst) {
   }
 }
 
-// ——— v3.68 Grupa 7: Minutna kiša — 15-minutni bar chart + pametni rezime ———
 function renderKisaMinutno(m) {
   var panel = document.getElementById("kisa-minutno-panel");
   if (!m || !m.time || !m.precipitation) { panel.style.display = "none"; return; }
@@ -2451,7 +2437,6 @@ function renderKisaMinutno(m) {
   }
 }
 
-// v3.70 Grupa 9: Vremenska upozorenja — analiza current + daily[0], prikaz po ozbiljnosti
 function obradiUpozorenja(tekst) {
   var el = document.getElementById("upozorenje");
   if (!el) return;
@@ -2524,7 +2509,6 @@ function obradiUpozorenja(tekst) {
   }
 }
 
-// v3.69 Grupa 10: Kvalitet vazduha — EU AQI + polutanti stubići
 function obradiVazduh(j) {
   var p = document.getElementById("vazduh-panel");
   if (!p) return;
@@ -2608,7 +2592,6 @@ function obradi(tekst) {
   document.getElementById("mood").textContent = poruka;
   document.getElementById("wind").textContent = v;
   document.getElementById("rain").textContent = k;
-  // v3.64: Dodatni meteorološki podaci — osećaj, vlažnost, pritisak, UV, smer vetra
   document.getElementById("wind-dir").textContent = pravacVetra(tekst.current.wind_direction_10m);
   document.getElementById("osecaj").textContent = Math.round(tekst.current.apparent_temperature);
   document.getElementById("vlaznost").textContent = tekst.current.relative_humidity_2m;
@@ -2656,7 +2639,6 @@ function obradi(tekst) {
   if (jeNoc(tekst) && LAVOVI[moodKlasa + "Noc"]) postaviLava(moodKlasa + "Noc");
   if (jeJutro(tekst) && LAVOVI[moodKlasa + "Jutro"]) postaviLava(moodKlasa + "Jutro");
   if (jeSumrak(tekst) && LAVOVI[moodKlasa + "Sumrak"]) postaviLava(moodKlasa + "Sumrak");
-  // postaviEfekte(moodKlasa); // UKLONJENO — stari CSS DOM efekti (16 kapi, 9 pahulja, blesak, magla) zamenjeni canvas engine-om; infinite animacije su kočile scroll
   var stare = document.body.className.match(/mood-\S+/g) || [];
   for (var mi = 0; mi < stare.length; mi++) document.body.classList.remove(stare[mi]);
   document.body.classList.add("mood-" + moodKlasa);
@@ -2828,7 +2810,6 @@ function ucitajPrognozu() {
       .catch(function(){});
   }, 0);
 
-  // v3.69 Grupa 10: Kvalitet vazduha — Open-Meteo air-quality API (EU AQI)
   fetch(
     "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=" + LOK.lat + "&longitude=" + LOK.lon +
     "&current=european_aqi,european_aqi_pm2_5,european_aqi_pm10,european_aqi_o3,european_aqi_no2,european_aqi_so2,pm2_5,pm10,ozone,nitrogen_dioxide,sulphur_dioxide&timezone=auto"
@@ -2899,7 +2880,6 @@ document.getElementById("lok-unos").addEventListener("keydown", function(e){
   if (e.key === "Enter") traziGrad();
 });
 
-// v3.55: tap na mesec otvara krupan prikaz sa kraterima
 window.addEventListener("DOMContentLoaded", function(){
   var mz = document.getElementById("mesec-zum");
   var ms = document.getElementById("mesec-zum-sadrzaj");
@@ -2919,7 +2899,6 @@ window.addEventListener("DOMContentLoaded", function(){
   mz.addEventListener("click", function(e){ if (e.target === mz) zatvoriZum(); });
 });
 
-// v3.61: Radar — Leaflet + RainViewer, kretanje oblaka i padavina (Vlad 8.10)
 window.addEventListener("DOMContentLoaded", function(){
   var rz = document.getElementById("radar-zum");
   var rZatvori = document.getElementById("radar-zatvori");
