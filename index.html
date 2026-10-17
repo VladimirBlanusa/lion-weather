@@ -455,7 +455,7 @@
   body.je-noc.mood-sneg    { background: radial-gradient(ellipse at 50% 20%, #1c2c42 0%, #101a2a 65%, #060a12 100%); }
   body.je-noc.mood-oluja   { background: radial-gradient(ellipse at 50% 20%, #10121e 0%, #080a12 65%, #030408 100%); }
   /* Zora i sumrak: nebo prati izlazak i zalazak sunca */
-  body.mood-sunce.je-jutro  { background: radial-gradient(ellipse at 50% 20%, #f6cf8e 0%, #7ba3d6 45%, #1d3f70 100%); }
+  body.mood-sunce.je-jutro  { background: radial-gradient(ellipse at 50% 20%, #f5dca8 0%, #a9c8e6 40%, #4574a8 100%); }
   body.mood-sunce.je-sumrak { background: radial-gradient(ellipse at 50% 20%, #e0955a 0%, #7a4666 45%, #172743 100%); }
   /* ——— Vremenski mood: KVADRAT oko lava se menja sa vremenom ——— */
   #scena {
@@ -1683,11 +1683,9 @@ function oblaciCanvas(vrsta, fazaDana) {
   if (!e) return;
   var W = e.getW(), H = e.getH();
 
-  // odredi paletu — nijanse sive + tople za sumrak/jutro
+  // odredi paletu — nijanse sive po tipu vremena; noc posebno (zora/sumrak drže vremensko nebo)
   var pKey = vrsta;
-  if (fazaDana === "sumrak") pKey = "sumrak";
-  else if (fazaDana === "noc") pKey = "noc";
-  else if (fazaDana === "jutro") pKey = "jutro";
+  if (fazaDana === "noc") pKey = "noc";
   var P = OBL_PALETA[pKey] || OBL_PALETA.oblacno;
 
   var alfaOsnovna = P.alfa;
