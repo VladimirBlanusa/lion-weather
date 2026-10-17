@@ -2785,10 +2785,22 @@ function prikaziKes(razlog) {
 // Prognoza za trenutnu lokaciju (LOK)
 function ucitajPrognozu() {
   document.getElementById("err").style.display = "none";
-  document.getElementById("msg").style.display = "block";
   document.getElementById("offline-bedz").classList.remove("prikazi");
-  document.getElementById("msg").textContent = t('ucitavam');
-  document.getElementById("loader").style.display = "block";
+
+  // ——— Keš prvo: prikaži odmah ako postoji, pa fetch u pozadini ———
+  var kes = null;
+  try { kes = JSON.parse(localStorage.getItem(KES_KEY)); } catch (e) {}
+  var imaKes = kes && kes.podaci && kes.podaci.current && kes.lat === LOK.lat && kes.lon === LOK.lon;
+
+  if (imaKes) {
+    obradi(kes.podaci);
+    document.getElementById("msg").style.display = "none";
+    document.getElementById("loader").style.display = "none";
+  } else {
+    document.getElementById("msg").style.display = "block";
+    document.getElementById("msg").textContent = t('ucitavam');
+    document.getElementById("loader").style.display = "block";
+  }
 
   fetch(
     "https://api.open-meteo.com/v1/forecast?latitude=" + LOK.lat + "&longitude=" + LOK.lon +
@@ -2799,8 +2811,8 @@ function ucitajPrognozu() {
     "&forecast_days=7&timezone=auto"
   )
     .then(function(r){ return r.json(); })
-    .then(function(j){ sacuvajKes(j); obradi(j); })
-    .catch(function(){ prikaziKes(t('prognozaNijeStigla')); });
+    .then(function(j){ sacuvajKes(j); obradi(j); document.getElementById("msg").style.display = "none"; document.getElementById("loader").style.display = "none"; })
+    .catch(function(){ if (!imaKes) prikaziKes(t('prognozaNijeStigla')); });
 
   // Uporedni modeli (ECMWF dolazi iz glavnog poziva)
   fetch(
