@@ -484,7 +484,12 @@
   }
   .mood-sunce   .card { background: linear-gradient(180deg, rgba(72, 148, 220, .62), rgba(20, 50, 92, .85)); }
   .mood-oblacno .card { background-color: rgba(70, 85, 105, .9); }
-  .mood-oblacno #temp, .mood-oblacno #grad, .mood-oblacno #mood, .mood-oblacno #desc, .mood-oblacno .meta span b, .mood-oblacno .meta, .mood-oblacno .meta-detalji { text-shadow: 0 2px 14px rgba(0,0,0,.82); }
+  .mood-oblacno #temp, .mood-oblacno #grad, .mood-oblacno #mood, .mood-oblacno #desc, .mood-oblacno .meta span b, .mood-oblacno .meta, .mood-oblacno .meta-detalji { text-shadow: 0 2px 14px rgba(0,0,0,.9), 0 0 6px rgba(0,0,0,.5); }
+  .mood-oblacno:not(.je-jutro):not(.je-sumrak):not(.je-noc) #scena::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(180deg, transparent 45%, rgba(20,25,35,.5) 100%);
+    z-index: 2;
+  }
   .mood-magla   .card { background-color: rgba(185, 190, 196, .58); }
   .mood-kisa    .card { background-color: rgba(28, 78, 148, .7); }
   .mood-sneg    .card { background-color: rgba(170, 200, 235, .6); }
