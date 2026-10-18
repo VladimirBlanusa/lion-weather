@@ -474,6 +474,7 @@
   .mood-oluja.je-sumrak #scena { background: url("https://oss-macaron-ai.macaron.im/image/text_to_image/6ad4a6fede2f35bfdf8f4785.webp") center/cover no-repeat, radial-gradient(ellipse at 50% 20%, rgba(180,80,60,.3) 0%, rgba(60,40,60,.6) 60%, rgba(15,15,25,.9) 100%); }
   .mood-magla.je-sumrak #scena { background: url("https://oss-macaron-ai.macaron.im/image/text_to_image/6ad4a6fe4686db368883927f.webp") center/cover no-repeat, radial-gradient(ellipse at 50% 20%, rgba(230,140,80,.35) 0%, rgba(120,60,100,.5) 60%, rgba(25,20,40,.88) 100%); }
   .mood-sunce.je-sumrak #scena { background: url("https://oss-macaron-ai.macaron.im/image/text_to_image/6ad4b09c3651cbee45e5bded.webp") center/cover no-repeat, radial-gradient(ellipse at 50% 20%, rgba(230,140,80,.35) 0%, rgba(120,60,100,.5) 60%, rgba(25,20,40,.88) 100%); }
+  .mood-sunce #scena { background: url("https://oss-macaron-ai.macaron.im/image/text_to_image/6ad4b4c34686db368883ab1b.webp") center/cover no-repeat, radial-gradient(ellipse at 50% 20%, rgba(255,216,120,.25) 0%, rgba(70,130,200,.5) 60%, rgba(20,40,80,.85) 100%); }
   .card > *:not(#scena):not(.ugao-nebo):not(#lok-radar) { position: relative; z-index: 1; }
   /* Sunce diše na celoj kartici — zlatno svetlo od lava preko kvadrata */
   .mood-sunce #scena::before {
@@ -481,7 +482,7 @@
     background: radial-gradient(circle at 50% 26%, rgba(255,216,120,.15), rgba(255,216,120,.05) 55%, transparent 78%);
     animation: ef-disi 6s ease-in-out infinite;
   }
-  .mood-sunce   .card { background-color: rgba(72, 148, 220, .72); }
+  .mood-sunce   .card { background: linear-gradient(180deg, rgba(72, 148, 220, .62), rgba(20, 50, 92, .85)); }
   .mood-oblacno .card { background-color: rgba(70, 85, 105, .9); }
   .mood-oblacno #temp, .mood-oblacno #grad, .mood-oblacno #mood, .mood-oblacno #desc, .mood-oblacno .meta span b, .mood-oblacno .meta, .mood-oblacno .meta-detalji { text-shadow: 0 2px 14px rgba(0,0,0,.82); }
   .mood-magla   .card { background-color: rgba(185, 190, 196, .58); }
@@ -559,6 +560,18 @@
   .mood-magla #kisa-paznja {
     color: #2a2218;
     text-shadow: 0 1px 2px rgba(255,255,255,.55), 0 0 4px rgba(255,255,255,.3);
+  }
+  /* ——— Vedro dan: zlatni tekst sa pojačanom senkom — vidljiv na svetloj plavoj ——— */
+  .mood-sunce:not(.je-jutro):not(.je-sumrak):not(.je-noc) #temp,
+  .mood-sunce:not(.je-jutro):not(.je-sumrak):not(.je-noc) #grad,
+  .mood-sunce:not(.je-jutro):not(.je-sumrak):not(.je-noc) .meta span b,
+  .mood-sunce:not(.je-jutro):not(.je-sumrak):not(.je-noc) #desc,
+  .mood-sunce:not(.je-jutro):not(.je-sumrak):not(.je-noc) #mood,
+  .mood-sunce:not(.je-jutro):not(.je-sumrak):not(.je-noc) .meta,
+  .mood-sunce:not(.je-jutro):not(.je-sumrak):not(.je-noc) .meta-detalji,
+  .mood-sunce:not(.je-jutro):not(.je-sumrak):not(.je-noc) #kisa-paznja {
+    color: var(--gold);
+    text-shadow: 0 2px 14px rgba(0,0,0,.82), 0 0 6px rgba(0,0,0,.5);
   }
   /* ——— Scena u kvadratu: kapi, pahulje, blesak, oblaci, zvezde ——— */
   .sc-blesak {
