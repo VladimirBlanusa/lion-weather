@@ -1782,6 +1782,16 @@ function oblaciCanvas(vrsta, fazaDana) {
     octx.fillStyle = gL;
     octx.fillRect(0, 0, fw, off.height);
     octx.globalCompositeOperation = "source-over";
+    // ——— toniranje oblaka prema paleti (multiply + alfa) — čuva detalje teksture, pomeri ton ———
+    octx.globalAlpha = 0.55;
+    octx.globalCompositeOperation = "multiply";
+    var gB = octx.createLinearGradient(0, 0, 0, off.height);
+    gB.addColorStop(0, P.vrh);
+    gB.addColorStop(1, P.don);
+    octx.fillStyle = gB;
+    octx.fillRect(0, 0, off.width, off.height);
+    octx.globalAlpha = 1;
+    octx.globalCompositeOperation = "source-over";
     return off;
   };
 
