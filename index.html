@@ -1781,6 +1781,13 @@ function oblaciCanvas(vrsta, fazaDana) {
     gL.addColorStop(1, "rgba(0,0,0,0)");
     octx.fillStyle = gL;
     octx.fillRect(0, 0, fw, off.height);
+    // ——— bojenje oblaka prema paleti (vrh gore, don dole) — source-atop boji samo teksturu, čuva alfa ———
+    octx.globalCompositeOperation = "source-atop";
+    var gB = octx.createLinearGradient(0, 0, 0, off.height);
+    gB.addColorStop(0, P.vrh);
+    gB.addColorStop(1, P.don);
+    octx.fillStyle = gB;
+    octx.fillRect(0, 0, off.width, off.height);
     octx.globalCompositeOperation = "source-over";
     return off;
   };
