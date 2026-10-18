@@ -1702,9 +1702,20 @@ var OBL_PALETA = {
   oluja:  { vrh: '#484848', don: '#686868', alfa: .90 },
   sneg:   { vrh: '#b0b0b0', don: '#e8e8e8', alfa: .80 },
   magla:  { vrh: '#c0c0c0', don: '#d8d8d8', alfa: .50 },
-  // tople nijanse za sumrak (peach) i jutro (zlatno)
+  // tople nijanse za sumrak (peach) i jutro (siva)
   sumrak:{ vrh: '#8a6050', don: '#d8a878', alfa: .80 },
   jutro:  { vrh: '#787878', don: '#a8a8a8', alfa: .80 },
+  // ——— kombinacije vrsta×faza — palete za svaku ———
+  snegJutro:   { vrh: '#b0b0b0', don: '#d8d8d8', alfa: .80 },
+  kisaJutro:   { vrh: '#787878', don: '#a8a8a8', alfa: .82 },
+  olujaJutro:  { vrh: '#585868', don: '#888898', alfa: .88 },
+  oblacnoJutro:{ vrh: '#989898', don: '#c8c8c8', alfa: .82 },
+  maglaJutro:  { vrh: '#b8b8b8', don: '#d8d8d8', alfa: .55 },
+  snegSumrak:   { vrh: '#a89888', don: '#d8c0a8', alfa: .78 },
+  kisaSumrak:   { vrh: '#786858', don: '#a89888', alfa: .82 },
+  olujaSumrak:  { vrh: '#584858', don: '#887878', alfa: .88 },
+  oblacnoSumrak:{ vrh: '#888068', don: '#b8a888', alfa: .80 },
+  maglaSumrak:  { vrh: '#b0a090', don: '#d8c8b8', alfa: .55 },
   // noć — tamna sivoplava
   noc:   { vrh: '#383840', don: '#585868', alfa: .75 }
 };
@@ -1721,16 +1732,15 @@ function oblaciCanvas(vrsta, fazaDana) {
   if (!e) return;
   var W = e.getW(), H = e.getH();
 
-  // odredi paletu — nijanse sive po tipu vremena; noc, zora i sumrak nose svoje tople palete
-  var pKey = vrsta;
-  if (fazaDana === "noc") pKey = "noc";
-  else if (fazaDana === "jutro") pKey = "jutro";
-  else if (fazaDana === "sumrak") pKey = "sumrak";
-  var P = OBL_PALETA[pKey] || OBL_PALETA.oblacno;
+  // odredi paletu — kombinacija vrsta×faza (snegJutro, kisaSumrak...); dan = samo vrsta
+  var pKey = vrsta + (fazaDana === "noc" ? "Noc" : fazaDana === "jutro" ? "Jutro" : fazaDana === "sumrak" ? "Sumrak" : "");
+  var P = OBL_PALETA[pKey] || OBL_PALETA[vrsta] || OBL_PALETA.oblacno;
+  // tekstura — po fazi (jutro/sumrak/noc) ili po vrsti (dan)
+  var tKey = (fazaDana === "noc") ? "noc" : (fazaDana === "jutro") ? "jutro" : (fazaDana === "sumrak") ? "sumrak" : vrsta;
 
   var alfaOsnovna = P.alfa;
 
-  // ——— teksture oblaka — 8 generisanih slika po varijanti (pKey → URL) ———
+  // ——— teksture oblaka — 8 generisanih slika po varijanti (tKey → URL) ———
   var OBL_TEX = {
     oblacno: "https://oss-macaron-ai.macaron.im/image/text_to_image/6acf3d2ea36ccea6ed3721fa.webp",
     kisa:    "https://oss-macaron-ai.macaron.im/image/text_to_image/6acf3d2e1ea25d2b4470ad56.webp",
@@ -1742,12 +1752,12 @@ function oblaciCanvas(vrsta, fazaDana) {
     noc:     "https://oss-macaron-ai.macaron.im/image/text_to_image/6acf3d2e7a54714631727dc5.webp"
   };
   if (!window.OBL_IMG_CACHE) window.OBL_IMG_CACHE = {};
-  if (!OBL_IMG_CACHE[pKey]) {
+  if (!OBL_IMG_CACHE[tKey]) {
     var im = new Image();
-    im.src = OBL_TEX[pKey];
-    OBL_IMG_CACHE[pKey] = im;
+    im.src = OBL_TEX[tKey];
+    OBL_IMG_CACHE[tKey] = im;
   }
-  var oblImg = OBL_IMG_CACHE[pKey];
+  var oblImg = OBL_IMG_CACHE[tKey];
 
   // ——— crossfade: offscreen canvas sa fade ivicama (ublažava mirror šav) ———
   if (!window.OBL_FADE_CACHE) window.OBL_FADE_CACHE = {};
