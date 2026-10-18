@@ -1784,7 +1784,7 @@ function oblaciCanvas(vrsta, fazaDana) {
     octx.globalCompositeOperation = "source-over";
     // ——— toniranje oblaka prema paleti (multiply + alfa) — čuva detalje teksture, pomeri ton ———
     octx.globalAlpha = 0.55;
-    octx.globalCompositeOperation = "multiply";
+    octx.globalCompositeOperation = "overlay";
     var gB = octx.createLinearGradient(0, 0, 0, off.height);
     gB.addColorStop(0, P.vrh);
     gB.addColorStop(1, P.don);
