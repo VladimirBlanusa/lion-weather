@@ -1476,7 +1476,7 @@ var PROBA_MKISA = PROBA_UKLJUCEN ? (PROBA.get("mkisa") || "").toLowerCase() : ""
 // Da li je noć (posle zalaska / pre izlaska sunca)
 function jeNoc(tekst) {
   if (PROBA_FAZA === "noc") return true;
-  if (PROBA_FAZA === "jutro" || PROBA_FAZA === "sumrak") return false;
+  if (PROBA_FAZA === "jutro" || PROBA_FAZA === "sumrak" || PROBA_FAZA === "dan") return false;
   if (!tekst.daily || !tekst.daily.sunrise || !tekst.daily.sunset) return false;
   var t = tekst.current.time;
   return (t < tekst.daily.sunrise[0]) || (t >= tekst.daily.sunset[0]);
@@ -1490,7 +1490,7 @@ function minuDana(iso) {
 // Zora: od izlaska sunca pa 2 sata — jutro diše zlatom
 function jeJutro(tekst) {
   if (PROBA_FAZA === "jutro") return true;
-  if (PROBA_FAZA === "sumrak" || PROBA_FAZA === "noc") return false;
+  if (PROBA_FAZA === "sumrak" || PROBA_FAZA === "noc" || PROBA_FAZA === "dan") return false;
   if (!tekst.daily || !tekst.daily.sunrise) return false;
   var t = minuDana(tekst.current.time), i = minuDana(tekst.daily.sunrise[0]);
   return (t >= i) && (t < i + 120);
@@ -1499,7 +1499,7 @@ function jeJutro(tekst) {
 // Sumrak: 2 sata pred zalazak sunca
 function jeSumrak(tekst) {
   if (PROBA_FAZA === "sumrak") return true;
-  if (PROBA_FAZA === "jutro" || PROBA_FAZA === "noc") return false;
+  if (PROBA_FAZA === "jutro" || PROBA_FAZA === "noc" || PROBA_FAZA === "dan") return false;
   if (!tekst.daily || !tekst.daily.sunset) return false;
   var t = minuDana(tekst.current.time), z = minuDana(tekst.daily.sunset[0]);
   return (t >= z - 120) && (t < z);
