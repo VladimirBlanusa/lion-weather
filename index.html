@@ -2446,21 +2446,42 @@ function renderDana(d) {
 }
 
 // ——— Upozorenje na kišu: lav gleda dva sata unapred ———
+// Izvor: minutely_15 precipitation (mm) — ISTI podatak koji puni panel „SLEDEĆA 2 SATA".
+// Verovatnoća po satu se NE koristi za ovu poruku (davala je „kiša kroz sat" + „suvo" u isto vreme).
+var KISA_PRAG = 0.05;
 function proveriKisu(tekst) {
   var el = document.getElementById("kisa-paznja");
   if (!el) return;
   el.style.display = "none";
-  if (!tekst || !tekst.current || !tekst.hourly || !tekst.hourly.time || !tekst.hourly.precipitation_probability) return;
+  if (!tekst || !tekst.current) return;
   var k = tekst.current.weather_code;
   var VEC_PADA = (k >= 51 && k <= 67) || (k >= 80 && k <= 82) || (k >= 95);
   if (VEC_PADA) return;
+  var kad = JEZIK === 'sr' ? ["kroz sat", "za dva sata"] : ["in an hour", "in two hours"];
+
+  // primarni izvor: količina kiše po 15 min
+  var m = tekst.minutely_15;
+  if (m && m.precipitation && m.precipitation.length) {
+    var p = m.precipitation;
+    for (var i = 1; i < p.length; i++) {
+      if (p[i] !== null && p[i] !== undefined && p[i] >= KISA_PRAG) {
+        var min = i * 15;
+        el.textContent = t('lavKaze') + " " + (min <= 60 ? kad[0] : kad[1]) + " " + t('ponesiKisobran');
+        el.style.display = "block";
+        return;
+      }
+    }
+    return; // minutely je merodavan — nema kiše u naredna 2h, poruka se ne prikazuje
+  }
+
+  // rezerva (samo ako minutely_15 nije stigao): procenat, ali sa istim pragom kao panel
+  if (!tekst.hourly || !tekst.hourly.time || !tekst.hourly.precipitation_probability) return;
   var si = tekst.hourly.time.indexOf(tekst.current.time.slice(0, 13) + ":00");
   if (si < 0) return;
-  var kad = JEZIK === 'sr' ? ["kroz sat", "za dva sata"] : ["in an hour", "in two hours"];
-  for (var p = 1; p <= 2; p++) {
-    var s = tekst.hourly.precipitation_probability[si + p];
-    if (s !== undefined && s >= 50) {
-      el.textContent = t('lavKaze') + " " + kad[p - 1] + " " + t('ponesiKisobran');
+  for (var h = 1; h <= 2; h++) {
+    var s = tekst.hourly.precipitation_probability[si + h];
+    if (s !== undefined && s !== null && s >= 50) {
+      el.textContent = t('lavKaze') + " " + kad[h - 1] + " " + t('ponesiKisobran');
       el.style.display = "block";
       return;
     }
