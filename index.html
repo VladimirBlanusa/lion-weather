@@ -1040,6 +1040,7 @@
     <div id="kisa-minutno-rezime" class="kisa-rezime"></div>
     <div id="kisa-minutno-traka" class="kisa-minutno-traka"></div>
     <div id="kisa-minutno-vremena" class="kisa-minutno-vremena"></div>
+    <div id="radar-sad" class="kisa-rezime" style="margin-top:6px;"></div>
   </div>
 
   <div class="panel vazduh" id="vazduh-panel">
@@ -2448,7 +2449,22 @@ function renderDana(d) {
 // ——— Upozorenje na kišu: lav gleda dva sata unapred ———
 // Izvor: minutely_15 precipitation (mm) — ISTI podatak koji puni panel „SLEDEĆA 2 SATA".
 // Verovatnoća po satu se NE koristi za ovu poruku (davala je „kiša kroz sat" + „suvo" u isto vreme).
-var KISA_PRAG = 0.05;
+var KISA_PRAG = 0.02;
+// Sansa na kisu u sledeca 2 sata iz hourly podataka — koristi se kad model
+// prikaze 0 mm, a verovatnoca je visoka (slaba kisa se cesto izgubi u mm).
+function sansaSledeca2h() {
+  if (!POSLEDNJI_TEKST || !POSLEDNJI_TEKST.hourly || !POSLEDNJI_TEKST.hourly.time) return 0;
+  var h = POSLEDNJI_TEKST.hourly;
+  if (!h.precipitation_probability) return 0;
+  var si = h.time.indexOf(POSLEDNJI_TEKST.current.time.slice(0, 13) + ":00");
+  if (si < 0) return 0;
+  var naj = 0;
+  for (var i = 0; i <= 2; i++) {
+    var s = h.precipitation_probability[si + i];
+    if (s !== undefined && s !== null && s > naj) naj = s;
+  }
+  return naj;
+}
 function proveriKisu(tekst) {
   var el = document.getElementById("kisa-paznja");
   if (!el) return;
@@ -2498,10 +2514,16 @@ function renderKisaMinutno(m) {
   var traka = document.getElementById("kisa-minutno-traka");
   var vremena = document.getElementById("kisa-minutno-vremena");
   var rezime = document.getElementById("kisa-minutno-rezime");
-  if (maxP < 0.05) {
-    // Suvo — samo rezime, sakrij bar chart i vremena
-    rezime.textContent = t('suvo') + " ☀️";
-    rezime.style.color = "rgba(245, 241, 230, .82)";
+  if (maxP < KISA_PRAG) {
+    // Model ne vidi mm, ali verovatnoca zna da kisa dolazi — ne pisemo „suvo" ako je rizik visok
+    var sansa = sansaSledeca2h();
+    if (sansa >= 60) {
+      rezime.textContent = (JEZIK === "sr" ? "Bez merljive kiše · moguća kiša (" : "No measurable rain · rain likely (") + sansa + "%)";
+      rezime.style.color = "rgba(165, 195, 235, .95)";
+    } else {
+      rezime.textContent = t('suvo') + " ☀️";
+      rezime.style.color = "rgba(245, 241, 230, .82)";
+    }
     traka.style.display = "none";
     vremena.style.display = "none";
     return;
@@ -2670,6 +2692,69 @@ function obradiVazduh(j) {
   document.getElementById("vazduh-stubici").innerHTML = html;
 }
 
+// ——— Radar: pada li kiša SADA na zadatoj tački (radi za svaku lokaciju) ———
+// Izvor: RainViewer javni radar. Tile se čita preko canvas-a (CORS je otvoren),
+// pa se za bilo koju lat/lon dobije „pada / ne pada" bez obzira na model.
+var RADAR_CACHE = { t: 0, lat: null, lon: null, tekst: "" };
+function radarNivo(r, g, b) {
+  if (r > 190 && b > 170) return "jaka";
+  if (r > 190 && g < 150) return "vrlo jaka";
+  if (g > 150 && r < 170) return "umerena";
+  return "slaba";
+}
+function pitajRadar() {
+  var el = document.getElementById("radar-sad");
+  if (!el || !LOK) return;
+  if (RADAR_CACHE.lat === LOK.lat && RADAR_CACHE.lon === LOK.lon && RADAR_CACHE.tekst &&
+      Date.now() - RADAR_CACHE.t < 5 * 60000) {
+    el.textContent = RADAR_CACHE.tekst;
+    return;
+  }
+  el.textContent = "Radar: proveravam…";
+  fetch("https://api.rainviewer.com/public/weather-maps.json")
+    .then(function(r){ return r.json(); })
+    .then(function(meta){
+      var past = meta && meta.radar && meta.radar.past;
+      if (!past || !past.length) throw new Error("nema frejmova");
+      var z = 7, n = Math.pow(2, z);
+      var xf = (LOK.lon + 180) / 360 * n;
+      var lr = LOK.lat * Math.PI / 180;
+      var yf = (1 - Math.log(Math.tan(lr) + 1 / Math.cos(lr)) / Math.PI) / 2 * n;
+      var x = Math.floor(xf), y = Math.floor(yf);
+      var px = Math.min(252, Math.max(3, Math.round((xf - x) * 256)));
+      var py = Math.min(252, Math.max(3, Math.round((yf - y) * 256)));
+      var url = meta.host + past[past.length - 1].path + "/256/" + z + "/" + x + "/" + y + "/2/1_1.png";
+      var img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = function(){
+        try {
+          var cv = document.createElement("canvas");
+          cv.width = 256; cv.height = 256;
+          var ctx = cv.getContext("2d");
+          ctx.drawImage(img, 0, 0);
+  var najjaci = null;
+          for (var dy = -3; dy <= 3; dy++) {
+            for (var dx = -3; dx <= 3; dx++) {
+              var d = ctx.getImageData(px + dx, py + dy, 1, 1).data;
+              if (d[3] < 30) continue;
+              var nivo = radarNivo(d[0], d[1], d[2]);
+              if (!najjaci || (najjaci === "slaba" && nivo !== "slaba")) najjaci = nivo;
+            }
+          }
+          var tekst = najjaci ? "Radar: pada " + najjaci + " kiša upravo sad" : "Radar: nema odraza kiše na tvojoj tački";
+          el.textContent = tekst;
+          el.style.color = najjaci ? "rgba(165, 195, 235, .95)" : "rgba(245, 241, 230, .82)";
+          RADAR_CACHE = { t: Date.now(), lat: LOK.lat, lon: LOK.lon, tekst: tekst };
+        } catch (e) {
+          el.textContent = "Radar: nedostupno";
+        }
+      };
+      img.onerror = function(){ el.textContent = "Radar: nedostupno"; };
+      img.src = url;
+    })
+    .catch(function(){ el.textContent = "Radar: nedostupno"; });
+}
+
 function obradi(tekst) {
   POSLEDNJI_TEKST = tekst;
   var tep = Math.round(tekst.current.temperature_2m);
@@ -2809,6 +2894,7 @@ function obradi(tekst) {
     }
   }
   renderKisaMinutno(mkData);
+  pitajRadar();
 }
 
 function uporediModel(model, prefix) {
@@ -2890,6 +2976,27 @@ function ucitajPrognozu() {
     .then(function(r){ return r.json(); })
     .then(function(j){ sacuvajKes(j); obradi(j); document.getElementById("msg").style.display = "none"; document.getElementById("loader").style.display = "none"; })
     .catch(function(){ if (!imaKes) prikaziKes(t('prognozaNijeStigla')); });
+
+  // Minutna kiša iz ICON-a: default model ume da vrati 0 mm dok ICON vidi slabu kišu.
+  // Ako je ICON „mokriji", njegov minutely_15 preuzima panel „SLEDEĆA 2 SATA" i upozorenje.
+  fetch(
+    "https://api.open-meteo.com/v1/forecast?latitude=" + LOK.lat + "&longitude=" + LOK.lon +
+    "&minutely_15=precipitation&forecast_minutely_15=8&timezone=auto&models=icon_seamless"
+  )
+    .then(function(r){ return r.json(); })
+    .then(function(j){
+      var m = j && j.minutely_15;
+      if (!m || !m.precipitation || !m.precipitation.length) return;
+      var ima = false;
+      for (var i = 0; i < m.precipitation.length; i++) {
+        if ((m.precipitation[i] || 0) >= KISA_PRAG) { ima = true; break; }
+      }
+      if (!ima || !POSLEDNJI_TEKST) return;
+      POSLEDNJI_TEKST.minutely_15 = m;
+      renderKisaMinutno(m);
+      proveriKisu(POSLEDNJI_TEKST);
+    })
+    .catch(function(){});
 
   // Uporedni modeli — odloži da ne blokiraju glavni fetch (ECMWF dolazi iz glavnog poziva)
   setTimeout(function(){
